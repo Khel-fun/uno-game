@@ -399,7 +399,8 @@ const PreviewGame = () => {
               alignItems: "center",
               padding: "0.5rem",
               width: "100%",
-              maxWidth: "400px"
+              maxWidth: "400px",
+              flexDirection: index != 4 ? "column" : "row"
             }}>
               {opponent.deck.map((item, i) => (
                 <div 
@@ -407,7 +408,7 @@ const PreviewGame = () => {
                   style={{
                     position: "relative",
                     margin: "0 -10px",
-                    transform: `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`,
+                    transform: index != 4 ? `rotate(${i % 2 === 0 ? '-2' : '2'}deg) translateY(${-54 * i}px)` : `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`,
                     zIndex: i
                   }}
                 >

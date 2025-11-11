@@ -1,7 +1,7 @@
 import React from "react";
 import MemoizedSpinner from "./Spinner";
 
-const PlayerViewofOpponent = ({ opponentDeck, turn, opponent }) => {
+const PlayerViewofOpponent = ({ opponentDeck, turn, opponent, index = 0 }) => {
   return (
     <div style={{
       display: "flex",
@@ -9,7 +9,8 @@ const PlayerViewofOpponent = ({ opponentDeck, turn, opponent }) => {
       alignItems: "center",
       padding: "0.5rem",
       width: "100%",
-      maxWidth: "400px"
+      maxWidth: "400px",
+      flexDirection: index !== 4 ? "column" : "row"
     }}>
       {opponentDeck.map((item, i) => (
         <div 
@@ -17,7 +18,7 @@ const PlayerViewofOpponent = ({ opponentDeck, turn, opponent }) => {
           style={{
             position: "relative",
             margin: "0 -10px",
-            transform: `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`,
+            transform: index !== 4 ? `rotate(${i % 2 === 0 ? '-2' : '2'}deg) translateY(${-54 * i}px)` : `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`,
             zIndex: i
           }}
         >

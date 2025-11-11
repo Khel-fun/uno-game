@@ -346,6 +346,7 @@ const GameScreen = ({
                 turn={turn}
                 opponent={opponent.name}
                 opponentDeck={opponent.deck}
+                index={index}
               />
             </div>
           );
