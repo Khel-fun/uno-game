@@ -1,0 +1,355 @@
+{"level":"info","message":"Server started on Port 4000 at 2025-09-21T20:29:44.537Z","service":"gameofuno-backend","timestamp":"2025-09-22 01:59:44"}
+{"level":"info","message":"Shutting down gracefully...","service":"gameofuno-backend","timestamp":"2025-09-22 02:00:02"}
+{"level":"info","message":"Server started on Port 4000 at 2025-11-08T13:59:57.263Z","service":"gameofuno-backend","timestamp":"2025-11-08 19:29:57"}
+{"level":"info","message":"User H9c1wOL9YQzmM7NyAAAB connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-08 19:34:00"}
+{"level":"info","message":"User 8eIas1r8PF8CS4-CAAAD connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-08 19:34:12"}
+{"level":"info","message":"User 0NqwRvq7ihMX5s48AAAF connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-08 19:37:23"}
+{"level":"info","message":"User UDTycE8YAxTyx7d9AAAH connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:12"}
+{"level":"info","message":"User UDTycE8YAxTyx7d9AAAH added to room 231 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:12"}
+{"level":"info","message":"User UDTycE8YAxTyx7d9AAAH joined room game-231","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:12"}
+{"level":"info","message":"User UDTycE8YAxTyx7d9AAAH removed from room 231","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:12"}
+{"level":"info","message":"User UDTycE8YAxTyx7d9AAAH added to room 231 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:12"}
+{"level":"info","message":"User UDTycE8YAxTyx7d9AAAH joined room game-231","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:12"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:18"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ added to room 231 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:18"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ joined room game-231","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:18"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ removed from room 231","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:18"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ added to room 231 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:18"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ joined room game-231","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:18"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:30"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL added to room 231 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:30"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL joined room game-231","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:30"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL removed from room 231","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:30"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL added to room 231 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:30"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL joined room game-231","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:30"}
+{"level":"info","message":"Game started in room game-231","service":"gameofuno-backend","timestamp":"2025-11-08 19:40:48"}
+{"level":"info","message":"User UDTycE8YAxTyx7d9AAAH disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-08 19:46:42"}
+{"level":"info","message":"User UDTycE8YAxTyx7d9AAAH removed from room 231","service":"gameofuno-backend","timestamp":"2025-11-08 19:46:42"}
+{"level":"info","message":"User 0NqwRvq7ihMX5s48AAAF disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-08 19:46:45"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL removed from room 231","service":"gameofuno-backend","timestamp":"2025-11-08 19:51:37"}
+{"level":"info","message":"User aL_Ns180xA26INHeAAAN connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-08 19:51:37"}
+{"level":"info","message":"User C1v8Z8pe89tIrfCKAAAP connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-08 19:51:50"}
+{"level":"info","message":"User YW6t71PprEf8sA_-AAAR connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-08 19:51:50"}
+{"level":"info","message":"User q3Ypqmz5GieBeuy8AAAT connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-08 19:51:50"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL added to room 232 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 19:53:16"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 19:53:16"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 19:53:16"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL added to room 232 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 19:53:16"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 19:53:16"}
+{"level":"info","message":"User YW6t71PprEf8sA_-AAAR added to room 232 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-08 19:53:48"}
+{"level":"info","message":"User YW6t71PprEf8sA_-AAAR joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 19:53:48"}
+{"level":"info","message":"User YW6t71PprEf8sA_-AAAR removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 19:53:48"}
+{"level":"info","message":"User YW6t71PprEf8sA_-AAAR added to room 232 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-08 19:53:48"}
+{"level":"info","message":"User YW6t71PprEf8sA_-AAAR joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 19:53:48"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ removed from room 231","service":"gameofuno-backend","timestamp":"2025-11-08 19:54:05"}
+{"level":"info","message":"User 7oqeAn6WNQnr3BxYAAAV connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-08 19:54:05"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ added to room 232 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-08 19:54:12"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 19:54:12"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 19:54:12"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ added to room 232 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-08 19:54:12"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 19:54:12"}
+{"level":"info","message":"Game started in room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 19:54:19"}
+{"level":"info","message":"Game initialized in room 232 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-08 19:54:19"}
+{"level":"info","message":"Game initialized in room 232 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-08 19:54:19"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ disconnected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-08 20:01:05"}
+{"level":"info","message":"User ftDcsgNtajrEIZAkAAAJ removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 20:01:05"}
+{"level":"info","message":"User TyuzpZITfzvmYOu3AAAX connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-08 20:01:06"}
+{"level":"info","message":"User TyuzpZITfzvmYOu3AAAX disconnected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-08 20:01:06"}
+{"level":"info","message":"User zHxxiFty-HiU0TwQAAAZ connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-08 20:01:06"}
+{"level":"info","message":"User zHxxiFty-HiU0TwQAAAZ disconnected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-08 20:01:07"}
+{"level":"info","message":"User c_gGZlFYao_EGx15AAAb connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-08 20:01:08"}
+{"level":"info","message":"User 8eIas1r8PF8CS4-CAAAD disconnected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-08 20:01:43"}
+{"level":"info","message":"User 7oqeAn6WNQnr3BxYAAAV disconnected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-08 20:01:45"}
+{"level":"info","message":"User c_gGZlFYao_EGx15AAAb disconnected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-08 20:01:48"}
+{"level":"info","message":"User a_AOsmQLQP8gUwRfAAAf connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:17"}
+{"level":"info","message":"User 6XYuIVqSWrZi8L06AAAg connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:17"}
+{"level":"info","message":"User _jmidjiO4l10-SFRAAAh connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:17"}
+{"level":"info","message":"User YW6t71PprEf8sA_-AAAR disconnected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:36"}
+{"level":"info","message":"User YW6t71PprEf8sA_-AAAR removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:36"}
+{"level":"info","message":"User q3Ypqmz5GieBeuy8AAAT disconnected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:36"}
+{"level":"info","message":"User C1v8Z8pe89tIrfCKAAAP disconnected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:36"}
+{"level":"info","message":"User H9c1wOL9YQzmM7NyAAAB disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:36"}
+{"level":"info","message":"User aL_Ns180xA26INHeAAAN disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:36"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:36"}
+{"level":"info","message":"User cekzwNYg9Aa0HjofAAAL removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:36"}
+{"level":"info","message":"User 6XYuIVqSWrZi8L06AAAg disconnected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:36"}
+{"level":"info","message":"User a_AOsmQLQP8gUwRfAAAf disconnected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:36"}
+{"level":"info","message":"User _jmidjiO4l10-SFRAAAh disconnected. Active connections: 0","service":"gameofuno-backend","timestamp":"2025-11-08 20:02:36"}
+{"level":"info","message":"User M-ZTtv7q6Bodpb0iAAAj connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:44"}
+{"level":"info","message":"User YVM-n2V4ICByvaJaAAAm connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User YVM-n2V4ICByvaJaAAAm added to room 232 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User YVM-n2V4ICByvaJaAAAm joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User YVM-n2V4ICByvaJaAAAm removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User YVM-n2V4ICByvaJaAAAm added to room 232 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User YVM-n2V4ICByvaJaAAAm joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn added to room 232 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn added to room 232 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 20:12:50"}
+{"level":"info","message":"User YVM-n2V4ICByvaJaAAAm disconnected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-08 20:13:10"}
+{"level":"info","message":"User YVM-n2V4ICByvaJaAAAm removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 20:13:10"}
+{"level":"info","message":"User cX_TxLNwC2pAVFkvAAAp connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-08 20:13:10"}
+{"level":"info","message":"User KVySda0DU40OM-kpAAAr connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-08 20:13:13"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-08 20:13:51"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt added to room 233 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 20:13:51"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt joined room game-233","service":"gameofuno-backend","timestamp":"2025-11-08 20:13:51"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt removed from room 233","service":"gameofuno-backend","timestamp":"2025-11-08 20:13:51"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt added to room 233 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 20:13:51"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt joined room game-233","service":"gameofuno-backend","timestamp":"2025-11-08 20:13:51"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 20:14:01"}
+{"level":"info","message":"User QFrl-JMiynmekfrgAAAv connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-08 20:14:01"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn added to room 233 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-08 20:14:11"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn joined room game-233","service":"gameofuno-backend","timestamp":"2025-11-08 20:14:11"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn removed from room 233","service":"gameofuno-backend","timestamp":"2025-11-08 20:14:11"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn added to room 233 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-08 20:14:11"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn joined room game-233","service":"gameofuno-backend","timestamp":"2025-11-08 20:14:11"}
+{"level":"info","message":"Game started in room game-233","service":"gameofuno-backend","timestamp":"2025-11-08 20:14:28"}
+{"level":"info","message":"Game initialized in room 233 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-08 20:14:28"}
+{"level":"info","message":"Game initialized in room 233 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-08 20:14:28"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-08 20:21:38"}
+{"level":"info","message":"User ImL-KP5aeXsx2aMeAAAn removed from room 233","service":"gameofuno-backend","timestamp":"2025-11-08 20:21:38"}
+{"level":"info","message":"User QFrl-JMiynmekfrgAAAv disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-08 20:21:38"}
+{"level":"info","message":"User 4krivwby8ZXXbWBuAAAx connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-08 20:21:39"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt removed from room 233","service":"gameofuno-backend","timestamp":"2025-11-08 20:21:43"}
+{"level":"info","message":"User NoA4HW-cUoPE9lU0AAAz connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-08 20:21:43"}
+{"level":"info","message":"User 79OnZKXJb3oaa-RdAAA1 connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:19"}
+{"level":"info","message":"User 79OnZKXJb3oaa-RdAAA1 added to room 234 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:19"}
+{"level":"info","message":"User 79OnZKXJb3oaa-RdAAA1 joined room game-234","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:19"}
+{"level":"info","message":"User 79OnZKXJb3oaa-RdAAA1 removed from room 234","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:19"}
+{"level":"info","message":"User 79OnZKXJb3oaa-RdAAA1 added to room 234 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:19"}
+{"level":"info","message":"User 79OnZKXJb3oaa-RdAAA1 joined room game-234","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:19"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt added to room 234 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:28"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt joined room game-234","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:28"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt removed from room 234","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:28"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt added to room 234 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:28"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt joined room game-234","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:28"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:39"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 added to room 232 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:39"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:39"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:39"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 added to room 232 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:39"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 joined room game-232","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:39"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 removed from room 232","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:41"}
+{"level":"info","message":"User YZTaTvvTp1zbYiIoAAA5 connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-08 20:22:41"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 added to room 234 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-08 20:23:24"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 joined room game-234","service":"gameofuno-backend","timestamp":"2025-11-08 20:23:24"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 removed from room 234","service":"gameofuno-backend","timestamp":"2025-11-08 20:23:24"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 added to room 234 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-08 20:23:24"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 joined room game-234","service":"gameofuno-backend","timestamp":"2025-11-08 20:23:24"}
+{"level":"info","message":"Game started in room game-234","service":"gameofuno-backend","timestamp":"2025-11-08 20:23:35"}
+{"level":"info","message":"Game initialized in room 234 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-08 20:23:35"}
+{"level":"info","message":"Game initialized in room 234 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-08 20:23:35"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 disconnected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-08 20:33:39"}
+{"level":"info","message":"User YntL7HoxbBh3Vu0JAAA3 removed from room 234","service":"gameofuno-backend","timestamp":"2025-11-08 20:33:39"}
+{"level":"info","message":"User YZTaTvvTp1zbYiIoAAA5 disconnected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-08 20:33:41"}
+{"level":"info","message":"User 79OnZKXJb3oaa-RdAAA1 disconnected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-08 21:04:09"}
+{"level":"info","message":"User 79OnZKXJb3oaa-RdAAA1 removed from room 234","service":"gameofuno-backend","timestamp":"2025-11-08 21:04:09"}
+{"level":"info","message":"User 4krivwby8ZXXbWBuAAAx disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-08 21:04:10"}
+{"level":"info","message":"User YVxyqW_zaYjbQDw-AAA7 connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-08 22:06:38"}
+{"level":"info","message":"User AD4qBgRI3jp2IHx7AAA9 connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-08 22:06:39"}
+{"level":"info","message":"User AD4qBgRI3jp2IHx7AAA9 disconnected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-08 22:06:41"}
+{"level":"info","message":"User YVxyqW_zaYjbQDw-AAA7 disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-08 22:06:41"}
+{"level":"info","message":"User Pv4WVuiNjkAOApsOAAA_ connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-08 22:06:50"}
+{"level":"info","message":"User Pv4WVuiNjkAOApsOAAA_ disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-08 22:12:10"}
+{"level":"info","message":"User NoA4HW-cUoPE9lU0AAAz disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-09 00:03:44"}
+{"level":"info","message":"User KVySda0DU40OM-kpAAAr disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-09 00:03:44"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt disconnected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-09 00:03:44"}
+{"level":"info","message":"User 5IufsF3p1whiysDaAAAt removed from room 234","service":"gameofuno-backend","timestamp":"2025-11-09 00:03:44"}
+{"level":"info","message":"User Sfd-v6V2-4w5c8E2AABB connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-09 00:03:45"}
+{"level":"info","message":"User 3bfzp8_-BkQ37-OjAABD connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-09 00:03:45"}
+{"level":"info","message":"User VNPUH9EuGatMIfvBAABF connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-09 00:03:45"}
+{"level":"info","message":"User M-ZTtv7q6Bodpb0iAAAj disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-09 00:23:01"}
+{"level":"info","message":"User cX_TxLNwC2pAVFkvAAAp disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-09 00:23:01"}
+{"level":"info","message":"User Sfd-v6V2-4w5c8E2AABB disconnected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-09 00:23:01"}
+{"level":"info","message":"User 3bfzp8_-BkQ37-OjAABD disconnected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-09 00:23:01"}
+{"level":"info","message":"User VNPUH9EuGatMIfvBAABF disconnected. Active connections: 0","service":"gameofuno-backend","timestamp":"2025-11-09 00:23:01"}
+{"level":"info","message":"User JWanqfRPtj73CDiZAABH connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-09 00:23:02"}
+{"level":"info","message":"User lfwIt3_DBiVexiJoAABJ connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-09 00:23:02"}
+{"level":"info","message":"User v05xjSn5N6b-XCYrAABL connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-09 00:23:02"}
+{"level":"info","message":"User D9HV4lXDLQWbOk92AABN connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-09 00:23:03"}
+{"level":"info","message":"User ejCMlV4sCWF1fRgAAABP connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-09 00:23:03"}
+{"level":"info","message":"User vVJ2tJ2jopIgAUnpAABR connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-09 00:33:04"}
+{"level":"info","message":"User csB52hbwglBfkBA2AABT connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-09 00:33:05"}
+{"level":"info","message":"Server started on Port 4000 at 2025-11-12T05:20:49.674Z","service":"gameofuno-backend","timestamp":"2025-11-12 10:50:49"}
+{"level":"info","message":"User ogJl7L5PINBou_-MAAAB connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-12 10:50:50"}
+{"level":"info","message":"User oAQn1PcOIJyc128iAAAD connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 11:19:03"}
+{"level":"info","message":"User OqAHFaDIIxgNXFeyAAAF connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 11:20:00"}
+{"level":"info","message":"User EXjq7wUl9cDwCJGFAAAH connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 11:20:22"}
+{"level":"info","message":"User c6-0isnm6tLP6b2IAAAJ connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:07"}
+{"level":"info","message":"User c6-0isnm6tLP6b2IAAAJ added to room 235 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:07"}
+{"level":"info","message":"User c6-0isnm6tLP6b2IAAAJ joined room game-235","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:07"}
+{"level":"info","message":"User c6-0isnm6tLP6b2IAAAJ removed from room 235","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:07"}
+{"level":"info","message":"User c6-0isnm6tLP6b2IAAAJ added to room 235 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:07"}
+{"level":"info","message":"User c6-0isnm6tLP6b2IAAAJ joined room game-235","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:07"}
+{"level":"info","message":"User hnZBvQQLQ6URzqEdAAAL connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:18"}
+{"level":"info","message":"User hnZBvQQLQ6URzqEdAAAL added to room 235 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:18"}
+{"level":"info","message":"User hnZBvQQLQ6URzqEdAAAL joined room game-235","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:18"}
+{"level":"info","message":"User hnZBvQQLQ6URzqEdAAAL removed from room 235","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:18"}
+{"level":"info","message":"User hnZBvQQLQ6URzqEdAAAL added to room 235 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:18"}
+{"level":"info","message":"User hnZBvQQLQ6URzqEdAAAL joined room game-235","service":"gameofuno-backend","timestamp":"2025-11-12 11:23:18"}
+{"level":"info","message":"User EXjq7wUl9cDwCJGFAAAH disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 11:24:58"}
+{"level":"info","message":"User f4FPidae81SAuDzfAAAN connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 11:25:00"}
+{"level":"info","message":"User mxrwVnDZkFJ4FFFeAAAP connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-12 11:25:09"}
+{"level":"info","message":"User mxrwVnDZkFJ4FFFeAAAP added to room 235 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-12 11:25:09"}
+{"level":"info","message":"User mxrwVnDZkFJ4FFFeAAAP joined room game-235","service":"gameofuno-backend","timestamp":"2025-11-12 11:25:09"}
+{"level":"info","message":"User mxrwVnDZkFJ4FFFeAAAP removed from room 235","service":"gameofuno-backend","timestamp":"2025-11-12 11:25:09"}
+{"level":"info","message":"User mxrwVnDZkFJ4FFFeAAAP added to room 235 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-12 11:25:09"}
+{"level":"info","message":"User mxrwVnDZkFJ4FFFeAAAP joined room game-235","service":"gameofuno-backend","timestamp":"2025-11-12 11:25:09"}
+{"level":"info","message":"Game started in room game-235","service":"gameofuno-backend","timestamp":"2025-11-12 11:25:25"}
+{"level":"info","message":"Game initialized in room 235 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-12 11:25:25"}
+{"level":"info","message":"Game initialized in room 235 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-12 11:25:25"}
+{"level":"info","message":"User f4FPidae81SAuDzfAAAN disconnected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 11:28:05"}
+{"level":"info","message":"User mxrwVnDZkFJ4FFFeAAAP disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 11:28:05"}
+{"level":"info","message":"User mxrwVnDZkFJ4FFFeAAAP removed from room 235","service":"gameofuno-backend","timestamp":"2025-11-12 11:28:05"}
+{"level":"info","message":"User Ok-79y7HsqUHymH3AAAR connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 11:28:07"}
+{"level":"info","message":"User ogJl7L5PINBou_-MAAAB disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 11:28:34"}
+{"level":"info","message":"User hnZBvQQLQ6URzqEdAAAL disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 11:28:34"}
+{"level":"info","message":"User hnZBvQQLQ6URzqEdAAAL removed from room 235","service":"gameofuno-backend","timestamp":"2025-11-12 11:28:34"}
+{"level":"info","message":"User J6b1_w_tF8qhVLboAAAT connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 11:28:36"}
+{"level":"info","message":"User oAQn1PcOIJyc128iAAAD disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 11:35:44"}
+{"level":"info","message":"User c6-0isnm6tLP6b2IAAAJ disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 11:35:48"}
+{"level":"info","message":"User c6-0isnm6tLP6b2IAAAJ removed from room 235","service":"gameofuno-backend","timestamp":"2025-11-12 11:35:48"}
+{"level":"info","message":"User YkMZdXEgAjPU0gnMAAAV connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 11:47:50"}
+{"level":"info","message":"User 37iHtFtBr52k_AIDAAAX connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 11:47:51"}
+{"level":"info","message":"User 37iHtFtBr52k_AIDAAAX disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 11:47:54"}
+{"level":"info","message":"User YkMZdXEgAjPU0gnMAAAV disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 11:47:54"}
+{"level":"info","message":"User nAExuvKHYLJ4c9ReAAAZ connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 11:50:22"}
+{"level":"info","message":"User nAExuvKHYLJ4c9ReAAAZ added to room 236 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-12 11:50:22"}
+{"level":"info","message":"User nAExuvKHYLJ4c9ReAAAZ joined room game-236","service":"gameofuno-backend","timestamp":"2025-11-12 11:50:22"}
+{"level":"info","message":"User nAExuvKHYLJ4c9ReAAAZ removed from room 236","service":"gameofuno-backend","timestamp":"2025-11-12 11:50:22"}
+{"level":"info","message":"User nAExuvKHYLJ4c9ReAAAZ added to room 236 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-12 11:50:22"}
+{"level":"info","message":"User nAExuvKHYLJ4c9ReAAAZ joined room game-236","service":"gameofuno-backend","timestamp":"2025-11-12 11:50:22"}
+{"level":"info","message":"User SwKb9nPMhpmIXs8iAAAb connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 11:50:40"}
+{"level":"info","message":"User HQ-xyPzjIMhSJlrAAAAd connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:06"}
+{"level":"info","message":"User HQ-xyPzjIMhSJlrAAAAd added to room 236 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:06"}
+{"level":"info","message":"User HQ-xyPzjIMhSJlrAAAAd joined room game-236","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:06"}
+{"level":"info","message":"User HQ-xyPzjIMhSJlrAAAAd removed from room 236","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:06"}
+{"level":"info","message":"User HQ-xyPzjIMhSJlrAAAAd added to room 236 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:06"}
+{"level":"info","message":"User HQ-xyPzjIMhSJlrAAAAd joined room game-236","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:06"}
+{"level":"info","message":"User qiHzxoFK8uTviWeoAAAf connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:29"}
+{"level":"info","message":"User qiHzxoFK8uTviWeoAAAf added to room 236 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:29"}
+{"level":"info","message":"User qiHzxoFK8uTviWeoAAAf joined room game-236","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:29"}
+{"level":"info","message":"User qiHzxoFK8uTviWeoAAAf removed from room 236","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:29"}
+{"level":"info","message":"User qiHzxoFK8uTviWeoAAAf added to room 236 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:29"}
+{"level":"info","message":"User qiHzxoFK8uTviWeoAAAf joined room game-236","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:29"}
+{"level":"info","message":"Game started in room game-236","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:36"}
+{"level":"info","message":"Game initialized in room 236 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:36"}
+{"level":"info","message":"Game initialized in room 236 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-12 11:52:36"}
+{"level":"info","message":"User HQ-xyPzjIMhSJlrAAAAd removed from room 236","service":"gameofuno-backend","timestamp":"2025-11-12 11:57:08"}
+{"level":"info","message":"User KaEaZ5dzxoiOrNQkAAAh connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-12 11:57:08"}
+{"level":"info","message":"User qiHzxoFK8uTviWeoAAAf removed from room 236","service":"gameofuno-backend","timestamp":"2025-11-12 11:57:12"}
+{"level":"info","message":"User G_pDF01hs7Gxh5EGAAAj connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-12 11:57:12"}
+{"level":"info","message":"User Ok-79y7HsqUHymH3AAAR disconnected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-12 11:57:17"}
+{"level":"info","message":"User G_pDF01hs7Gxh5EGAAAj disconnected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-12 11:57:17"}
+{"level":"info","message":"User qiHzxoFK8uTviWeoAAAf disconnected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 11:57:17"}
+{"level":"info","message":"User nAExuvKHYLJ4c9ReAAAZ removed from room 236","service":"gameofuno-backend","timestamp":"2025-11-12 11:57:24"}
+{"level":"info","message":"User g7g6VneCWP_pvtT2AAAl connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-12 11:57:24"}
+{"level":"info","message":"User HQ-xyPzjIMhSJlrAAAAd disconnected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 12:02:46"}
+{"level":"info","message":"User KaEaZ5dzxoiOrNQkAAAh disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 12:02:48"}
+{"level":"info","message":"User SwKb9nPMhpmIXs8iAAAb disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 12:02:50"}
+{"level":"info","message":"User J6b1_w_tF8qhVLboAAAT disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 12:23:43"}
+{"level":"info","message":"User g7g6VneCWP_pvtT2AAAl disconnected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 12:23:43"}
+{"level":"info","message":"User nAExuvKHYLJ4c9ReAAAZ disconnected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-12 12:23:43"}
+{"level":"info","message":"User uKan4_1W1qXX5FDtAAAn connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 12:23:44"}
+{"level":"info","message":"User hG8cHGwz5SOeu6NbAAAp connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 12:23:44"}
+{"level":"info","message":"User _J8_1VzKkEIX3Rt-AAAr connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 12:23:44"}
+{"level":"info","message":"User OqAHFaDIIxgNXFeyAAAF disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 12:26:37"}
+{"level":"info","message":"User uKan4_1W1qXX5FDtAAAn disconnected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 12:26:37"}
+{"level":"info","message":"User hG8cHGwz5SOeu6NbAAAp disconnected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-12 12:26:37"}
+{"level":"info","message":"User _J8_1VzKkEIX3Rt-AAAr disconnected. Active connections: 0","service":"gameofuno-backend","timestamp":"2025-11-12 12:26:37"}
+{"level":"info","message":"User INkXgz8TnDK20AvgAAAt connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-12 12:26:38"}
+{"level":"info","message":"User uKDWYlHPdgsve9YLAAAv connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 12:26:39"}
+{"level":"info","message":"User NDQBRsAYKMQKJI15AAAx connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 12:26:39"}
+{"level":"info","message":"User G-ET_5szVCqjjq32AAAz connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 12:26:39"}
+{"level":"info","message":"User uKDWYlHPdgsve9YLAAAv disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 12:30:00"}
+{"level":"info","message":"User lPGd0-tz68Il4_fAAAA1 connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 12:30:01"}
+{"level":"info","message":"User lPGd0-tz68Il4_fAAAA1 disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 12:43:19"}
+{"level":"info","message":"User 11vZHsKU2QdyLi43AAA3 connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 12:43:19"}
+{"level":"info","message":"User INkXgz8TnDK20AvgAAAt disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 12:53:39"}
+{"level":"info","message":"User NDQBRsAYKMQKJI15AAAx disconnected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 12:53:39"}
+{"level":"info","message":"User G-ET_5szVCqjjq32AAAz disconnected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-12 12:53:39"}
+{"level":"info","message":"User 11vZHsKU2QdyLi43AAA3 disconnected. Active connections: 0","service":"gameofuno-backend","timestamp":"2025-11-12 12:53:39"}
+{"level":"info","message":"User ldt7sQS2LNRBbJTxAAA5 connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-12 12:53:40"}
+{"level":"info","message":"User B1SQm-WFEcP6W75-AAA7 connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 12:53:41"}
+{"level":"info","message":"User Js386MF9IrQ3IB6ZAAA9 connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 12:53:41"}
+{"level":"info","message":"User LJSE9LfkjfD6UcvEAAA_ connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 12:53:41"}
+{"level":"info","message":"User A5CIJSBk-a72tZr0AABB connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 12:56:54"}
+{"level":"info","message":"User dMhgANZpOaXSI_FNAABD connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 12:56:54"}
+{"level":"info","message":"User __kaCAuwKTNva0s0AABF connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-12 12:56:54"}
+{"level":"info","message":"User A5CIJSBk-a72tZr0AABB disconnected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 12:56:55"}
+{"level":"info","message":"User __kaCAuwKTNva0s0AABF disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 12:56:55"}
+{"level":"info","message":"User dMhgANZpOaXSI_FNAABD disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 12:56:55"}
+{"level":"info","message":"User B1SQm-WFEcP6W75-AAA7 disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 13:02:21"}
+{"level":"info","message":"User Js386MF9IrQ3IB6ZAAA9 disconnected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 13:02:21"}
+{"level":"info","message":"User LJSE9LfkjfD6UcvEAAA_ disconnected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-12 13:02:21"}
+{"level":"info","message":"Server started on Port 4000 at 2025-11-12T07:52:27.828Z","service":"gameofuno-backend","timestamp":"2025-11-12 13:22:27"}
+{"level":"info","message":"User QpxjPuU2Cob_JPMJAAAB connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-12 13:22:28"}
+{"level":"info","message":"User -iQ4ej2VE4N22kLnAAAD connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 13:22:29"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 13:22:33"}
+{"level":"info","message":"User nczQOP1_3ZWPlXn9AAAH connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:19"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF added to room 237 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:38"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF joined room game-237","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:38"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF removed from room 237","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:38"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF added to room 237 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:38"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF joined room game-237","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:38"}
+{"level":"info","message":"User GQNFQSzrNAYTOlxKAAAJ connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:41"}
+{"level":"info","message":"User GQNFQSzrNAYTOlxKAAAJ added to room 237 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:41"}
+{"level":"info","message":"User GQNFQSzrNAYTOlxKAAAJ joined room game-237","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:41"}
+{"level":"info","message":"User GQNFQSzrNAYTOlxKAAAJ removed from room 237","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:41"}
+{"level":"info","message":"User GQNFQSzrNAYTOlxKAAAJ added to room 237 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:41"}
+{"level":"info","message":"User GQNFQSzrNAYTOlxKAAAJ joined room game-237","service":"gameofuno-backend","timestamp":"2025-11-12 13:32:41"}
+{"level":"info","message":"Game started in room game-237","service":"gameofuno-backend","timestamp":"2025-11-12 13:34:50"}
+{"level":"info","message":"[GAME] [2025-11-12T08:04:50.781Z] | Game: 237 | Turn: 0 | Player: SYSTEM... | Action: startGame | Details: Players: 1","service":"gameofuno-backend","timestamp":"2025-11-12 13:34:50"}
+{"level":"info","message":"[GAME] Player 1: 0xfb749E1f494E4e5e91A012B039807e3e1892637b","service":"gameofuno-backend","timestamp":"2025-11-12 13:34:50"}
+{"level":"info","message":"[GAME] [2025-11-12T08:04:50.784Z] | Game: 237 | Turn: 0 | Player: SYSTEM... | Action: startGame | Details: First card: yellow 5 | Color: yellow | Value: 5 | Next: 0xfb749E...","service":"gameofuno-backend","timestamp":"2025-11-12 13:34:50"}
+{"level":"info","message":"Game initialized in room 237 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-12 13:34:50"}
+{"level":"info","message":"Game initialized in room 237 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-12 13:34:50"}
+{"level":"info","message":"User nczQOP1_3ZWPlXn9AAAH disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 13:35:13"}
+{"level":"info","message":"User GQNFQSzrNAYTOlxKAAAJ disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 13:35:13"}
+{"level":"info","message":"User GQNFQSzrNAYTOlxKAAAJ removed from room 237","service":"gameofuno-backend","timestamp":"2025-11-12 13:35:13"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF removed from room 237","service":"gameofuno-backend","timestamp":"2025-11-12 13:35:17"}
+{"level":"info","message":"User Yu_0coKkK1B0_ZpvAAAL connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 13:35:18"}
+{"level":"info","message":"User PLbAVv_LZVd3DormAAAN connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 13:35:21"}
+{"level":"info","message":"User 8cqUYxyyWAAugGJiAAAP connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 13:35:38"}
+{"level":"info","message":"User tMYqqY_oZ_m-NCkmAAAR connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:04"}
+{"level":"info","message":"User tMYqqY_oZ_m-NCkmAAAR added to room 238 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:05"}
+{"level":"info","message":"User tMYqqY_oZ_m-NCkmAAAR joined room game-238","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:05"}
+{"level":"info","message":"User tMYqqY_oZ_m-NCkmAAAR removed from room 238","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:05"}
+{"level":"info","message":"User tMYqqY_oZ_m-NCkmAAAR added to room 238 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:05"}
+{"level":"info","message":"User tMYqqY_oZ_m-NCkmAAAR joined room game-238","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:05"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF added to room 238 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:15"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF joined room game-238","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:15"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF removed from room 238","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:15"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF added to room 238 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:15"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF joined room game-238","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:15"}
+{"level":"info","message":"User Qsv3v90JyQByBl7VAAAT connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:27"}
+{"level":"info","message":"User Qsv3v90JyQByBl7VAAAT added to room 238 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:27"}
+{"level":"info","message":"User Qsv3v90JyQByBl7VAAAT joined room game-238","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:27"}
+{"level":"info","message":"User Qsv3v90JyQByBl7VAAAT removed from room 238","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:27"}
+{"level":"info","message":"User Qsv3v90JyQByBl7VAAAT added to room 238 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:27"}
+{"level":"info","message":"User Qsv3v90JyQByBl7VAAAT joined room game-238","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:27"}
+{"level":"info","message":"Game started in room game-238","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:33"}
+{"level":"info","message":"[GAME] [2025-11-12T08:06:33.767Z] | Game: 238 | Turn: 0 | Player: SYSTEM... | Action: startGame | Details: Players: 3","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:33"}
+{"level":"info","message":"[GAME] Player 1: 0x2D75E228eca690777a7F1E9879112324099424b2","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:33"}
+{"level":"info","message":"[GAME] Player 2: 0xfb749E1f494E4e5e91A012B039807e3e1892637b","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:33"}
+{"level":"info","message":"[GAME] Player 3: 0x030e255635dfE3eB318943B726870535BFe6B9FB","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:33"}
+{"level":"info","message":"[GAME] [2025-11-12T08:06:33.767Z] | Game: 238 | Turn: 0 | Player: SYSTEM... | Action: startGame | Details: First card: blue 4 | Color: blue | Value: 4 | Next: 0x030e25...","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:33"}
+{"level":"info","message":"Game initialized in room 238 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:33"}
+{"level":"info","message":"Game initialized in room 238 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-12 13:36:33"}
+{"level":"info","message":"User 8cqUYxyyWAAugGJiAAAP disconnected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-12 13:37:37"}
+{"level":"info","message":"User tMYqqY_oZ_m-NCkmAAAR disconnected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 13:37:37"}
+{"level":"info","message":"User tMYqqY_oZ_m-NCkmAAAR removed from room 238","service":"gameofuno-backend","timestamp":"2025-11-12 13:37:37"}
+{"level":"info","message":"User jLS4Qjl4tmKjgjR4AAAV connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-12 13:37:38"}
+{"level":"info","message":"User jLS4Qjl4tmKjgjR4AAAV disconnected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-12 13:37:40"}
+{"level":"info","message":"User QpxjPuU2Cob_JPMJAAAB disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-12 13:37:43"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-12 13:37:43"}
+{"level":"info","message":"User 26hmmCxfHMZZuA5eAAAF removed from room 238","service":"gameofuno-backend","timestamp":"2025-11-12 13:37:43"}
+{"level":"info","message":"User Yu_0coKkK1B0_ZpvAAAL disconnected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 13:37:43"}
+{"level":"info","message":"User -iQ4ej2VE4N22kLnAAAD disconnected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 13:37:43"}
+{"level":"info","message":"User Qsv3v90JyQByBl7VAAAT removed from room 238","service":"gameofuno-backend","timestamp":"2025-11-12 13:40:31"}
+{"level":"info","message":"User 7rMNYl_nWxllppiAAAAX connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-12 13:40:31"}
+{"level":"info","message":"User PLbAVv_LZVd3DormAAAN disconnected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 13:41:10"}
+{"level":"info","message":"User Qsv3v90JyQByBl7VAAAT disconnected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-12 13:41:10"}
+{"level":"info","message":"User 7rMNYl_nWxllppiAAAAX disconnected. Active connections: 0","service":"gameofuno-backend","timestamp":"2025-11-12 13:41:10"}
