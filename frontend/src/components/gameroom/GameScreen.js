@@ -247,11 +247,13 @@ const GameScreen = ({
         {opponentDecks.map((opponent, index) => {
           // Position opponents around the table based on index
           let positionStyle = {};
-          if (isComputerMode) {
-            // In computer mode, use simple absolute positioning for all opponents
+          const totalPlayers = opponentDecks.length + 1; // +1 for current player
+          
+          if (isComputerMode || totalPlayers === 2) {
+            // In computer mode or 2-player game, use simple absolute positioning for all opponents
             positionStyle = { position: "absolute" };
           } else {
-            // In multiplayer mode, position opponents around the table
+            // In multiplayer mode with more than 2 players, position opponents around the table
             if (index === 0) {
               // Left side, middle
               positionStyle = { position: "absolute", top: "42%", left: "0%" };
