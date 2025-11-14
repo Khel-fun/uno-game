@@ -353,3 +353,36 @@
 {"level":"info","message":"User PLbAVv_LZVd3DormAAAN disconnected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-12 13:41:10"}
 {"level":"info","message":"User Qsv3v90JyQByBl7VAAAT disconnected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-12 13:41:10"}
 {"level":"info","message":"User 7rMNYl_nWxllppiAAAAX disconnected. Active connections: 0","service":"gameofuno-backend","timestamp":"2025-11-12 13:41:10"}
+{"level":"info","message":"Server started on Port 4000 at 2025-11-14T12:43:48.804Z","service":"gameofuno-backend","timestamp":"2025-11-14 18:13:48"}
+{"level":"info","message":"User -Y3KtTHc1nmEMdWrAAAB connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-14 18:15:34"}
+{"level":"info","message":"User qkfLe9xqEdtzNz1hAAAD connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:37"}
+{"level":"info","message":"User qkfLe9xqEdtzNz1hAAAD added to room 18 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:37"}
+{"level":"info","message":"User qkfLe9xqEdtzNz1hAAAD joined room game-18","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:37"}
+{"level":"info","message":"User qkfLe9xqEdtzNz1hAAAD removed from room 18","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:37"}
+{"level":"info","message":"User qkfLe9xqEdtzNz1hAAAD added to room 18 as Player 1","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:37"}
+{"level":"info","message":"User qkfLe9xqEdtzNz1hAAAD joined room game-18","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:37"}
+{"level":"info","message":"User -EmSPQ7YVJ3bFSMOAAAF connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:42"}
+{"level":"info","message":"User khL9w3ozOR3u-D3JAAAH connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:52"}
+{"level":"info","message":"User khL9w3ozOR3u-D3JAAAH added to room 18 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:52"}
+{"level":"info","message":"User khL9w3ozOR3u-D3JAAAH joined room game-18","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:52"}
+{"level":"info","message":"User khL9w3ozOR3u-D3JAAAH removed from room 18","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:52"}
+{"level":"info","message":"User khL9w3ozOR3u-D3JAAAH added to room 18 as Player 2","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:52"}
+{"level":"info","message":"User khL9w3ozOR3u-D3JAAAH joined room game-18","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:52"}
+{"level":"info","message":"User Jd1QxUDV9xKxMZbxAAAJ connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-14 18:16:58"}
+{"level":"info","message":"User 80-rS7cqyYmBNTUgAAAL connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:18"}
+{"level":"info","message":"User 80-rS7cqyYmBNTUgAAAL added to room 18 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:18"}
+{"level":"info","message":"User 80-rS7cqyYmBNTUgAAAL joined room game-18","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:18"}
+{"level":"info","message":"User 80-rS7cqyYmBNTUgAAAL removed from room 18","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:18"}
+{"level":"info","message":"User 80-rS7cqyYmBNTUgAAAL added to room 18 as Player 3","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:18"}
+{"level":"info","message":"User 80-rS7cqyYmBNTUgAAAL joined room game-18","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:18"}
+{"level":"info","message":"Game started in room game-18","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:28"}
+{"level":"info","message":"[GAME] [2025-11-14T12:47:28.089Z] | Game: 18 | Turn: 0 | Player: SYSTEM... | Action: startGame | Details: Players: 2","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:28"}
+{"level":"info","message":"[GAME] Player 1: 0x030e255635dfE3eB318943B726870535BFe6B9FB","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:28"}
+{"level":"info","message":"[GAME] Player 2: 0xfb749E1f494E4e5e91A012B039807e3e1892637b","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:28"}
+{"level":"info","message":"[GAME] [2025-11-14T12:47:28.091Z] | Game: 18 | Turn: 0 | Player: SYSTEM... | Action: startGame | Details: First card: blue 1 | Color: blue | Value: 1 | Next: 0x030e25...","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:28"}
+{"level":"info","message":"Game initialized in room 18 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:28"}
+{"level":"info","message":"Game initialized in room 18 with 6 players","service":"gameofuno-backend","timestamp":"2025-11-14 18:17:28"}
+{"level":"info","message":"User -Y3KtTHc1nmEMdWrAAAB disconnected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-14 18:23:37"}
+{"level":"info","message":"User qkfLe9xqEdtzNz1hAAAD disconnected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-14 18:23:37"}
+{"level":"info","message":"User qkfLe9xqEdtzNz1hAAAD removed from room 18","service":"gameofuno-backend","timestamp":"2025-11-14 18:23:37"}
+{"level":"info","message":"User y8mX7PCq2oVw3QoZAAAN connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-14 18:23:39"}

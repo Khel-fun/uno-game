@@ -815,7 +815,8 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         });
         
         // Skip turn without drawing
-        const turnCopy = turn === "Player 1" ? "Player 2" : "Player 1";
+        const activePlayers = getActivePlayers();
+        const turnCopy = getNextPlayer(turn, activePlayers);
         
         if (isComputerMode) {
           dispatch({
@@ -871,7 +872,8 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     
     console.log('Card drawn:', drawCard, 'Playable:', isPlayable, { isWildCard, isColorMatch, isNumberMatch });
     // Only change turn if the drawn card is NOT playable
-    const turnCopy = isPlayable ? turn : (turn === "Player 1" ? "Player 2" : "Player 1");
+    const activePlayers = getActivePlayers();
+    const turnCopy = isPlayable ? turn : getNextPlayer(turn, activePlayers);
     
     // Show toast notification if the card is playable
     // if (isPlayable) {
@@ -883,16 +885,22 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     //   });
     // }
 
+    // Build the update object with the drawn card added to the current player's deck
+    const currentPlayerDeck = getPlayerDeck(turn);
+    const updatedDeck = [...currentPlayerDeck, drawCard];
+    const deckKey = `${turn.toLowerCase().replace(' ', '')}Deck`;
+    
+    const updateState = {
+      turn: turnCopy,
+      [deckKey]: updatedDeck,
+      drawCardPile: copiedDrawCardPileArray,
+      playedCardsPile: updatedPlayedCardsPile, // Include updated played cards pile
+      drawButtonPressed,
+    };
+
     if (isComputerMode) {
       // Handle locally for computer mode
-      dispatch({
-        turn: turnCopy,
-        player1Deck: turn === "Player 1" ? [...player1Deck, drawCard] : player1Deck,
-        player2Deck: turn === "Player 2" ? [...player2Deck, drawCard] : player2Deck,
-        drawCardPile: copiedDrawCardPileArray,
-        playedCardsPile: updatedPlayedCardsPile, // Include updated played cards pile
-        drawButtonPressed,
-      });
+      dispatch(updateState);
       
       // For computer mode, if computer draws a playable card, trigger another move
       // Use computerMoveCounter to ensure fresh state instead of setTimeout with stale closure
@@ -904,22 +912,16 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       }
     } else {
       //send new state to server for multiplayer mode
-      socket.emit("updateGameState", {
-        turn: turnCopy,
-        player1Deck: turn === "Player 1" ? [...player1Deck, drawCard] : player1Deck,
-        player2Deck: turn === "Player 2" ? [...player2Deck, drawCard] : player2Deck,
-        drawCardPile: copiedDrawCardPileArray,
-        playedCardsPile: updatedPlayedCardsPile, // Include updated played cards pile
-        drawButtonPressed,
-      });
+      socket.emit("updateGameState", updateState);
     }
   };
 
   const onSkipButtonHandler = () => {
     //extract player who skipped
     const cardPlayedBy = turn;
+    const activePlayers = getActivePlayers();
     const newState = {
-      turn: cardPlayedBy === "Player 1" ? "Player 2" : "Player 1",
+      turn: getNextPlayer(cardPlayedBy, activePlayers),
       drawButtonPressed: false,
     };
 
