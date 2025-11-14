@@ -25,6 +25,7 @@ const GameScreen = ({
   drawButtonPressed,
   onSkipButtonHandler,
   isComputerMode = false,
+  isExtraTurn = false,
 }) => {
   // Get all player decks in an object
   const allPlayerDecks = {
@@ -105,6 +106,10 @@ const GameScreen = ({
             if (turn === currentUser && drawButtonPressed) {
               onSkipButtonHandler();
             } 
+            // If it's an extra turn from special card, just skip (lose the extra turn)
+            else if (turn === currentUser && isExtraTurn) {
+              onSkipButtonHandler();
+            }
             // Otherwise, draw a card and potentially skip
             else if (turn === currentUser) {
               onCardDrawnHandler();
@@ -124,7 +129,7 @@ const GameScreen = ({
       }
     };
   // Only reset timer when turn or game state changes, not when Uno button is clicked
-  }, [turn, currentUser, drawButtonPressed, unoClicked]);  // Added unoClicked to dependencies
+  }, [turn, currentUser, drawButtonPressed, unoClicked, isExtraTurn]);  // Added unoClicked and isExtraTurn to dependencies
 
   // Effect for skip timer
   useEffect(() => {

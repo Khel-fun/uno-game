@@ -50,6 +50,7 @@ const initialGameState = {
   isUnoButtonPressed: false,
   drawButtonPressed: false,
   lastCardPlayedBy: "",
+  isExtraTurn: false, // Track if current turn is an extra turn from special card
   totalPlayers: 2, // Track the number of players in the game
 };
 
@@ -88,6 +89,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     isUnoButtonPressed,
     drawButtonPressed,
     lastCardPlayedBy,
+    isExtraTurn,
     totalPlayers = playerCount,
   } = gameState;
 
@@ -472,6 +474,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       currentColor: colorOfPlayedCard,
       currentNumber: numberOfPlayedCard,
       drawCardPile: copiedDrawCardPileArray,
+      isExtraTurn: !toggleTurn, // Set to true when player gets extra turn from special card
     };
 
     // Update the deck for the player who played the card
@@ -822,11 +825,13 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
           dispatch({
             turn: turnCopy,
             drawButtonPressed: false,
+            isExtraTurn: false, // Reset when no cards available
           });
         } else {
           socket.emit("updateGameState", {
             turn: turnCopy,
             drawButtonPressed: false,
+            isExtraTurn: false, // Reset when no cards available
           });
         }
         return;
@@ -896,6 +901,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       drawCardPile: copiedDrawCardPileArray,
       playedCardsPile: updatedPlayedCardsPile, // Include updated played cards pile
       drawButtonPressed,
+      isExtraTurn: false, // Reset extra turn when drawing a card
     };
 
     if (isComputerMode) {
@@ -923,6 +929,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     const newState = {
       turn: getNextPlayer(cardPlayedBy, activePlayers),
       drawButtonPressed: false,
+      isExtraTurn: false, // Reset extra turn when skipping
     };
 
     if (isComputerMode) {
@@ -1118,6 +1125,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
             drawButtonPressed={drawButtonPressed}
             onSkipButtonHandler={onSkipButtonHandler}
             isComputerMode={isComputerMode}
+            isExtraTurn={isExtraTurn}
             onUnoClicked={() => {
               // Only allow setting Uno to true if it's not already pressed
               if (!isUnoButtonPressed) {
