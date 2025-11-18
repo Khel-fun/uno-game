@@ -84,7 +84,7 @@ const CommonView = ({
             display: "flex",
             justifyContent: "center",
             position: "absolute",
-            bottom: "-33px",
+            bottom: "-51px",
             left: "50%",
             transform: "translateX(-50%)"
           }}

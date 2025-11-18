@@ -173,7 +173,7 @@ const GameScreen = ({
 
   return (
     <div className="game-container" style={{
-      minHeight: "100vh",
+      minHeight: "100svh",
       display: "flex",
       flexDirection: "column",
     }}>
@@ -246,7 +246,7 @@ const GameScreen = ({
           justifyContent: "center",
           gap: "2rem",
           height: "auto",
-          paddingTop: "174px"
+          paddingTop: "200px"
         }}
       >
         {opponentDecks.map((opponent, index) => {
@@ -371,6 +371,7 @@ const GameScreen = ({
             justifyContent: "center",
             position: "relative",
             width: "100%",
+            marginBottom: "70px"
           }}
         >
           <div

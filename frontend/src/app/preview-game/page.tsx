@@ -66,7 +66,7 @@ const PreviewGame = () => {
     <div
       className="game-container"
       style={{
-        minHeight: "100vh",
+        height: "100svh",
         display: "flex",
         flexDirection: "column",
         position: "relative",
@@ -78,7 +78,7 @@ const PreviewGame = () => {
         top: 0,
         left: 0,
         width: '100vw',
-        height: '100vh',
+        height: '100svh',
         overflow: 'hidden',
         zIndex: 0
       }}>
@@ -293,7 +293,7 @@ const PreviewGame = () => {
           justifyContent: "center",
           gap: "2rem",
           height: "auto",
-          paddingTop: "174px"
+          paddingTop: "200px"
         }}
       >
         {opponents.map((opponent, index) => {
@@ -436,6 +436,7 @@ const PreviewGame = () => {
           justifyContent: "center",
           position: "relative",
           width: "100%",
+          marginBottom: "70px"
         }}
       >
         <div
@@ -508,7 +509,7 @@ const PreviewGame = () => {
                   display: "flex",
                   justifyContent: "center",
                   position: "absolute",
-                  bottom: "-33px",
+                  bottom: "-51px",
                   left: "50%",
                   transform: "translateX(-50%)"
                 }}
