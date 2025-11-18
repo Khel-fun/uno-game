@@ -1,5 +1,5 @@
-import React, { useEffect, useReducer, useState } from "react";
-import socket from "../../services/socket";
+import React, { useEffect, useReducer, useState, useRef } from "react";
+import socket, { socketManager } from "../../services/socket";
 import MemoizedHeader from "./Header";
 import CenterInfo from "./CenterInfo";
 import GameScreen from "./GameScreen";
@@ -18,6 +18,7 @@ import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
 import { ethers } from "ethers";
 import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
 import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
+import { useSocketConnection } from "@/context/SocketConnectionContext";
 
 //NUMBER CODES FOR ACTION CARDS
 //SKIP - 100
@@ -65,6 +66,10 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
   const [computerMoveCounter, setComputerMoveCounter] = useState(0);
   const [showLowBalanceDrawer, setShowLowBalanceDrawer] = useState(false);
   const { checkBalance } = useBalanceCheck();
+  
+  // Connection status tracking
+  const { isConnected: socketConnected, isReconnecting } = useSocketConnection();
+  const pendingActionsRef = useRef([]);
 
   // Use Wagmi hooks for wallet functionality
   const { address, isConnected } = useWalletAddress();
@@ -94,6 +99,55 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
   } = gameState;
 
   const { toast } = useToast();
+
+  // Helper function to emit socket events with buffering support
+  const emitSocketEvent = (eventName, data) => {
+    if (socketConnected) {
+      socket.emit(eventName, data);
+    } else {
+      console.log(`Socket disconnected, buffering event: ${eventName}`);
+      pendingActionsRef.current.push({ eventName, data });
+      
+      toast({
+        title: "Connection issue",
+        description: "Your action will be sent when connection is restored",
+        duration: 3000,
+        variant: "warning",
+      });
+    }
+  };
+
+  // Process pending actions when reconnected
+  useEffect(() => {
+    if (socketConnected && pendingActionsRef.current.length > 0) {
+      console.log(`Processing ${pendingActionsRef.current.length} pending actions`);
+      
+      pendingActionsRef.current.forEach(({ eventName, data }) => {
+        socket.emit(eventName, data);
+      });
+      
+      pendingActionsRef.current = [];
+      
+      toast({
+        title: "Connection restored",
+        description: "All pending actions have been sent",
+        duration: 3000,
+        variant: "success",
+      });
+    }
+  }, [socketConnected]);
+
+  // Show warning when connection is lost during game
+  useEffect(() => {
+    if (!socketConnected && !isReconnecting && gameState.turn) {
+      toast({
+        title: "Connection lost",
+        description: "Attempting to reconnect...",
+        duration: 5000,
+        variant: "destructive",
+      });
+    }
+  }, [socketConnected, isReconnecting]);
 
   // Computer AI logic
   const getValidMoves = (computerDeck, currentColor, currentNumber) => {
@@ -286,7 +340,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         });
 
         //send initial state to server
-        socket.emit("initGameState", gameState);
+        emitSocketEvent("initGameState", gameState);
       }
     }
   }, [isComputerMode]);
@@ -514,7 +568,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       }
     } else {
       // Send new state to server for multiplayer mode
-      socket.emit("updateGameState", newGameState);
+      emitSocketEvent("updateGameState", newGameState);
     }
   };
 
@@ -828,7 +882,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
             isExtraTurn: false, // Reset when no cards available
           });
         } else {
-          socket.emit("updateGameState", {
+          emitSocketEvent("updateGameState", {
             turn: turnCopy,
             drawButtonPressed: false,
             isExtraTurn: false, // Reset when no cards available
@@ -918,7 +972,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       }
     } else {
       //send new state to server for multiplayer mode
-      socket.emit("updateGameState", updateState);
+      emitSocketEvent("updateGameState", updateState);
     }
   };
 
@@ -937,7 +991,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       dispatch(newState);
     } else {
       // Send new state to server for multiplayer mode
-      socket.emit("updateGameState", newState);
+      emitSocketEvent("updateGameState", newState);
     }
   };
 

@@ -6,6 +6,7 @@ import { WagmiProvider } from "wagmi";
 import RecoilProvider from "../userstate/RecoilProvider";
 import { MiniKitContextProvider } from "../providers/MiniKitProvider";
 import { ThirdwebProvider } from "thirdweb/react";
+import { SocketConnectionProvider } from "../context/SocketConnectionContext";
 
 const queryClient = new QueryClient();
 
@@ -15,7 +16,9 @@ export function Providers({ children }) {
       <RecoilProvider>
         <ThirdwebProvider>
           <WagmiProvider config={config}>
-            <MiniKitContextProvider>{children}</MiniKitContextProvider>
+            <SocketConnectionProvider>
+              <MiniKitContextProvider>{children}</MiniKitContextProvider>
+            </SocketConnectionProvider>
           </WagmiProvider>
         </ThirdwebProvider>
       </RecoilProvider>

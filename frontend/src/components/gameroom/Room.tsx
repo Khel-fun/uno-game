@@ -3,9 +3,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import Game from "./Game";
 import { useParams, useSearchParams } from 'next/navigation'
-import socket from "@/services/socket";
+import socket, { socketManager } from "@/services/socket";
 import Header from "./Header";
 import CenterInfo from "./CenterInfo";
+import { ConnectionStatusIndicator } from "@/components/ConnectionStatusIndicator";
+import { useSocketConnection } from "@/context/SocketConnectionContext";
 import { UnoGameContract, OffChainGameState, OnChainGameState, Card, Action, ActionType } from '../../lib/types'
 import { useUserAccount } from '@/userstate/useUserAccount';
 import { getContractNew } from '../../lib/web3'
@@ -34,6 +36,7 @@ const Room = () => {
   const { id } = useParams()
   const searchParams = useSearchParams()
   const isComputerMode = searchParams.get('mode') === 'computer'
+  const { isConnected, isReconnecting } = useSocketConnection();
   
   //initialize socket state
   const [room] = useState(id);
@@ -41,6 +44,7 @@ const Room = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User["name"]>("");
   const [gameStarted, setGameStarted] = useState(false);
+  const hasJoinedRoom = useRef(false);
   const { account, bytesAddress } = useUserAccount();
   const { address } = useWalletAddress();
   const [contract, setContract] = useState<UnoGameContract | null>(null)
@@ -145,18 +149,30 @@ const Room = () => {
       // We'll initialize the computer game after contract setup
       console.log('Computer mode detected, will initialize after contract setup');
     } else {
-      socket.emit("join", { room: room }, (error: any) => {
-        if (error) setRoomFull(true);
-      });
+      // Set room info for reconnection
+      socketManager.setRoomInfo(room as string, id as string);
+      
+      // Only join if we haven't already and socket is connected
+      if (isConnected && !hasJoinedRoom.current) {
+        socket.emit("join", { room: room }, (error: any) => {
+          if (error) {
+            setRoomFull(true);
+          } else {
+            hasJoinedRoom.current = true;
+          }
+        });
+      }
     }
 
     return function cleanup() {
       if (!isComputerMode) {
         socket.emit("quitRoom");
+        socketManager.clearRoomInfo();
+        hasJoinedRoom.current = false;
         socket.off();
       }
     };
-  }, [room, isComputerMode]);
+  }, [room, isComputerMode, isConnected]);
 
   useEffect(() => {
     const setup = async () => {
@@ -234,7 +250,31 @@ const Room = () => {
     const roomId = `game-${id}`;
     
     console.log(`Joining room: ${roomId}`);
-    socket.emit("joinRoom", roomId);
+    
+    // Only join room if connected
+    if (isConnected) {
+      socket.emit("joinRoom", roomId);
+    }
+    
+    // Handle reconnection - rejoin room when connection is restored
+    const handleReconnect = () => {
+      console.log('Reconnected, rejoining room:', roomId);
+      socket.emit("joinRoom", roomId);
+      
+      // Request game state sync if game was started
+      if (gameStarted) {
+        socket.emit('requestGameStateSync', { roomId, gameId: id });
+      }
+    };
+    
+    socket.on('connect', handleReconnect);
+    socket.on('roomRejoined', handleReconnect);
+    
+    // Cleanup
+    return () => {
+      socket.off('connect', handleReconnect);
+      socket.off('roomRejoined', handleReconnect);
+    };
 
     if (socket) {
       socket.on(`gameStarted-${roomId}`, (data: { newState: OffChainGameState; cardHashMap: any; }) => {
@@ -305,8 +345,33 @@ const Room = () => {
           setPlayerHand(newState.playerHands[account]);
         }
       });
+      
+      // Listen for game state sync response (after reconnection)
+      socket.on(`gameStateSync-${roomId}`, (data: { newState: OffChainGameState; cardHashMap: any; }) => {
+        console.log('Received game state sync:', data);
+        const { newState, cardHashMap } = data;
+        
+        if (newState) {
+          setOffChainGameState(newState);
+          
+          if (cardHashMap) {
+            updateGlobalCardHashMap(cardHashMap);
+          }
+          
+          if (account && newState.playerHands[account]) {
+            setPlayerHand(newState.playerHands[account]);
+          }
+          
+          toast({
+            title: "Game state synchronized",
+            description: "You're back in the game!",
+            duration: 3000,
+            variant: "success",
+          });
+        }
+      });
     }
-  }, [id, socket]);
+  }, [id, socket, isConnected, gameStarted]);
 
   useEffect(() => {
     socket.on("roomData", ({ users }: { users: User[] }) => {
@@ -519,6 +584,7 @@ const Room = () => {
         backgroundAttachment: "fixed",
       }}
     >
+    <ConnectionStatusIndicator />
     <Toaster />
       {isComputerMode ? (
         // Computer mode - skip waiting and go directly to game

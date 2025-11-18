@@ -4,10 +4,19 @@ const cors = require("cors");
 const server = require("http").createServer(app);
 const ws = require("ws");
 const path = require('path');
-const {addUser, removeUser, getUser, getUsersInRoom} = require("./users");
+const {
+    addUser, 
+    removeUser, 
+    getUser, 
+    getUsersInRoom, 
+    markUserDisconnected, 
+    cleanupDisconnectedUsers,
+    findUserByNameAndRoom
+} = require("./users");
 const { createClaimableBalance } = require("./diamnetService");
 const logger = require('./logger');
 const gameLogger = require('./gameLogger');
+const gameStateManager = require('./gameStateManager');
 
 // Set server timeout to prevent hanging connections
 server.timeout = 30000; // 30 seconds
@@ -88,12 +97,23 @@ let activeConnections = 0;
 
 // Health check endpoint for Cloud Run
 app.get('/health', (req, res) => {
+    const gameStats = gameStateManager.getStats();
     res.status(200).json({
         status: 'ok',
         connections: activeConnections,
-        uptime: process.uptime()
+        uptime: process.uptime(),
+        gameStates: gameStats.totalGames,
+        activeRooms: gameStats.activeRooms.length
     });
 });
+
+// Periodic cleanup of disconnected users (every 30 seconds)
+setInterval(() => {
+    const removed = cleanupDisconnectedUsers(60000); // Remove users disconnected for > 60 seconds
+    if (removed.length > 0) {
+        logger.info(`Periodic cleanup removed ${removed.length} disconnected users`);
+    }
+}, 30000);
 
 io.on("connection", (socket) => {
     activeConnections++;
@@ -102,6 +122,90 @@ io.on("connection", (socket) => {
     
     // Note: Socket timeout is already configured in the io initialization options
     // (pingTimeout, pingInterval, and connectTimeout)
+
+    // ============================================
+    // RECONNECTION HANDLERS
+    // ============================================
+    
+    // 1. Heartbeat/Ping-Pong Handler
+    socket.on('ping', () => {
+        logger.debug(`[Heartbeat] Received ping from ${socket.id}, sending pong`);
+        socket.emit('pong');
+    });
+    
+    // 2. Room Rejoin Handler
+    socket.on('rejoinRoom', ({ room, gameId }, callback) => {
+        try {
+            logger.info(`User ${socket.id} attempting to rejoin room ${room}`);
+            
+            // Check if room has active users
+            const roomUsers = getUsersInRoom(room);
+            const roomExists = roomUsers.length > 0 || gameStateManager.hasGameState(`game-${gameId}`);
+            
+            if (roomExists) {
+                // Add socket back to room
+                socket.join(room);
+                socket.join(`game-${gameId}`);
+                
+                logger.info(`User ${socket.id} successfully rejoined room ${room}`);
+                
+                // Send success response
+                if (callback && typeof callback === 'function') {
+                    callback({ success: true, room, gameId });
+                }
+                
+                // Notify other players in the room
+                socket.to(room).emit('playerReconnected', {
+                    userId: socket.id,
+                    room,
+                    timestamp: Date.now()
+                });
+                
+                // Emit reconnected event to the socket itself
+                socket.emit('reconnected', { room, gameId });
+            } else {
+                logger.warn(`Room ${room} not found for rejoin`);
+                if (callback && typeof callback === 'function') {
+                    callback({ success: false, error: 'Room not found' });
+                }
+            }
+        } catch (error) {
+            logger.error(`Error rejoining room ${room}:`, error);
+            if (callback && typeof callback === 'function') {
+                callback({ success: false, error: error.message });
+            }
+        }
+    });
+    
+    // 3. Game State Sync Handler
+    socket.on('requestGameStateSync', ({ roomId, gameId }) => {
+        try {
+            logger.info(`User ${socket.id} requesting game state sync for room ${roomId}`);
+            
+            // Fetch current game state
+            const gameState = gameStateManager.getGameState(roomId);
+            const cardHashMap = gameStateManager.getCardHashMap(roomId);
+            
+            if (gameState) {
+                // Send state back to the requesting client
+                socket.emit(`gameStateSync-${roomId}`, {
+                    newState: gameState,
+                    cardHashMap: cardHashMap || {}
+                });
+                logger.info(`Game state synced for user ${socket.id} in room ${roomId}`);
+            } else {
+                logger.warn(`No game state found for room ${roomId}`);
+                socket.emit(`gameStateSync-${roomId}`, {
+                    error: 'Game state not found'
+                });
+            }
+        } catch (error) {
+            logger.error(`Error syncing game state for room ${roomId}:`, error);
+            socket.emit(`gameStateSync-${roomId}`, {
+                error: error.message
+            });
+        }
+    });
 
     // Add room functionality
     socket.on("joinRoom", (roomId) => {
@@ -119,6 +223,9 @@ io.on("connection", (socket) => {
     socket.on('gameStarted', (data) => {
         const { newState, cardHashMap, roomId } = data;
         logger.info(`Game started in room ${roomId}`);
+        
+        // Save game state for reconnection support
+        gameStateManager.saveGameState(roomId, newState, cardHashMap);
         
         // Log game start with all details
         if (newState) {
@@ -148,6 +255,11 @@ io.on("connection", (socket) => {
     socket.on('playCard', (data) => {
         const { roomId, action, newState } = data;
         logger.info(`Card played in room ${roomId}`);
+        
+        // Save updated game state for reconnection support
+        if (newState) {
+            gameStateManager.saveGameState(roomId, newState);
+        }
         
         // Log card play action
         if (action && newState) {
@@ -271,6 +383,9 @@ io.on("connection", (socket) => {
     socket.on("initGameState", (gameState) => {
         const user = getUser(socket.id);
         if (user) {
+            // Save game state for reconnection support
+            gameStateManager.saveGameState(user.room, gameState);
+            
             // Broadcast the game state to all players in the room
             io.to(user.room).emit("initGameState", gameState);
             logger.info(`Game initialized in room ${user.room} with ${Object.keys(gameState).filter(k => k.includes('Deck')).length} players`);
@@ -281,6 +396,9 @@ io.on("connection", (socket) => {
         try {
             const user = getUser(socket.id);
             if (user) {
+                // Save updated game state for reconnection support
+                gameStateManager.saveGameState(user.room, gameState);
+                
                 // Add a timestamp to track latency
                 const enhancedGameState = {
                     ...gameState,
@@ -305,19 +423,51 @@ io.on("connection", (socket) => {
         if (user) io.to(user.room).emit("roomData", { room: user.room, users: getUsersInRoom(user.room) });
     });
 
-    // Handle disconnection
-    socket.on("disconnect", () => {
+    // Handle disconnection with grace period for reconnection
+    socket.on("disconnect", (reason) => {
         activeConnections--;
-        logger.info(`User ${socket.id} disconnected. Active connections: ${activeConnections}`);
+        logger.info(`User ${socket.id} disconnected: ${reason}. Active connections: ${activeConnections}`);
         
-        // Clean up user data on disconnect to prevent memory leaks
-        const user = removeUser(socket.id);
+        // Mark user as temporarily disconnected instead of removing immediately
+        const user = markUserDisconnected(socket.id);
+        
         if (user) {
-            io.to(user.room).emit("roomData", { 
-                room: user.room, 
-                users: getUsersInRoom(user.room) 
+            // Notify other players that user is temporarily disconnected
+            io.to(user.room).emit('playerDisconnected', {
+                userId: socket.id,
+                userName: user.name,
+                temporary: true,
+                reason: reason
             });
-            io.to(user.room).emit("userLeft", socket.id);
+            
+            // Set timeout to remove user if they don't reconnect (60 second grace period)
+            setTimeout(() => {
+                const currentUser = getUser(socket.id);
+                
+                // Only remove if user is still disconnected
+                if (currentUser && currentUser.connected === false) {
+                    const removedUser = removeUser(socket.id);
+                    
+                    if (removedUser) {
+                        logger.info(`User ${socket.id} did not reconnect, removing from room ${removedUser.room}`);
+                        
+                        // Update room data
+                        io.to(removedUser.room).emit("roomData", { 
+                            room: removedUser.room, 
+                            users: getUsersInRoom(removedUser.room) 
+                        });
+                        
+                        // Notify that player permanently left
+                        io.to(removedUser.room).emit('playerLeft', {
+                            userId: socket.id,
+                            userName: removedUser.name,
+                            permanent: true
+                        });
+                    }
+                } else if (currentUser && currentUser.connected === true) {
+                    logger.info(`User ${socket.id} reconnected before timeout`);
+                }
+            }, 60000); // 60 second grace period
         }
     });
     

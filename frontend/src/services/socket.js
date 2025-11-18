@@ -1,13 +1,8 @@
-import io from "socket.io-client";
+import socketManager from './socketManager';
 
-const ENDPOINT = process.env.NEXT_PUBLIC_WEBSOCKET_URL;
+// Create a backward-compatible socket instance
+const socket = socketManager.connect();
 
-const connectionOptions = {
-  forceNew: true,
-  reconnectionAttempts: "Infinity",
-  timeout: 10000,
-  transports: ["websocket"],
-};
-const socket = io.connect(ENDPOINT, connectionOptions);
-
+// Export both the socket and the manager for components that need advanced features
+export { socketManager };
 export default socket;
