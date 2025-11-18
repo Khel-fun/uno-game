@@ -53,6 +53,7 @@ const initialGameState = {
   lastCardPlayedBy: "",
   isExtraTurn: false, // Track if current turn is an extra turn from special card
   totalPlayers: 2, // Track the number of players in the game
+  playDirection: 1, // 1 for clockwise, -1 for counter-clockwise
 };
 
 const gameReducer = (state, action) => ({ ...state, ...action });
@@ -96,6 +97,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     lastCardPlayedBy,
     isExtraTurn,
     totalPlayers = playerCount,
+    playDirection = 1,
   } = gameState;
 
   const { toast } = useToast();
@@ -286,6 +288,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         playedCardsPile: playedCardsPile,
         drawCardPile: drawCardPile,
         totalPlayers: 2, // Computer mode is always 2 players
+        playDirection: 1, // Start with clockwise direction
       });
     } else {
       // For multiplayer mode, Player 1 initializes the game
@@ -332,6 +335,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         gameState.currentNumber = playedCardsPile[0].charAt(0);
         gameState.drawCardPile = drawCardPile;
         gameState.totalPlayers = playerCount; // Store the initial player count
+        gameState.playDirection = 1; // Start with clockwise direction
 
         console.log('Initialized game state:', {
           playerCount,
@@ -388,9 +392,10 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
   };
 
   // Helper function to get next player in turn rotation
-  const getNextPlayer = (currentPlayer, allPlayers) => {
+  // direction: 1 for clockwise (default), -1 for counter-clockwise
+  const getNextPlayer = (currentPlayer, allPlayers, direction = playDirection) => {
     const currentIndex = allPlayers.indexOf(currentPlayer);
-    const nextIndex = (currentIndex + 1) % allPlayers.length;
+    const nextIndex = (currentIndex + direction + allPlayers.length) % allPlayers.length;
     return allPlayers[nextIndex];
   };
 
@@ -607,18 +612,37 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         
         if (isColorMatch || isNumberMatch) {
           console.log('Valid skip card move:', { isColorMatch, isNumberMatch });
+          
+          // Skip card: skip the next player and move to the player after them
+          // Direction does NOT change
+          const activePlayers = getActivePlayers();
+          const nextPlayer = getNextPlayer(cardPlayedBy, activePlayers, playDirection);
+          const playerAfterSkipped = getNextPlayer(nextPlayer, activePlayers, playDirection);
+          
+          console.log('Skip card played:', {
+            cardPlayedBy,
+            skippedPlayer: nextPlayer,
+            nextTurn: playerAfterSkipped,
+            direction: playDirection
+          });
+          
+          // Manually set the turn to skip a player
           cardPlayedByPlayer({
             cardPlayedBy,
             played_card,
             colorOfPlayedCard,
             numberOfPlayedCard,
-            toggleTurn: false,
+            toggleTurn: false, // We'll manually set the turn
           });
           
-          // Trigger another computer move after playing skip (turn stays with computer)
-          if (isComputerMode && cardPlayedBy === "Player 2") {
-            setComputerMoveCounter(prev => prev + 1);
-          }
+          // After the card is played, update the turn to the player after the skipped one
+          setTimeout(() => {
+            if (isComputerMode) {
+              dispatch({ turn: playerAfterSkipped });
+            } else {
+              emitSocketEvent("updateGameState", { turn: playerAfterSkipped });
+            }
+          }, 0);
         }
         //if no color or number match, invalid move - do not update state
         else {
@@ -631,7 +655,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       case "_G":
       case "_B":
       case "_Y": {
-        //extract color of played skip card
+        //extract color of played reverse card
         const colorOfPlayedCard = played_card.charAt(1);
         const numberOfPlayedCard = 100;
         // Normalize the values for comparison
@@ -644,23 +668,74 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         
         if (isColorMatch || isNumberMatch) {
           console.log('Valid reverse card move:', { isColorMatch, isNumberMatch });
-          cardPlayedByPlayer({
-            cardPlayedBy,
-            played_card,
-            colorOfPlayedCard,
-            numberOfPlayedCard,
-            toggleTurn: false,
-          });
           
-          // Trigger another computer move after playing reverse (turn stays with computer)
-          if (isComputerMode && cardPlayedBy === "Player 2") {
-            setComputerMoveCounter(prev => prev + 1);
+          const activePlayers = getActivePlayers();
+          
+          // In a 2-player game, Reverse acts exactly like Skip
+          // because reversing direction brings the turn back to the same player
+          if (activePlayers.length === 2) {
+            console.log('Reverse in 2-player game acts like Skip - turn stays with current player');
+            
+            // Play the card but keep the turn with the current player
+            cardPlayedByPlayer({
+              cardPlayedBy,
+              played_card,
+              colorOfPlayedCard,
+              numberOfPlayedCard,
+              toggleTurn: false, // Turn stays with current player
+            });
+            
+            // Trigger another computer move if it's the computer's turn
+            if (isComputerMode && cardPlayedBy === "Player 2") {
+              setComputerMoveCounter(prev => prev + 1);
+            }
+          } else {
+            // In 3+ player games, Reverse flips the direction
+            const newDirection = playDirection * -1; // Flip direction: 1 -> -1 or -1 -> 1
+            
+            console.log('Reverse card flips direction:', {
+              oldDirection: playDirection === 1 ? 'clockwise' : 'counter-clockwise',
+              newDirection: newDirection === 1 ? 'clockwise' : 'counter-clockwise'
+            });
+            
+            // Get the next player in the NEW direction
+            const nextPlayer = getNextPlayer(cardPlayedBy, activePlayers, newDirection);
+            
+            console.log('Reverse card played:', {
+              cardPlayedBy,
+              newDirection: newDirection === 1 ? 'clockwise' : 'counter-clockwise',
+              nextTurn: nextPlayer
+            });
+            
+            // Play the card and update direction
+            cardPlayedByPlayer({
+              cardPlayedBy,
+              played_card,
+              colorOfPlayedCard,
+              numberOfPlayedCard,
+              toggleTurn: false, // We'll manually set the turn
+            });
+            
+            // Update the direction and turn
+            setTimeout(() => {
+              if (isComputerMode) {
+                dispatch({ 
+                  playDirection: newDirection,
+                  turn: nextPlayer 
+                });
+              } else {
+                emitSocketEvent("updateGameState", { 
+                  playDirection: newDirection,
+                  turn: nextPlayer 
+                });
+              }
+            }, 0);
           }
         }
         //if no color or number match, invalid move - do not update state
         else {
           console.log('Invalid reverse card move:', { isColorMatch, isNumberMatch });
-          alert("Invalid Move! reverse cards must match either the color or number of the current card.");
+          alert("Invalid Move! Reverse cards must match either the color or number of the current card.");
         }
         break;
       }
