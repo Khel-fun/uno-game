@@ -289,11 +289,11 @@ const PreviewGame = () => {
         style={{
           display: "flex",
           flexDirection: "row",
-          alignItems: "center",
+          alignItems: "end",
           justifyContent: "center",
           gap: "2rem",
           height: "auto",
-          paddingTop: "200px"
+          paddingTop: "180px"
         }}
       >
         {opponents.map((opponent, index) => {
@@ -394,7 +394,7 @@ const PreviewGame = () => {
               padding: "0.5rem",
               width: "100%",
               maxWidth: "400px",
-              flexDirection: index != 4 ? "column" : "row"
+              flexDirection: index in [0,1] ? "column" : "row"
             }}>
               {opponent.deck.map((item, i) => (
                 <div 
@@ -402,7 +402,7 @@ const PreviewGame = () => {
                   style={{
                     position: "relative",
                     margin: "0 -10px",
-                    transform: index != 4 ? `rotate(${i % 2 === 0 ? '-2' : '2'}deg) translateY(${-54 * i}px)` : `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`,
+                    transform: index in [0,1] ? `rotate(${i % 2 === 0 ? '-2' : '2'}deg) translateY(${-54 * i}px)` : `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`,
                     zIndex: i
                   }}
                 >
@@ -509,7 +509,7 @@ const PreviewGame = () => {
                   display: "flex",
                   justifyContent: "center",
                   position: "absolute",
-                  bottom: "-51px",
+                  bottom: "-56px",
                   left: "50%",
                   transform: "translateX(-50%)"
                 }}

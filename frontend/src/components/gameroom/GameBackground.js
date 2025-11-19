@@ -31,7 +31,7 @@ const GameBackground = ({ turn, currentColor, currentUser }) => {
           top: 0,
           left: 0,
           width: '100%',
-          height: '100%',
+          height: '100svh',
           backgroundImage: "url('/bg_primary.webp')",
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',

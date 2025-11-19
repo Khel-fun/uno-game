@@ -242,11 +242,11 @@ const GameScreen = ({
         style={{
           display: "flex",
           flexDirection: "row",
-          alignItems: "center",
+          alignItems: "end",
           justifyContent: "center",
           gap: "2rem",
           height: "auto",
-          paddingTop: "200px"
+          paddingTop: "180px"
         }}
       >
         {opponentDecks.map((opponent, index) => {

@@ -28,7 +28,7 @@ const PreviewRoom = () => {
     <div
       className="Game"
       style={{
-        height: "100vh",
+        height: "100svh",
         width: "100vw",
         backgroundImage: "url('/bg_primary.webp')",
         backgroundSize: "cover",
