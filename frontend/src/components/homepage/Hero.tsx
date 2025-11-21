@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import StyledButton from "../styled-button";
 
 const Hero = () => {
@@ -18,12 +18,12 @@ const Hero = () => {
     return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
-  const slides =  {
-      "title": "LEVEL UP NEW",
-      "subtitle": "EXPERIENCE",
-      "image": "/images/hero-1.png",
-      "logo": "/images/logo.png"
-    }
+  const slides = {
+    title: "LEVEL UP NEW",
+    subtitle: "EXPERIENCE",
+    image: "/images/hero-1.png",
+    logo: "/images/logo.png",
+  };
 
   return (
     <section className="relative min-h-screen bg-[#0A0A0A]">
@@ -75,7 +75,13 @@ const Hero = () => {
             ))}
           </div> */}
 
-          <StyledButton onClick={() => router.push("/play")} roundedStyle='rounded-full' className='bg-[#ff9000] text-2xl mt-6'>Start Game</StyledButton>
+          <StyledButton
+            onClick={() => router.push("/play")}
+            roundedStyle="rounded-full"
+            className="bg-[#ff9000] text-2xl mt-6"
+          >
+            Start Game
+          </StyledButton>
         </div>
 
         {/* <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col gap-8 text-2xl text-white/50">

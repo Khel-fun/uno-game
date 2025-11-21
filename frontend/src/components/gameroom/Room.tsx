@@ -144,16 +144,17 @@ const Room = () => {
         { id: "computer", name: "Computer", room: room as string }
       ]);
       setCurrentUser("Player 1");
-      
+
       // We'll initialize the computer game after contract setup
       console.log('Computer mode detected, will initialize after contract setup');
     } else {
-      // Set room info for reconnection
-      socketManager.setRoomInfo(room as string, id as string);
-      
+      // Set room info for reconnection (with wallet address for persistence)
+      socketManager.setRoomInfo(room as string, id as string, address);
+
       // Only join if we haven't already and socket is connected
       if (isConnected && !hasJoinedRoom.current) {
-        socket.emit("join", { room: room }, (error: any) => {
+        console.log('Joining room with wallet address:', address);
+        socket.emit("join", { room: room, address: address }, (error: any) => {
           if (error) {
             setRoomFull(true);
           } else {
@@ -171,7 +172,7 @@ const Room = () => {
         socket.off();
       }
     };
-  }, [room, isComputerMode, isConnected]);
+  }, [room, isComputerMode, isConnected, address]);
 
   useEffect(() => {
     const setup = async () => {
@@ -247,27 +248,24 @@ const Room = () => {
     if (!socket || !id) return;
 
     const roomId = `game-${id}`;
-    
-    console.log(`Joining room: ${roomId}`);
-    
-    // Only join room if connected
-    if (isConnected) {
-      socket.emit("joinRoom", roomId);
-      
-      // Request game state restoration on page load/refresh
-      console.log('Requesting game state restoration for game:', id);
-      socket.emit('requestGameStateSync', { roomId, gameId: id });
-    }
-    
+    let hasJoinedGameRoom = false;
+
+    console.log(`Setting up room listeners for: ${roomId}`);
+
     // Handle reconnection - rejoin room when connection is restored
     const handleReconnect = () => {
       console.log('Reconnected, rejoining room:', roomId);
-      socket.emit("joinRoom", roomId);
-      
+
+      // Only join if we haven't already in this effect lifecycle
+      if (!hasJoinedGameRoom) {
+        socket.emit("joinRoom", roomId);
+        hasJoinedGameRoom = true;
+      }
+
       // Re-join the lobby room to get player list (if game hasn't started)
-      if (!gameStarted && !isComputerMode) {
+      if (!gameStarted && !isComputerMode && hasJoinedRoom.current) {
         console.log('Re-joining lobby room:', room);
-        socket.emit("join", { room: room }, (error: any) => {
+        socket.emit("join", { room: room, address: address }, (error: any) => {
           if (error) {
             console.error('Error rejoining lobby:', error);
           } else {
@@ -275,13 +273,25 @@ const Room = () => {
           }
         });
       }
-      
+
       // Request game state sync if game was started
       if (gameStarted) {
+        console.log('Requesting game state sync for started game');
         socket.emit('requestGameStateSync', { roomId, gameId: id });
       }
     };
-    
+
+    // Only join room if connected and haven't joined yet
+    if (isConnected && !hasJoinedGameRoom) {
+      console.log('Initial join to game room:', roomId);
+      socket.emit("joinRoom", roomId);
+      hasJoinedGameRoom = true;
+
+      // Request game state restoration on page load/refresh
+      console.log('Requesting game state restoration for game:', id);
+      socket.emit('requestGameStateSync', { roomId, gameId: id });
+    }
+
     socket.on('connect', handleReconnect);
     socket.on('roomRejoined', handleReconnect);
     socket.on('reconnected', handleReconnect); // Handle socketManager's reconnected event

@@ -1,29 +1,29 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
+import Image from "next/image";
 
 const Procedure = () => {
   const steps = [
     {
-      image: '/connect-wallet.png',
-      title: 'Connect Wallet',
-      isButton: true
+      image: "/connect-wallet.png",
+      title: "Connect Wallet",
+      isButton: true,
     },
     {
-      image: '/join-room.png',
-      title: 'Join Room',
-      isButton: true
+      image: "/join-room.png",
+      title: "Join Room",
+      isButton: true,
     },
     {
-      image: '/waiting-room.png',
-      title: 'Wait for Player 2 to Join',
-      isButton: true
+      image: "/waiting-room.png",
+      title: "Wait for Player 2 to Join",
+      isButton: true,
     },
     {
-      image: '/game-start.png',
-      title: 'Game Starts!',
-      isButton: true
-    }
+      image: "/game-start.png",
+      title: "Game Starts!",
+      isButton: true,
+    },
   ];
 
   return (
@@ -34,7 +34,9 @@ const Procedure = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
-          <h3 className="text-[#FDB813] text-xl mb-2">how to join and play game</h3>
+          <h3 className="text-[#FDB813] text-xl mb-2">
+            how to join and play game
+          </h3>
           <h2 className="text-white text-6xl font-bold">LET'S START</h2>
         </div>
 
@@ -44,7 +46,9 @@ const Procedure = () => {
               <div
                 key={index}
                 className={`relative ${
-                  index % 2 === 0 ? 'transform -translate-y-8' : 'transform translate-y-8'
+                  index % 2 === 0
+                    ? "transform -translate-y-8"
+                    : "transform translate-y-8"
                 }`}
               >
                 <div className="relative w-72 h-72 mx-auto border-2 border-[#00D1FF]/30 rounded-lg overflow-hidden group">
