@@ -365,6 +365,7 @@ const GameScreen = ({
                 opponent={opponent.name}
                 opponentDeck={opponent.deck}
                 index={index}
+                playerCount={playerCount}
               />
             </div>
           );

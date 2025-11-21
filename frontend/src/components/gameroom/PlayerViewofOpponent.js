@@ -1,7 +1,7 @@
 import React from "react";
 import MemoizedSpinner from "./Spinner";
 
-const PlayerViewofOpponent = ({ opponentDeck, turn, opponent, index = 0 }) => {
+const PlayerViewofOpponent = ({ opponentDeck, turn, opponent, index = 0, playerCount }) => {
   return (
     <div style={{
       display: "flex",
