@@ -1,27 +1,36 @@
 const logger = require('./logger');
 const users = []
 
-const addUser = ({id, name, room}) => {
+const addUser = ({id, name, room, address}) => {
    const numberOfUsersInRoom = users.filter(user => user.room === room && user.connected !== false).length
    if(numberOfUsersInRoom === 6) {
       logger.info(`Room ${room} is full, user ${id} rejected`);
       return { error: 'Room full' };
    }
 
-   // Check if user is reconnecting (same name in same room)
-   const existingUser = users.find(u => u.name === name && u.room === room && u.connected === false);
+   // Check if user is reconnecting (same name in same room OR same address in same room)
+   let existingUser = users.find(u => u.name === name && u.room === room && u.connected === false);
+
+   // If not found by name, try by address (for page refresh scenarios)
+   if (!existingUser && address) {
+      existingUser = users.find(u => u.address === address && u.room === room && u.connected === false);
+   }
+
    if (existingUser) {
       // User is reconnecting, update their socket ID
       existingUser.id = id;
       existingUser.connected = true;
       existingUser.disconnectedAt = null;
+      if (address && !existingUser.address) {
+         existingUser.address = address;
+      }
       logger.info(`User ${name} reconnected to room ${room} with new socket ${id}`);
       return { newUser: existingUser, reconnected: true };
    }
 
-   const newUser = { id, name, room, connected: true, disconnectedAt: null };
+   const newUser = { id, name, room, address, connected: true, disconnectedAt: null };
    users.push(newUser);
-   logger.info(`User ${id} added to room ${room} as ${name}`);
+   logger.info(`User ${id} added to room ${room} as ${name} with address ${address}`);
    return { newUser };
 }
 
@@ -74,6 +83,12 @@ const findUserByNameAndRoom = (name, room) => {
    return users.find(user => user.name === name && user.room === room);
 }
 
+// Find user by address and room (for reconnection after page refresh)
+const findUserByAddressAndRoom = (address, room) => {
+   if (!address) return null;
+   return users.find(user => user.address === address && user.room === room);
+}
+
 const getUser = id => {
    return users.find(user => user.id === id)
 }
@@ -82,12 +97,13 @@ const getUsersInRoom = room => {
    return users.filter(user => user.room === room)
 }
 
-module.exports = { 
-   addUser, 
-   removeUser, 
-   getUser, 
-   getUsersInRoom, 
-   markUserDisconnected, 
+module.exports = {
+   addUser,
+   removeUser,
+   getUser,
+   getUsersInRoom,
+   markUserDisconnected,
    cleanupDisconnectedUsers,
-   findUserByNameAndRoom 
+   findUserByNameAndRoom,
+   findUserByAddressAndRoom
 }

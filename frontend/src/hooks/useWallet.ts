@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useAccount, useDisconnect } from 'wagmi';
-import { useUserAccount } from '@/userstate/useUserAccount';
-import { useCallback, useEffect } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { useWalletAddress } from '@/utils/onchainWalletUtils';
+import { useAccount, useDisconnect } from "wagmi";
+import { useUserAccount } from "@/userstate/useUserAccount";
+import { useCallback, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { useWalletAddress } from "@/utils/onchainWalletUtils";
 
 /**
  * Custom hook to manage wallet connection state
  */
 export function useWallet() {
-  const {address, isConnected} = useWalletAddress();
+  const { address, isConnected } = useWalletAddress();
   const { chainId } = useAccount();
   const { disconnect } = useDisconnect();
   const { account, updateUserAccount } = useUserAccount();
@@ -27,7 +27,7 @@ export function useWallet() {
   const handleDisconnect = useCallback(() => {
     disconnect();
     updateUserAccount(null);
-    
+
     toast({
       title: "Wallet Disconnected",
       description: "Your wallet has been disconnected.",
@@ -47,6 +47,6 @@ export function useWallet() {
     isConnected,
     chainId,
     disconnect: handleDisconnect,
-    account
+    account,
   };
 }

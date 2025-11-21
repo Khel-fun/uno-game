@@ -51,8 +51,11 @@ class SocketManager {
       return this.socket;
     }
 
+    // Try to restore room info from localStorage (in case of page refresh)
+    this.restoreRoomInfoFromStorage();
+
     this.updateStatus('connecting');
-    
+
     this.socket = io(this.config.url, {
       forceNew: true,
       reconnection: false, // We'll handle reconnection manually
@@ -62,7 +65,7 @@ class SocketManager {
 
     this.setupEventHandlers();
     // this.startHeartbeat(); // COMMENTED OUT: Using Socket.IO's built-in heartbeat
-    
+
     return this.socket;
   }
 
@@ -202,17 +205,31 @@ class SocketManager {
     if (!this.socket || !this.reconnectionInfo.lastRoom) return;
 
     console.log('Attempting to rejoin room:', this.reconnectionInfo.lastRoom);
-    
+
+    // Try to get player address from localStorage for reconnection
+    let playerAddress = null;
+    try {
+      const stored = localStorage.getItem('uno_room_info');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        playerAddress = parsed.playerAddress;
+      }
+    } catch (error) {
+      console.error('Failed to retrieve player address from localStorage:', error);
+    }
+
     this.socket.emit('rejoinRoom', {
       room: this.reconnectionInfo.lastRoom,
       gameId: this.reconnectionInfo.lastGameId,
+      playerAddress: playerAddress,
     }, (response: any) => {
       if (response.success) {
-        console.log('Successfully rejoined room');
+        console.log('Successfully rejoined room:', response);
         // Emit custom event for components to sync state
         this.socket!.emit('roomRejoined', {
           room: this.reconnectionInfo.lastRoom,
           gameId: this.reconnectionInfo.lastGameId,
+          userName: response.userName,
         });
       } else {
         console.error('Failed to rejoin room:', response.error);
@@ -267,14 +284,57 @@ class SocketManager {
     }
   }
 
-  public setRoomInfo(room: string, gameId?: string): void {
+  public setRoomInfo(room: string, gameId?: string, playerAddress?: string): void {
     this.reconnectionInfo.lastRoom = room;
     this.reconnectionInfo.lastGameId = gameId;
+
+    // Persist to localStorage for page refresh recovery
+    try {
+      localStorage.setItem('uno_room_info', JSON.stringify({
+        room,
+        gameId,
+        playerAddress,
+        timestamp: Date.now()
+      }));
+    } catch (error) {
+      console.error('Failed to persist room info to localStorage:', error);
+    }
   }
 
   public clearRoomInfo(): void {
     this.reconnectionInfo.lastRoom = undefined;
     this.reconnectionInfo.lastGameId = undefined;
+
+    // Clear from localStorage
+    try {
+      localStorage.removeItem('uno_room_info');
+    } catch (error) {
+      console.error('Failed to clear room info from localStorage:', error);
+    }
+  }
+
+  public restoreRoomInfoFromStorage(): { room?: string; gameId?: string } | null {
+    try {
+      const stored = localStorage.getItem('uno_room_info');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const age = Date.now() - (parsed.timestamp || 0);
+
+        // Only restore if less than 1 hour old
+        if (age < 3600000) {
+          this.reconnectionInfo.lastRoom = parsed.room;
+          this.reconnectionInfo.lastGameId = parsed.gameId;
+          console.log('Restored room info from localStorage:', parsed);
+          return { room: parsed.room, gameId: parsed.gameId };
+        } else {
+          // Clear stale data
+          this.clearRoomInfo();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to restore room info from localStorage:', error);
+    }
+    return null;
   }
 
   public disconnect(): void {

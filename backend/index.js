@@ -200,44 +200,91 @@ io.on("connection", (socket) => {
     */
     
     // 2. Room Rejoin Handler
-    socket.on('rejoinRoom', ({ room, gameId }, callback) => {
+    socket.on('rejoinRoom', ({ room, gameId, playerAddress }, callback) => {
         try {
-            logger.info(`User ${socket.id} attempting to rejoin room ${room}`);
-            
-            // Check if room has active users
+            logger.info(`User ${socket.id} attempting to rejoin room ${room} with address ${playerAddress}`);
+
+            // Check if room has active users or game state
             const roomUsers = getUsersInRoom(room);
-            const roomExists = roomUsers.length > 0 || gameStateManager.hasGameState(`game-${gameId}`);
-            
+            const gameRoomId = gameId ? `game-${gameId}` : room;
+            const roomExists = roomUsers.length > 0 || gameStateManager.hasGameState(gameRoomId);
+
             if (roomExists) {
-                // Add socket back to room
-                socket.join(room);
-                socket.join(`game-${gameId}`);
-                
-                logger.info(`User ${socket.id} successfully rejoined room ${room}`);
-                
-                // Send success response
-                if (callback && typeof callback === 'function') {
-                    callback({ success: true, room, gameId });
+                // Try to find the user's previous session by matching disconnected users
+                let reconnectedUser = null;
+                const disconnectedUsers = roomUsers.filter(u => u.connected === false);
+
+                if (disconnectedUsers.length > 0) {
+                    // If there's only one disconnected user, reconnect to that
+                    if (disconnectedUsers.length === 1) {
+                        reconnectedUser = disconnectedUsers[0];
+                    }
+                    // If multiple, try to match by playerAddress or take the most recent
+                    else if (playerAddress) {
+                        reconnectedUser = disconnectedUsers.find(u => u.address === playerAddress);
+                    }
+
+                    // Fallback: take the most recently disconnected user
+                    if (!reconnectedUser && disconnectedUsers.length > 0) {
+                        reconnectedUser = disconnectedUsers.sort((a, b) =>
+                            (b.disconnectedAt || 0) - (a.disconnectedAt || 0)
+                        )[0];
+                    }
                 }
-                
+
+                // If we found a user to reconnect, update their info
+                if (reconnectedUser) {
+                    reconnectedUser.id = socket.id;
+                    reconnectedUser.connected = true;
+                    reconnectedUser.disconnectedAt = null;
+                    if (playerAddress && !reconnectedUser.address) {
+                        reconnectedUser.address = playerAddress;
+                    }
+                    logger.info(`Reconnected user ${socket.id} as ${reconnectedUser.name} in room ${room}`);
+                }
+
+                // Add socket back to room channels
+                socket.join(room);
+                if (gameId) {
+                    socket.join(`game-${gameId}`);
+                }
+
+                logger.info(`User ${socket.id} successfully rejoined room ${room}`);
+
+                // Send success response with user info
+                if (callback && typeof callback === 'function') {
+                    callback({
+                        success: true,
+                        room,
+                        gameId,
+                        userName: reconnectedUser?.name,
+                        reconnected: !!reconnectedUser
+                    });
+                }
+
                 // Notify other players in the room
                 socket.to(room).emit('playerReconnected', {
                     userId: socket.id,
+                    userName: reconnectedUser?.name,
                     room,
                     timestamp: Date.now()
                 });
-                
+
                 // Emit reconnected event to the socket itself
-                socket.emit('reconnected', { room, gameId });
-                
+                socket.emit('reconnected', {
+                    room,
+                    gameId,
+                    userName: reconnectedUser?.name
+                });
+
                 // Send updated room data to all users in the room (including the reconnected user)
-                const updatedRoomUsers = getUsersInRoom(room);
+                const updatedRoomUsers = getUsersInRoom(room).filter(u => u.connected !== false);
                 io.to(room).emit('roomData', { room, users: updatedRoomUsers });
                 logger.info(`Sent updated room data to room ${room} with ${updatedRoomUsers.length} users`);
             } else {
-                logger.warn(`Room ${room} not found for rejoin`);
+                logger.warn(`Room ${room} not found for rejoin (no users and no game state)`);
                 if (callback && typeof callback === 'function') {
-                    callback({ success: false, error: 'Room not found' });
+                    callback({ success: false, error: 'Room not found or expired' });
                 }
             }
         } catch (error) {
@@ -384,23 +431,35 @@ io.on("connection", (socket) => {
     });
 
     socket.on("join", (payload, callback) => {
-        let numberOfUsersInRoom = getUsersInRoom(payload.room).length;
+        // Filter to only count connected users for room capacity
+        const connectedUsersInRoom = getUsersInRoom(payload.room).filter(u => u.connected !== false);
+        let numberOfUsersInRoom = connectedUsersInRoom.length;
 
-        // Assign player name based on current number of users (Player 1-6)
+        // Assign player name based on current number of connected users (Player 1-6)
         const playerName = `Player ${numberOfUsersInRoom + 1}`;
 
-        const { error, newUser } = addUser({
+        const { error, newUser, reconnected } = addUser({
             id: socket.id,
             name: playerName,
             room: payload.room,
+            address: payload.address || null,
         });
 
         if (error) return callback(error);
 
         socket.join(newUser.room);
 
-        io.to(newUser.room).emit("roomData", { room: newUser.room, users: getUsersInRoom(newUser.room) });
+        // Send updated room data to all users (only show connected users)
+        const activeUsers = getUsersInRoom(newUser.room).filter(u => u.connected !== false);
+        io.to(newUser.room).emit("roomData", { room: newUser.room, users: activeUsers });
         socket.emit("currentUserData", { name: newUser.name });
+
+        if (reconnected) {
+            logger.info(`User ${socket.id} reconnected as ${newUser.name} in room ${newUser.room}`);
+        } else {
+            logger.info(`New user ${socket.id} joined as ${newUser.name} in room ${newUser.room}`);
+        }
+
         logger.debug(newUser)
         callback();
     });

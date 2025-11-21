@@ -1,17 +1,20 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
+import Image from "next/image";
 
 const Partner = () => {
   return (
     <section className="py-20 bg-[#0A0A0A] relative overflow-hidden">
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-[#ff00ff]/20 to-[#00ffff]/20" />
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at center, #ffffff 1px, transparent 1px)`,
-          backgroundSize: '30px 30px',
-          opacity: 0.1
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(circle at center, #ffffff 1px, transparent 1px)`,
+            backgroundSize: "30px 30px",
+            opacity: 0.1,
+          }}
+        />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
@@ -32,15 +35,19 @@ const Partner = () => {
               priority
             />
           </div>
-          
-          <h2 className="text-6xl font-bold text-white mb-6" style={{
-            textShadow: '0 0 20px rgba(255, 255, 255, 0.5)'
-          }}>
+
+          <h2
+            className="text-6xl font-bold text-white mb-6"
+            style={{
+              textShadow: "0 0 20px rgba(255, 255, 255, 0.5)",
+            }}
+          >
             DIAMANTE
           </h2>
-          
+
           <p className="text-white/80 text-lg max-w-xl mx-auto">
-            Partnering with Diamante to bring you the next generation of blockchain gaming experiences.
+            Partnering with Diamante to bring you the next generation of
+            blockchain gaming experiences.
           </p>
         </div>
       </div>
