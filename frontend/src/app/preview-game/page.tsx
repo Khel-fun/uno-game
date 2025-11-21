@@ -61,17 +61,56 @@ const PreviewGame = () => {
   };
   const colorName = colorMap[currentColor] || 'blue';
   const turnType = currentTurn === "Player 1" ? "current" : "opponent";
-  
-  // Calculate player index: "current" if it's current user's turn, otherwise opponent index (0, 1, 2...)
-  let playerIndex: string | number = "current";
-  if (currentTurn !== "Player 1") {
-    const turnPlayerNum = parseInt(currentTurn.split(' ')[1]);
-    const currentPlayerNum = 1; // Player 1 is always the current user
-    // Calculate relative opponent index (starts from 0)
-    let relativeIndex = turnPlayerNum - currentPlayerNum;
-    if (relativeIndex < 0) relativeIndex += 4; // Wrap around for 4 players max
-    playerIndex = relativeIndex - 1; // Adjust to start from 0
-  }
+
+  const getPlayerIndex = (
+    turnName: string,
+    currentName: string,
+    totalPlayers: number
+  ): string | number => {
+    if (turnName === currentName) return "current";
+
+    const turnPlayerNum = parseInt(turnName.split(" ")[1], 10);
+    const currentPlayerNum = parseInt(currentName.split(" ")[1], 10);
+
+    if (Number.isNaN(turnPlayerNum) || Number.isNaN(currentPlayerNum) || totalPlayers < 2) {
+      return "current";
+    }
+
+    const normalizedDelta = (turnPlayerNum - currentPlayerNum + totalPlayers) % totalPlayers;
+
+    if (normalizedDelta === 0) return "current";
+
+    return normalizedDelta - 1; // Convert to zero-based index for opponents
+  };
+
+  const getRotationForSeat = (seat: string | number, totalPlayers: number) => {
+    if (seat === "current") return 0;
+    if (typeof seat !== "number") return 0;
+
+    if (totalPlayers <= 2) {
+      return 0;
+    }
+
+    if (totalPlayers === 3) {
+      if (seat === 0) return -90; // Player 2 - left
+      if (seat === 1) return 90; // Player 3 - right
+      return 0;
+    }
+
+    if (totalPlayers === 4) {
+      if (seat === 0) return -90; // Player 2 - left
+      if (seat === 1) return 0; // Player 3 - top
+      if (seat === 2) return 90; // Player 4 - right
+      if (seat === 3) return 180; // Additional seat (if ever used)
+    }
+
+    // Fallback: spread remaining seats evenly around the table
+    const angleStep = 360 / totalPlayers;
+    return -angleStep * (seat + 1);
+  };
+
+  const playerIndex = getPlayerIndex(currentTurn, "Player 1", playerCount);
+  const rotationDegrees = getRotationForSeat(playerIndex, playerCount);
 
   return (
     <div
@@ -178,13 +217,7 @@ const PreviewGame = () => {
             zIndex: 5,
             transition: 'opacity 0.5s ease-in-out, transform 0.5s ease-in-out',
             opacity: 0.9,
-            transform: playerIndex === "current" 
-              ? 'rotate(0deg)' 
-              : playerIndex === 0 
-                ? 'rotate(300deg)' 
-                : playerIndex === 1 
-                  ? 'rotate(60deg)' 
-                  : 'rotate(0deg)'
+            transform: `rotate(${rotationDegrees}deg)`
           }} 
         />
       </div>
