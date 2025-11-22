@@ -721,3 +721,24 @@
 {"level":"info","message":"Game state synced for user xuR6nwSkdbw_yF4yAAAD in room game-75","service":"gameofuno-backend","timestamp":"2025-11-21 09:49:27"}
 {"level":"info","message":"User paAg58-wbPNyyc1gAAAH requesting game state sync for room game-75, game 75","service":"gameofuno-backend","timestamp":"2025-11-21 09:49:27"}
 {"level":"info","message":"Game state synced for user paAg58-wbPNyyc1gAAAH in room game-75","service":"gameofuno-backend","timestamp":"2025-11-21 09:49:27"}
+{"level":"info","message":"Game state manager initialized with persistent storage and periodic cleanup","service":"gameofuno-backend","timestamp":"2025-11-23 00:06:46"}
+{"level":"info","message":"Server started on Port 4000 at 2025-11-22T18:36:46.706Z","service":"gameofuno-backend","timestamp":"2025-11-23 00:06:46"}
+{"level":"info","message":"User wHDSzbyjrQvuMCbAAAAB connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:41"}
+{"level":"info","message":"User 9UQ3VzFgtfjKk-3SAAAD connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:41"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:41"}
+{"level":"info","message":"User UJ3X9a0S_BW0W6zgAAAJ connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:45"}
+{"level":"info","message":"User EPhnxjmL9AfSHA53AAAK connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:45"}
+{"level":"info","message":"User 94ye37azWIkHlApGAAAL connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:45"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF added to room 107 as Player 1 with address 0xc36Ce6a2310C2c6418D0413c79439c950df97cC0","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"New user RtEU4U4vfYas9HxAAAAF joined as Player 1 in room 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF joined room game-107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF requesting game state sync for room game-107, game 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"Attempting to restore game state by game ID 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"warn","message":"No game state found for room game-107 or game 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF removed from room 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF added to room 107 as Player 1 with address 0xc36Ce6a2310C2c6418D0413c79439c950df97cC0","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"New user RtEU4U4vfYas9HxAAAAF joined as Player 1 in room 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF joined room game-107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF requesting game state sync for room game-107, game 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"Attempting to restore game state by game ID 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"warn","message":"No game state found for room game-107 or game 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}

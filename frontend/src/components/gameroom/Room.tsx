@@ -30,6 +30,35 @@ type User = {
   room: string;
 };
 
+// Helper function to convert OffChainGameState to Game component format
+const convertToGameComponentState = (offChainState: OffChainGameState, currentAccount: string | null) => {
+  // Game.js expects this format - we need to map what we can from the offChainState
+  // Note: Full state reconstruction may require the backend to save more details
+  return {
+    gameOver: false, // Will be set by game logic
+    winner: "",
+    turn: offChainState.players?.[offChainState.currentPlayerIndex] || "",
+    currentColor: offChainState.currentColor || "",
+    currentNumber: offChainState.currentValue || "",
+    // Player decks would need to be restored from server if saved there
+    // For now, we'll let the game re-sync via updateGameState events
+    player1Deck: [],
+    player2Deck: [],
+    player3Deck: [],
+    player4Deck: [],
+    player5Deck: [],
+    player6Deck: [],
+    playedCardsPile: offChainState.lastPlayedCardHash ? [offChainState.lastPlayedCardHash] : [],
+    drawCardPile: [],
+    isUnoButtonPressed: false,
+    drawButtonPressed: false,
+    lastCardPlayedBy: "",
+    isExtraTurn: false,
+    totalPlayers: offChainState.players?.length || 2,
+    playDirection: offChainState.directionClockwise ? 1 : -1,
+  };
+};
+
 const Room = () => {
   const { id } = useParams()
   const searchParams = useSearchParams()
@@ -60,6 +89,9 @@ const Room = () => {
   const [playerHand, setPlayerHand] = useState<string[]>([])
   const [showLowBalanceDrawer, setShowLowBalanceDrawer] = useState(false);
   const { checkBalance } = useBalanceCheck();
+
+  // Store restored game state for passing to Game component
+  const [restoredGameState, setRestoredGameState] = useState<any>(null);
 
   const { mutate: sendTransaction } = useSendTransaction();
 
@@ -136,6 +168,15 @@ const Room = () => {
     }
   };
 
+  // CRITICAL: Set room info with address BEFORE connection attempts
+  // This ensures address is persisted even if socket isn't connected yet
+  useEffect(() => {
+    if (!isComputerMode && address && room && id) {
+      console.log('Persisting room info with address:', address);
+      socketManager.setRoomInfo(room as string, id as string, address);
+    }
+  }, [address, room, id, isComputerMode]);
+
   useEffect(() => {
     if (isComputerMode) {
       // For computer mode, simulate having 2 players immediately
@@ -148,9 +189,6 @@ const Room = () => {
       // We'll initialize the computer game after contract setup
       console.log('Computer mode detected, will initialize after contract setup');
     } else {
-      // Set room info for reconnection (with wallet address for persistence)
-      socketManager.setRoomInfo(room as string, id as string, address);
-
       // Only join if we haven't already and socket is connected
       if (isConnected && !hasJoinedRoom.current) {
         console.log('Joining room with wallet address:', address);
@@ -249,14 +287,23 @@ const Room = () => {
 
     const roomId = `game-${id}`;
     let hasJoinedGameRoom = false;
+    let reconnectHandled = false;
 
     console.log(`Setting up room listeners for: ${roomId}`);
 
     // Handle reconnection - rejoin room when connection is restored
+    // CONSOLIDATED: Only one handler to prevent race conditions
     const handleReconnect = () => {
+      // Prevent duplicate reconnection attempts from multiple events
+      if (reconnectHandled) {
+        console.log('Reconnection already handled, skipping duplicate');
+        return;
+      }
+      reconnectHandled = true;
+
       console.log('Reconnected, rejoining room:', roomId);
 
-      // Only join if we haven't already in this effect lifecycle
+      // Join game room if not already joined
       if (!hasJoinedGameRoom) {
         socket.emit("joinRoom", roomId);
         hasJoinedGameRoom = true;
@@ -279,6 +326,11 @@ const Room = () => {
         console.log('Requesting game state sync for started game');
         socket.emit('requestGameStateSync', { roomId, gameId: id });
       }
+
+      // Reset flag after a short delay to allow future reconnections
+      setTimeout(() => {
+        reconnectHandled = false;
+      }, 1000);
     };
 
     // Only join room if connected and haven't joined yet
@@ -292,9 +344,11 @@ const Room = () => {
       socket.emit('requestGameStateSync', { roomId, gameId: id });
     }
 
+    // NOTE: socketManager's 'reconnected' event is the primary reconnection signal
+    // 'connect' and 'roomRejoined' are backup for edge cases
+    socket.on('reconnected', handleReconnect);
     socket.on('connect', handleReconnect);
     socket.on('roomRejoined', handleReconnect);
-    socket.on('reconnected', handleReconnect); // Handle socketManager's reconnected event
     
     // Set up game started event listener
     socket.on(`gameStarted-${roomId}`, (data: { newState: OffChainGameState; cardHashMap: any; }) => {
@@ -369,28 +423,34 @@ const Room = () => {
       // Listen for game state sync response (after reconnection or page refresh)
       socket.on(`gameStateSync-${roomId}`, (data: { newState: OffChainGameState; cardHashMap: any; restored?: boolean; error?: string; }) => {
         console.log('Received game state sync:', data);
-        
+
         if (data.error) {
           console.log('No saved game state found, starting fresh');
           return;
         }
-        
+
         const { newState, cardHashMap, restored } = data;
-        
+
         if (newState) {
           console.log('Restoring game state:', newState);
           setOffChainGameState(newState);
-          
+
           if (cardHashMap) {
             console.log('Restoring card hash map');
             updateGlobalCardHashMap(cardHashMap);
           }
-          
+
           // Check if game was already started
           if (newState.isStarted) {
             console.log('Game was already started, restoring game state');
             setGameStarted(true);
-            
+
+            // CRITICAL: Convert offChainGameState to Game.js format for restoration
+            // This allows the Game component to restore its state on page refresh
+            const gameStateForGameComponent = convertToGameComponentState(newState, account);
+            setRestoredGameState(gameStateForGameComponent);
+            console.log('Set restored game state for Game component:', gameStateForGameComponent);
+
             // Restore player hand if available
             if (account) {
               const playerHandHashes = newState.playerHands?.[account];
@@ -399,7 +459,7 @@ const Room = () => {
                 setPlayerHand(playerHandHashes);
               }
             }
-            
+
             // Set the current player
             if (newState.players && newState.currentPlayerIndex !== undefined) {
               const currentPlayer = newState.players[newState.currentPlayerIndex];
@@ -407,7 +467,7 @@ const Room = () => {
               setPlayerToStart(currentPlayer);
             }
           }
-          
+
           if (restored) {
             toast({
               title: "Game restored",
@@ -690,7 +750,7 @@ const Room = () => {
         (() => {
           console.log('Rendering computer mode, gameStarted:', gameStarted, 'currentUser:', currentUser);
           return gameStarted ? (
-            <Game room={room} currentUser={currentUser} isComputerMode={isComputerMode} playerCount={users.length} />
+            <Game room={room} currentUser={currentUser} isComputerMode={isComputerMode} playerCount={users.length} restoredGameState={restoredGameState} />
           ) : (
             <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
               <h1 className='topInfoText text-white font-2xl font-bold'>Starting game against Computer 🤖</h1>
@@ -979,7 +1039,7 @@ const Room = () => {
               </div>
             )
             : (
-              <Game room={room} currentUser={currentUser} isComputerMode={false} playerCount={users.length} />
+              <Game room={room} currentUser={currentUser} isComputerMode={false} playerCount={users.length} restoredGameState={restoredGameState} />
             )
         )
       )}

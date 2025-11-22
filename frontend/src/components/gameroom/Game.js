@@ -58,8 +58,12 @@ const initialGameState = {
 
 const gameReducer = (state, action) => ({ ...state, ...action });
 
-const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) => {
-  const [gameState, dispatch] = useReducer(gameReducer, initialGameState);
+const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2, restoredGameState = null }) => {
+  // Use restored game state if available (for reconnection), otherwise use initial state
+  const [gameState, dispatch] = useReducer(
+    gameReducer,
+    restoredGameState || initialGameState
+  );
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogCallback, setDialogCallback] = useState(null);
@@ -350,33 +354,36 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
   }, [isComputerMode]);
 
   useEffect(() => {
-    socket.on(
-      "initGameState",
-      (gameState) => {
-        // Dispatch all game state properties dynamically
-        dispatch(gameState);
-        playShufflingSound();
-      }
-    );
+    const handleInitGameState = (gameState) => {
+      // Dispatch all game state properties dynamically
+      dispatch(gameState);
+      playShufflingSound();
+    };
 
-    socket.on(
-      "updateGameState",
-      (gameState) => {
-        const { gameOver, winner, currentNumber } = gameState;
-        
-        gameOver && playGameOverSound();
-        //check for special card and play their sound else play regular sound
-        currentNumber && (currentNumber in playSoundMap ? playSoundMap[currentNumber]() : playCardPlayedSound());
-        
-        // Dispatch all game state updates
-        dispatch({
-          ...gameState,
-          isUnoButtonPressed: false,
-          drawButtonPressed: gameState.drawButtonPressed || false
-        });
-      }
-    );
-  }, []);
+    const handleUpdateGameState = (gameState) => {
+      const { gameOver, winner, currentNumber } = gameState;
+
+      gameOver && playGameOverSound();
+      //check for special card and play their sound else play regular sound
+      currentNumber && (currentNumber in playSoundMap ? playSoundMap[currentNumber]() : playCardPlayedSound());
+
+      // Dispatch all game state updates
+      dispatch({
+        ...gameState,
+        isUnoButtonPressed: false,
+        drawButtonPressed: gameState.drawButtonPressed || false
+      });
+    };
+
+    socket.on("initGameState", handleInitGameState);
+    socket.on("updateGameState", handleUpdateGameState);
+
+    // CRITICAL: Cleanup event listeners on unmount or reconnection
+    return () => {
+      socket.off("initGameState", handleInitGameState);
+      socket.off("updateGameState", handleUpdateGameState);
+    };
+  }, [playShufflingSound, playGameOverSound, playCardPlayedSound, playSoundMap]);
 
   // Helper function to get player deck by player name
   const getPlayerDeck = (playerName) => {
