@@ -1,5 +1,7 @@
-//pack of 108 cards (_ = reverse)
-const PACK_OF_CARDS = [
+import { PackOfCards, CardNotation } from "./types";
+
+// Pack of 108 cards (_ = reverse, D2 = draw2, D4W = draw4 wild, W = wild)
+const PACK_OF_CARDS: PackOfCards = [
   "0R",
   "1R",
   "1R",
@@ -110,4 +112,4 @@ const PACK_OF_CARDS = [
   "D4W",
 ];
 
-module.exports = PACK_OF_CARDS;
+export default PACK_OF_CARDS;

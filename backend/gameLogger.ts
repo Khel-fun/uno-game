@@ -1,19 +1,22 @@
-const fs = require('fs');
-const path = require('path');
-const logger = require('./logger');
+import * as fs from "fs";
+import * as path from "path";
+import { LogEntry, PlayerAction } from "./types";
+import logger from "./logger";
 
 // Create game-logs directory if it doesn't exist
-const gameLogsDir = path.join(__dirname, 'game-logs');
+const gameLogsDir = path.join(__dirname, "game-logs");
 if (!fs.existsSync(gameLogsDir)) {
   fs.mkdirSync(gameLogsDir, { recursive: true });
 }
 
 class GameLogger {
+  private logFilePath: string;
+
   constructor() {
-    this.logFilePath = path.join(gameLogsDir, 'game-history.log');
+    this.logFilePath = path.join(gameLogsDir, "game-history.log");
   }
 
-  formatLogEntry(entry) {
+  formatLogEntry(entry: LogEntry): string {
     const parts = [
       `[${entry.timestamp}]`,
       `Game: ${entry.gameId}`,
@@ -42,47 +45,56 @@ class GameLogger {
       parts.push(`Next: ${entry.nextPlayer.substring(0, 8)}...`);
     }
 
-    return parts.join(' | ');
+    return parts.join(" | ");
   }
 
-  log(entry) {
+  log(entry: LogEntry): void {
     const logLine = this.formatLogEntry(entry);
-    
+
     try {
       // Write to game-specific log file
-      fs.appendFileSync(this.logFilePath, logLine + '\n', 'utf8');
-      
+      fs.appendFileSync(this.logFilePath, logLine + "\n", "utf8");
+
       // Also log to winston logger for monitoring
       logger.info(`[GAME] ${logLine}`);
     } catch (error) {
-      logger.error('Failed to write to game log file:', error);
+      logger.error("Failed to write to game log file:", error);
     }
   }
 
-  logGameStart(gameId, players) {
-    const entry = {
+  logGameStart(gameId: string | number, players: string[]): void {
+    const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       gameId: gameId.toString(),
       turnNumber: 0,
-      player: 'SYSTEM',
-      action: 'startGame',
+      player: "SYSTEM",
+      action: "startGame",
       cardDetails: `Players: ${players.length}`,
     };
     this.log(entry);
-    
+
     // Log all players
-    players.forEach((player, index) => {
+    players.forEach((player: string, index: number) => {
       logger.info(`[GAME] Player ${index + 1}: ${player}`);
     });
   }
 
-  logCardPlay(gameId, turnNumber, player, cardHash, cardDetails, currentColor, currentValue, nextPlayer) {
-    const entry = {
+  logCardPlay(
+    gameId: string | number,
+    turnNumber: number,
+    player: string,
+    cardHash: string,
+    cardDetails: string,
+    currentColor: string,
+    currentValue: string,
+    nextPlayer: string
+  ): void {
+    const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       gameId: gameId.toString(),
       turnNumber,
       player,
-      action: 'playCard',
+      action: "playCard",
       cardHash,
       cardDetails,
       currentColor,
@@ -92,31 +104,41 @@ class GameLogger {
     this.log(entry);
   }
 
-  logCardDraw(gameId, turnNumber, player, cardHash, cardDetails, wasPlayed, nextPlayer) {
-    const entry = {
+  logCardDraw(
+    gameId: string | number,
+    turnNumber: number,
+    player: string,
+    cardHash: string,
+    cardDetails: string,
+    wasPlayed: boolean,
+    nextPlayer: string
+  ): void {
+    const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       gameId: gameId.toString(),
       turnNumber,
       player,
-      action: 'drawCard',
+      action: "drawCard",
       cardHash,
-      cardDetails: `${cardDetails} (${wasPlayed ? 'played immediately' : 'added to hand'})`,
+      cardDetails: `${cardDetails} (${
+        wasPlayed ? "played immediately" : "added to hand"
+      })`,
       nextPlayer,
     };
     this.log(entry);
   }
 
-  createGameLog(gameId) {
+  createGameLog(gameId: string | number): void {
     const gameLogPath = path.join(gameLogsDir, `game-${gameId}.log`);
     const header = `=== GAME ${gameId} LOG ===\nStarted: ${new Date().toISOString()}\n\n`;
-    
+
     try {
-      fs.writeFileSync(gameLogPath, header, 'utf8');
+      fs.writeFileSync(gameLogPath, header, "utf8");
     } catch (error) {
-      logger.error('Failed to create game-specific log file:', error);
+      logger.error("Failed to create game-specific log file:", error);
     }
   }
 }
 
 // Export singleton instance
-module.exports = new GameLogger();
+export default new GameLogger();
