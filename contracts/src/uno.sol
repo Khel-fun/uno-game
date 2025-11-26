@@ -86,6 +86,7 @@ contract UnoGame is ReentrancyGuard {
     function joinGame(uint256 gameId, address _joinee) external nonReentrant validateGame(gameId, GameStatus.NotStarted){
         Game storage game = games[gameId];
         require(game.players.length < 10, "Game is full");
+        // put check for status of the game
 
         game.players.push(_joinee);
         emit PlayerJoined(gameId, _joinee);
