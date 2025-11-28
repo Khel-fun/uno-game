@@ -1965,6 +1965,7 @@
 {"level":"info","location":"index.ts:822","message":"Shutting down gracefully...","service":"gameofuno-backend","timestamp":"2025-11-28 18:20:12"}
 {"level":"info","location":"index.ts:822","message":"Shutting down gracefully...","service":"gameofuno-backend","timestamp":"2025-11-28 18:20:12"}
 {"level":"error","location":"index.ts:829","message":"Forced shutdown after timeout","service":"gameofuno-backend","timestamp":"2025-11-28 18:20:22"}
+<<<<<<< HEAD
 {"level":"info","location":"index.ts:848","message":"Server started on Port 4000 at 2025-11-28T12:52:18.544Z","service":"gameofuno-backend","timestamp":"2025-11-28 18:22:18"}
 {"level":"info","location":"index.ts:849","message":"Convex URL: https://quixotic-raccoon-840.convex.cloud","service":"gameofuno-backend","timestamp":"2025-11-28 18:22:18"}
 {"level":"info","location":"index.ts:191","message":"User lTUd2kBBAkwgX5byAAAB connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-28 18:22:26"}
@@ -3127,3 +3128,5 @@
 {"level":"info","location":"index.ts:1089","message":"Server started on Port 4000 at 2025-11-29T06:07:08.287Z","service":"gameofuno-backend","timestamp":"2025-11-29 11:37:08"}
 {"level":"info","location":"index.ts:1090","message":"Convex URL: https://quixotic-raccoon-840.convex.cloud","service":"gameofuno-backend","timestamp":"2025-11-29 11:37:08"}
 {"level":"info","location":"index.ts:1063","message":"Shutting down gracefully...","service":"gameofuno-backend","timestamp":"2025-11-29 11:37:10"}
+=======
+>>>>>>> e99d45a (make backend work)
