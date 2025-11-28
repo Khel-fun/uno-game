@@ -69,9 +69,7 @@
       "gameId": "456",
       "state": {
         "id": "456",
-        "players": [
-          "0x9876543210fedcba9876543210fedcba98765432"
-        ],
+        "players": ["0x9876543210fedcba9876543210fedcba98765432"],
         "isActive": true,
         "currentPlayerIndex": 0,
         "lastActionTimestamp": 1700549000000,
@@ -79,10 +77,7 @@
         "directionClockwise": true,
         "playerHandsHash": {},
         "playerHands": {
-          "0x9876543210fedcba9876543210fedcba98765432": [
-            "hash7",
-            "hash8"
-          ]
+          "0x9876543210fedcba9876543210fedcba98765432": ["hash7", "hash8"]
         },
         "deckHash": "deckHashValue2",
         "discardPileHash": "discardPileHashValue2",
@@ -104,9 +99,7 @@
       },
       "lastUpdated": 1700549420000,
       "metadata": {
-        "players": [
-          "0x9876543210fedcba9876543210fedcba98765432"
-        ],
+        "players": ["0x9876543210fedcba9876543210fedcba98765432"],
         "startTime": 1700549000000,
         "lastActivity": 1700549420000,
         "roomId": "game-456",

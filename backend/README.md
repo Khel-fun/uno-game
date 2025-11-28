@@ -1,64 +1,72 @@
 # Game of Uno Backend
 
-This is the backend server for the Game of Uno application. It handles game state management, real-time communication, and blockchain interactions.
+TypeScript + Convex backend for multiplayer UNO game with real-time synchronization.
 
-## Setup Instructions
+## Quick Start
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+```bash
+# 1. Deploy Convex schema and generate types
+npx convex dev
 
-2. Create a `.env` file based on the `.env.example` template:
-   ```bash
-   cp .env.example .env
-   ```
+# 2. Set environment variables
+cp .env.example .env.local
+# Add your CONVEX_URL to .env.local
 
-3. Update the `.env` file with your configuration values.
-
-4. Start the server:
-   ```bash
-   npm start
-   ```
-
-## Logging
-
-The application uses Winston for logging. Logs are stored in the `logs` directory:
-- `error.log`: Contains all error-level logs
-- `combined.log`: Contains all logs of all levels
-
-You can configure the log level in the `.env` file:
-```
-LOG_LEVEL=info
+# 3. Build and run
+npm install
+npm run build
+npm start
 ```
 
-Available log levels (from most to least severe):
-- error
-- warn
-- info
-- http
-- verbose
-- debug
-- silly
+## Architecture
 
-In development mode, logs are also output to the console with color formatting.
+**Stack:** TypeScript + Convex + Socket.IO
+
+**Database (Convex):**
+- `players` - User profiles and connection state
+- `games` - Game metadata and current state
+- `hands` - Mutable player hands
+- `cardMappings` - Hash-to-card decoder for security
+- `moves` - Immutable event log
+- `gameStates` - State snapshots
+
+**Key Features:**
+- Event-sourced architecture with full audit trail
+- Real-time sync via Convex (automatic)
+- Card security via cryptographic hashing
+- Reconnection support (60s grace period)
+- ACID transactions
 
 ## API Endpoints
 
-- `POST /api/create-claimable-balance`: Creates a claimable balance on the Diamnet blockchain
-- `GET /health`: Health check endpoint that returns server status
+- `GET /health` - Health check with game stats
+- `GET /api/game-state/:gameId` - Get game state
+- `GET /api/recent-games` - List recent games
+- `POST /api/create-claimable-balance` - Diamnet blockchain integration
 
 ## Socket.IO Events
 
-The server uses Socket.IO for real-time communication. Key events include:
-- `connection`: Triggered when a client connects
-- `joinRoom`: Joins a specific game room
-- `createGameRoom`: Creates a new game room
-- `gameStarted`: Signals the start of a game
-- `playCard`: Handles card play actions
-- `updateGameState`: Updates the game state
-- `disconnect`: Handles client disconnection
+**Client → Server:**
+- `join` - Join game lobby
+- `gameStarted` - Initialize game (calls `gameActions.initializeGame`)
+- `playCard` - Play a card (calls `gameActions.playCard`)
+- `drawCard` - Draw a card (calls `gameActions.drawCard`)
+- `rejoinRoom` - Reconnect to game
+- `requestGameStateSync` - Sync state after reconnect
 
-## Graceful Shutdown
+**Server → Client:**
+- `gameStarted-{roomId}` - Game initialized
+- `cardPlayed-{roomId}` - Card played
+- `gameStateSync-{roomId}` - State synced
+- `playerReconnected` - Player rejoined
+- `playerDisconnected` - Player left (temporary/permanent)
 
-The server implements graceful shutdown handling for SIGTERM and SIGINT signals.
+## Migration Notes
+
+**Deprecated (moved to `deprecated/`):**
+- `gameLogger.ts` → Convex `moves` table
+- `gameStateManager.ts` → Convex `games` + `gameStates` tables
+- `users.ts` → Convex `players` table
+
+**Before (in-memory):** `gameStateManager.saveGameState(roomId, state)`
+**After (Convex):** `convex.mutation(api.games.updateState, { gameId, ... })`

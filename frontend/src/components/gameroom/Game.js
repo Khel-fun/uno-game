@@ -22,36 +22,36 @@ import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { client } from "@/utils/thirdWebClient";
-import { 
-  INITIAL_GAME_STATE, 
-  ACTION_CARD_CODES, 
-  GAME_CONFIG, 
-  TOAST_DURATION 
+import {
+  INITIAL_GAME_STATE,
+  ACTION_CARD_CODES,
+  GAME_CONFIG,
+  TOAST_DURATION,
 } from "../../utils/gameConstants";
-import { 
-  getPlayerDeck, 
-  getActivePlayers, 
+import {
+  getPlayerDeck,
+  getActivePlayers,
   getNextPlayer,
   extractCardDetails,
   isCardPlayable,
 } from "../../utils/gameLogic";
-import { 
-  computerMakeMove, 
-  selectRandomColor, 
-  shouldDeclareUno 
+import {
+  computerMakeMove,
+  selectRandomColor,
+  shouldDeclareUno,
 } from "../../utils/computerAI";
-import { 
-  initializeComputerGame, 
-  initializeMultiplayerGame 
+import {
+  initializeComputerGame,
+  initializeMultiplayerGame,
 } from "../../utils/gameInitialization";
-import { 
-  drawCardWithReshuffle, 
-  reshuffleDiscardPile 
+import {
+  drawCardWithReshuffle,
+  reshuffleDiscardPile,
 } from "../../utils/cardHandlers";
-import { 
-  processCardPlay, 
-  validateCardPlay, 
-  handleSkipCard, 
+import {
+  processCardPlay,
+  validateCardPlay,
+  handleSkipCard,
   handleReverseCard,
   getCardType,
 } from "../../utils/cardPlayHandlers";
@@ -62,26 +62,37 @@ import {
 
 const gameReducer = (state, action) => ({ ...state, ...action });
 
-const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) => {
-  // State management
-  const [gameState, dispatch] = useReducer(gameReducer, INITIAL_GAME_STATE);
+const Game = ({
+  room,
+  currentUser,
+  isComputerMode = false,
+  playerCount = 2,
+  restoredGameState = null,
+}) => {
+  // Use restored game state if available (for reconnection), otherwise use initial state
+  const [gameState, dispatch] = useReducer(
+    gameReducer,
+    restoredGameState || initialGameState
+  );
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogCallback, setDialogCallback] = useState(null);
   const [rewardGiven, setRewardGiven] = useState(false);
   const [computerMoveCounter, setComputerMoveCounter] = useState(0);
   const [showLowBalanceDrawer, setShowLowBalanceDrawer] = useState(false);
-  
+
   // Refs
   const pendingActionsRef = useRef([]);
-  
+
   // Hooks
   const { checkBalance } = useBalanceCheck();
-  const { isConnected: socketConnected, isReconnecting } = useSocketConnection();
+  const { isConnected: socketConnected, isReconnecting } =
+    useSocketConnection();
   const { address, isConnected } = useWalletAddress();
   const { data: walletClient } = useWalletClient();
   const { mutate: sendTransaction } = useSendTransaction();
   const { toast } = useToast();
-  
+
   // Sound effects
   const {
     playUnoSound,
@@ -93,7 +104,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     playDraw4CardSound,
     playGameOverSound,
   } = useSoundProvider();
-  
+
   // Destructure game state
   const {
     gameOver,
@@ -116,7 +127,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     totalPlayers = playerCount,
     playDirection = 1,
   } = gameState;
-  
+
   // Sound map for action cards
   const playSoundMap = {
     [ACTION_CARD_CODES.SKIP]: playSkipCardSound,
@@ -124,7 +135,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     [ACTION_CARD_CODES.DRAW_4_WILD]: playDraw4CardSound,
     [ACTION_CARD_CODES.WILD]: playWildCardSound,
   };
-  
+
   /**
    * Socket event emitter with buffering support
    */
@@ -134,7 +145,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     } else {
       console.log(`Socket disconnected, buffering event: ${eventName}`);
       pendingActionsRef.current.push({ eventName, data });
-      
+
       toast({
         title: "Connection issue",
         description: "Your action will be sent when connection is restored",
@@ -143,20 +154,22 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       });
     }
   };
-  
+
   /**
    * Process pending actions when reconnected
    */
   useEffect(() => {
     if (socketConnected && pendingActionsRef.current.length > 0) {
-      console.log(`Processing ${pendingActionsRef.current.length} pending actions`);
-      
+      console.log(
+        `Processing ${pendingActionsRef.current.length} pending actions`
+      );
+
       pendingActionsRef.current.forEach(({ eventName, data }) => {
         socket.emit(eventName, data);
       });
-      
+
       pendingActionsRef.current = [];
-      
+
       toast({
         title: "Connection restored",
         description: "All pending actions have been sent",
@@ -165,7 +178,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       });
     }
   }, [socketConnected]);
-  
+
   /**
    * Show warning when connection is lost during game
    */
@@ -179,7 +192,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       });
     }
   }, [socketConnected, isReconnecting]);
-  
+
   /**
    * Handle computer turn with delay for better UX
    */
@@ -190,129 +203,270 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         if (shouldDeclareUno(player2Deck.length)) {
           playUnoSound();
         }
-        
-        const computerMove = computerMakeMove(player2Deck, currentColor, currentNumber);
-        
+
+        const computerMove = computerMakeMove(
+          player2Deck,
+          currentColor,
+          currentNumber
+        );
+
         if (computerMove === "draw") {
           onCardDrawnHandler();
         } else {
           onCardPlayedHandler(computerMove);
         }
       }, GAME_CONFIG.COMPUTER_TURN_DELAY);
-      
+
       return () => clearTimeout(computerTurnDelay);
     }
   }, [turn, isComputerMode, gameOver, computerMoveCounter]);
-  
+
   /**
    * Initialize game on component mount
    */
   useEffect(() => {
-    console.log('Game component mounted, isComputerMode:', isComputerMode);
-    
+    console.log("Game component mounted, isComputerMode:", isComputerMode);
+
     if (isComputerMode) {
-      console.log('Initializing computer mode game...');
+      console.log("Initializing computer mode game...");
       const initialState = initializeComputerGame();
       dispatch(initialState);
     } else if (currentUser === "Player 1") {
-      console.log(`Player 1 initializing multiplayer game with ${playerCount} players...`);
+      console.log(
+        `Player 1 initializing multiplayer game with ${playerCount} players...`
+      );
       const initialState = initializeMultiplayerGame(playerCount);
       emitSocketEvent("initGameState", initialState);
     }
   }, [isComputerMode]);
-  
+
   /**
    * Socket event listeners
    */
   useEffect(() => {
-    socket.on("initGameState", (gameState) => {
+    const handleInitGameState = (gameState) => {
+      // Dispatch all game state properties dynamically
       dispatch(gameState);
       playShufflingSound();
-    });
-    
-    socket.on("updateGameState", (gameState) => {
+    };
+
+    const handleUpdateGameState = (gameState) => {
       const { gameOver, winner, currentNumber } = gameState;
-      
-      if (gameOver) playGameOverSound();
-      
-      // Play appropriate sound for card played
-      if (currentNumber && currentNumber in playSoundMap) {
-        playSoundMap[currentNumber]();
-      } else if (currentNumber) {
-        playCardPlayedSound();
-      }
-      
+
+      gameOver && playGameOverSound();
+      //check for special card and play their sound else play regular sound
+      currentNumber &&
+        (currentNumber in playSoundMap
+          ? playSoundMap[currentNumber]()
+          : playCardPlayedSound());
+
+      // Dispatch all game state updates
       dispatch({
         ...gameState,
         isUnoButtonPressed: false,
         drawButtonPressed: gameState.drawButtonPressed || false,
       });
-    });
-    
-    return () => {
-      socket.off("initGameState");
-      socket.off("updateGameState");
     };
-  }, []);
-  
-  /**
-   * Main card play handler - routes to specific handlers based on card type
-   */
-  const onCardPlayedHandler = (played_card) => {
-    const cardPlayedBy = turn;
-    
-    // Update the last player who played a card
-    dispatch({ lastCardPlayedBy: cardPlayedBy });
-    
-    const cardType = getCardType(played_card);
-    const cardDetails = extractCardDetails(played_card);
-    
-    // Route to specific handler based on card type
-    switch (cardType.type) {
-      case 'skip':
-        handleSkipCardPlay(played_card, cardDetails);
-        break;
-        
-      case 'reverse':
-        handleReverseCardPlay(played_card, cardDetails);
-        break;
-        
-      case 'draw2':
-        handleDraw2CardPlay(played_card, cardDetails);
-        break;
-        
-      case 'wild':
-      case 'draw4wild':
-        handleWildCardPlay(played_card, cardType.type === 'draw4wild');
-        break;
-        
+
+    socket.on("initGameState", handleInitGameState);
+    socket.on("updateGameState", handleUpdateGameState);
+
+    // CRITICAL: Cleanup event listeners on unmount or reconnection
+    return () => {
+      socket.off("initGameState", handleInitGameState);
+      socket.off("updateGameState", handleUpdateGameState);
+    };
+  }, [
+    playShufflingSound,
+    playGameOverSound,
+    playCardPlayedSound,
+    playSoundMap,
+  ]);
+
+  // Helper function to get player deck by player name
+  const getPlayerDeck = (playerName) => {
+    switch (playerName) {
+      case "Player 1":
+        return player1Deck;
+      case "Player 2":
+        return player2Deck;
+      case "Player 3":
+        return player3Deck;
+      case "Player 4":
+        return player4Deck;
+      case "Player 5":
+        return player5Deck;
+      case "Player 6":
+        return player6Deck;
       default:
-        handleRegularCardPlay(played_card, cardDetails);
-        break;
+        return [];
     }
   };
-  
-  /**
-   * Handle skip card play
-   */
-  const handleSkipCardPlay = (played_card, cardDetails) => {
-    const validation = validateCardPlay(played_card, currentColor, currentNumber);
-    
-    if (!validation.isValid) {
-      alert("Invalid Move! Skip cards must match either the color or number of the current card.");
-      return;
+
+  // Helper function to get next player in turn rotation
+  // direction: 1 for clockwise (default), -1 for counter-clockwise
+  const getNextPlayer = (
+    currentPlayer,
+    allPlayers,
+    direction = playDirection
+  ) => {
+    const currentIndex = allPlayers.indexOf(currentPlayer);
+    const nextIndex =
+      (currentIndex + direction + allPlayers.length) % allPlayers.length;
+    return allPlayers[nextIndex];
+  };
+
+  // Helper function to get all active players based on initial player count
+  const getActivePlayers = () => {
+    const players = [];
+    const numPlayers = totalPlayers || playerCount;
+    for (let i = 1; i <= numPlayers; i++) {
+      players.push(`Player ${i}`);
     }
-    
-    const activePlayers = getActivePlayers(totalPlayers);
-    const skipResult = handleSkipCard(turn, activePlayers, playDirection);
-    
-    console.log('Skip card played:', {
-      cardPlayedBy: turn,
-      skippedPlayer: skipResult.skippedPlayer,
-      nextTurn: skipResult.nextTurn,
-      direction: playDirection,
+    return players;
+  };
+
+  //remove the played card from player's deck and add it to playedCardsPile (immutably)
+  //then update turn, currentColor and currentNumber
+  //also checks for the card played and update opponentDeck accordingly
+  //also checks for UNO pressed if not add 2 cards to playerDeck as penalty
+  //play the relevant sound when particular card is played
+  //This is generic helper method and can be used for any player
+  const cardPlayedByPlayer = ({
+    cardPlayedBy,
+    played_card,
+    colorOfPlayedCard,
+    numberOfPlayedCard,
+    isDraw2 = false,
+    isDraw4 = false,
+    toggleTurn = true,
+  }) => {
+    //check who is the current player
+    const playerDeck = getPlayerDeck(cardPlayedBy);
+    const activePlayers = getActivePlayers();
+    const nextPlayerName = getNextPlayer(cardPlayedBy, activePlayers);
+    const nextPlayerDeck = getPlayerDeck(nextPlayerName);
+
+    console.log("Turn rotation:", {
+      cardPlayedBy,
+      activePlayers,
+      nextPlayerName,
+      totalPlayers,
+      currentPlayerDeckSize: playerDeck.length,
+      nextPlayerDeckSize: nextPlayerDeck.length,
     });
-    
+
+    //remove the played card from player's deck and add it to playedCardsPile and update their deck(immutably)
+    const removeIndex = playerDeck.indexOf(played_card);
+    let updatedPlayerDeck = [
+      ...playerDeck.slice(0, removeIndex),
+      ...playerDeck.slice(removeIndex + 1),
+    ];
+
+    //make a drawcardpile copy for managing draw2,draw4 and UNO penalty
+    let copiedDrawCardPileArray = [...drawCardPile];
+    let updatedPlayedCardsPile = [...playedCardsPile, played_card];
+    let nextPlayerDeckCopy = [...nextPlayerDeck];
+
+    // Helper function to draw a card with reshuffle if needed
+    const drawCardWithReshuffle = () => {
+      // Check if draw pile is empty and needs reshuffling
+      if (copiedDrawCardPileArray.length === 0) {
+        // Keep the top card (the one just played)
+        const topCard =
+          updatedPlayedCardsPile[updatedPlayedCardsPile.length - 1];
+
+        // Take all other cards from the discard pile
+        const cardsToReshuffle = updatedPlayedCardsPile.slice(
+          0,
+          updatedPlayedCardsPile.length - 1
+        );
+
+        // If we have cards to reshuffle
+        if (cardsToReshuffle.length > 0) {
+          // Shuffle these cards
+          copiedDrawCardPileArray = shuffleArray([...cardsToReshuffle]);
+          updatedPlayedCardsPile = [topCard];
+
+          // Play shuffling sound
+          playShufflingSound();
+
+          console.log(
+            "Reshuffled discard pile into draw pile during penalty. New draw pile size:",
+            copiedDrawCardPileArray.length
+          );
+        }
+      }
+
+      // Draw a card if possible
+      if (copiedDrawCardPileArray.length > 0) {
+        return copiedDrawCardPileArray.pop();
+      }
+
+      return null; // No card available
+    };
+
+    // if it is a draw2 or draw4 move pop cards from drawCardPile
+    // and add them to next player's deck (immutably)
+    if (isDraw2 || isDraw4) {
+      // Draw 2 cards for Draw 2
+      const card1 = drawCardWithReshuffle();
+      if (card1) nextPlayerDeckCopy.push(card1);
+
+      const card2 = drawCardWithReshuffle();
+      if (card2) nextPlayerDeckCopy.push(card2);
+
+      // Draw 2 more cards for Draw 4
+      if (isDraw4) {
+        const card3 = drawCardWithReshuffle();
+        if (card3) nextPlayerDeckCopy.push(card3);
+
+        const card4 = drawCardWithReshuffle();
+        if (card4) nextPlayerDeckCopy.push(card4);
+      }
+    }
+
+    //if it is special card which persists turn like skip, draw4 card don't change the turn
+    //else change turn after every play
+    let turnCopy = cardPlayedBy;
+    if (toggleTurn) {
+      turnCopy = nextPlayerName;
+    }
+
+    //did player press UNO when 2 cards were remaining in their deck
+    //if not then add 2 cards as penalty else continue
+    // In computer mode, computer (Player 2) automatically calls UNO, so skip penalty for computer
+    const isComputerPlayer = isComputerMode && cardPlayedBy === "Player 2";
+    if (playerDeck.length === 2 && !isUnoButtonPressed && !isComputerPlayer) {
+      alert("Oops! You forgot to press UNO. You drew 2 cards as penalty.");
+      //pull out last two cards from draw card pile and add them to player's deck
+      const penaltyCard1 = drawCardWithReshuffle();
+      if (penaltyCard1) updatedPlayerDeck.push(penaltyCard1);
+
+      const penaltyCard2 = drawCardWithReshuffle();
+      if (penaltyCard2) updatedPlayerDeck.push(penaltyCard2);
+    }
+
+    // Reset Uno button after checking for penalty
+    // This ensures the penalty check sees the correct UNO button state
+    dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: false });
+
+    // Create a more explicit update of player decks to prevent card transfer issues
+    const newGameState = {
+      gameOver: checkGameOver(playerDeck),
+      winner: checkWinner(playerDeck, cardPlayedBy),
+      turn: turnCopy,
+      playedCardsPile: updatedPlayedCardsPile,
+      currentColor: colorOfPlayedCard,
+      currentNumber: numberOfPlayedCard,
+      drawCardPile: copiedDrawCardPileArray,
+      isExtraTurn: !toggleTurn, // Set to true when player gets extra turn from special card
+    };
+
+    // Update the deck for the player who played the card
+    newGameState[`${cardPlayedBy.toLowerCase().replace(" ", "")}Deck`] =
+      updatedPlayerDeck;
+
     // Play the card but don't toggle turn (we'll set it manually)
     const newState = processCardPlay({
       cardPlayedBy: turn,
@@ -324,35 +478,42 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       isComputerMode,
       playShufflingSound,
     });
-    
+
     // Update state with the skipped turn
     updateGameState({
       ...newState,
       turn: skipResult.nextTurn,
     });
   };
-  
+
   /**
    * Handle reverse card play
    */
   const handleReverseCardPlay = (played_card, cardDetails) => {
-    const validation = validateCardPlay(played_card, currentColor, currentNumber);
-    
+    const validation = validateCardPlay(
+      played_card,
+      currentColor,
+      currentNumber
+    );
+
     if (!validation.isValid) {
-      alert("Invalid Move! Reverse cards must match either the color or number of the current card.");
+      alert(
+        "Invalid Move! Reverse cards must match either the color or number of the current card."
+      );
       return;
     }
-    
+
     const activePlayers = getActivePlayers(totalPlayers);
     const reverseResult = handleReverseCard(turn, activePlayers, playDirection);
-    
-    console.log('Reverse card played:', {
+
+    console.log("Reverse card played:", {
       cardPlayedBy: turn,
-      newDirection: reverseResult.newDirection === 1 ? 'clockwise' : 'counter-clockwise',
+      newDirection:
+        reverseResult.newDirection === 1 ? "clockwise" : "counter-clockwise",
       nextTurn: reverseResult.nextTurn,
       actsLikeSkip: reverseResult.actsLikeSkip,
     });
-    
+
     // Play the card
     const newState = processCardPlay({
       cardPlayedBy: turn,
@@ -364,31 +525,37 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       isComputerMode,
       playShufflingSound,
     });
-    
+
     // Update state with new direction and turn
     updateGameState({
       ...newState,
       playDirection: reverseResult.newDirection,
       turn: reverseResult.nextTurn,
     });
-    
+
     // Trigger another computer move if it's the computer's turn and acts like skip
     if (isComputerMode && reverseResult.actsLikeSkip && turn === "Player 2") {
-      setComputerMoveCounter(prev => prev + 1);
+      setComputerMoveCounter((prev) => prev + 1);
     }
   };
-  
+
   /**
    * Handle Draw 2 card play
    */
   const handleDraw2CardPlay = (played_card, cardDetails) => {
-    const validation = validateCardPlay(played_card, currentColor, currentNumber);
-    
+    const validation = validateCardPlay(
+      played_card,
+      currentColor,
+      currentNumber
+    );
+
     if (!validation.isValid) {
-      alert("Invalid Move! Draw 2 cards must match either the color or number of the current card.");
+      alert(
+        "Invalid Move! Draw 2 cards must match either the color or number of the current card."
+      );
       return;
     }
-    
+
     const newState = processCardPlay({
       cardPlayedBy: turn,
       played_card,
@@ -400,15 +567,15 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       isComputerMode,
       playShufflingSound,
     });
-    
+
     updateGameState(newState);
-    
+
     // Trigger another computer move (turn stays with computer)
     if (isComputerMode && turn === "Player 2") {
-      setComputerMoveCounter(prev => prev + 1);
+      setComputerMoveCounter((prev) => prev + 1);
     }
   };
-  
+
   /**
    * Handle wild card play
    */
@@ -416,62 +583,72 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     // For computer player, randomly select a color
     if (isComputerMode && turn === "Player 2") {
       const randomColor = selectRandomColor();
-      
+
       const newState = processCardPlay({
         cardPlayedBy: turn,
         played_card,
         colorOfPlayedCard: randomColor,
-        numberOfPlayedCard: isDraw4 ? ACTION_CARD_CODES.DRAW_4_WILD : ACTION_CARD_CODES.WILD,
+        numberOfPlayedCard: isDraw4
+          ? ACTION_CARD_CODES.DRAW_4_WILD
+          : ACTION_CARD_CODES.WILD,
         gameState,
         isDraw4,
         toggleTurn: !isDraw4,
         isComputerMode,
         playShufflingSound,
       });
-      
+
       updateGameState(newState);
-      
+
       // Trigger another computer move after playing +4 (turn stays with computer)
       if (isDraw4) {
-        setComputerMoveCounter(prev => prev + 1);
+        setComputerMoveCounter((prev) => prev + 1);
       }
     } else {
       // Ask for new color via dialog for human players
       setIsDialogOpen(true);
       setDialogCallback(() => (colorOfPlayedCard) => {
         if (!colorOfPlayedCard) return;
-        
+
         const newState = processCardPlay({
           cardPlayedBy: turn,
           played_card,
           colorOfPlayedCard,
-          numberOfPlayedCard: isDraw4 ? ACTION_CARD_CODES.DRAW_4_WILD : ACTION_CARD_CODES.WILD,
+          numberOfPlayedCard: isDraw4
+            ? ACTION_CARD_CODES.DRAW_4_WILD
+            : ACTION_CARD_CODES.WILD,
           gameState,
           isDraw4,
           toggleTurn: !isDraw4,
           isComputerMode,
           playShufflingSound,
         });
-        
+
         updateGameState(newState);
       });
     }
   };
-  
+
   /**
    * Handle regular card play
    */
   const handleRegularCardPlay = (played_card, cardDetails) => {
-    const validation = validateCardPlay(played_card, currentColor, currentNumber);
-    
+    const validation = validateCardPlay(
+      played_card,
+      currentColor,
+      currentNumber
+    );
+
     if (!validation.isValid) {
-      console.log('Invalid move:', validation);
-      alert("Invalid Move! You must play a card that matches either the color or number of the current card.");
+      console.log("Invalid move:", validation);
+      alert(
+        "Invalid Move! You must play a card that matches either the color or number of the current card."
+      );
       return;
     }
-    
-    console.log('Valid move:', validation);
-    
+
+    console.log("Valid move:", validation);
+
     const newState = processCardPlay({
       cardPlayedBy: turn,
       played_card,
@@ -481,24 +658,24 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       isComputerMode,
       playShufflingSound,
     });
-    
+
     updateGameState(newState);
   };
-  
+
   /**
    * Update game state (local or via socket)
    */
   const updateGameState = (newState) => {
     if (isComputerMode) {
       dispatch(newState);
-      
+
       // Play appropriate sound
       if (newState.currentNumber in playSoundMap) {
         playSoundMap[newState.currentNumber]();
       } else {
         playCardPlayedSound();
       }
-      
+
       // Check for game over
       if (newState.gameOver) {
         playGameOverSound();
@@ -507,7 +684,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       emitSocketEvent("updateGameState", newState);
     }
   };
-  
+
   /**
    * Handle dialog submission for wild cards
    */
@@ -517,82 +694,89 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     }
     setIsDialogOpen(false);
   };
-  
+
   /**
    * Handle card draw
    */
   const onCardDrawnHandler = () => {
     let copiedDrawCardPileArray = [...drawCardPile];
     let updatedPlayedCardsPile = [...playedCardsPile];
-    
+
     // Check if there are cards left in the draw pile
     if (copiedDrawCardPileArray.length === 0) {
       const reshuffleResult = reshuffleDiscardPile(playedCardsPile);
-      
+
       if (reshuffleResult) {
         copiedDrawCardPileArray = reshuffleResult.newDrawPile;
         updatedPlayedCardsPile = reshuffleResult.newPlayedCardsPile;
-        
+
         playShufflingSound();
-        
+
         toast({
           title: "Reshuffling Cards",
           description: "Draw pile has been replenished with shuffled cards.",
           variant: "default",
           duration: TOAST_DURATION.SHORT,
         });
-        
-        console.log('Reshuffled discard pile into draw pile. New draw pile size:', copiedDrawCardPileArray.length);
+
+        console.log(
+          "Reshuffled discard pile into draw pile. New draw pile size:",
+          copiedDrawCardPileArray.length
+        );
       } else {
-        console.warn('Draw card pile is empty and not enough cards to reshuffle!');
-        
+        console.warn(
+          "Draw card pile is empty and not enough cards to reshuffle!"
+        );
+
         toast({
           title: "No Cards Available",
           description: "There are no more cards to draw.",
           variant: "warning",
           duration: TOAST_DURATION.SHORT,
         });
-        
+
         // Skip turn without drawing
         const activePlayers = getActivePlayers(totalPlayers);
         const turnCopy = getNextPlayer(turn, activePlayers, playDirection);
-        
+
         const newState = {
           turn: turnCopy,
           drawButtonPressed: false,
           isExtraTurn: false,
         };
-        
+
         updateGameState(newState);
         return;
       }
     }
-    
+
     // Draw a card
     const drawCard = copiedDrawCardPileArray.pop();
-    
+
     if (!drawCard) {
-      console.error('Undefined card drawn from pile');
+      console.error("Undefined card drawn from pile");
       return;
     }
-    
+
     // Extract card details
     const cardDetails = extractCardDetails(drawCard);
-    
+
     // Check if the drawn card is playable
     const playable = isCardPlayable(drawCard, currentColor, currentNumber);
-    
-    console.log('Card drawn:', drawCard, 'Playable:', playable);
-    
+
+    console.log("Card drawn:", drawCard, "Playable:", playable);
+
     // Only change turn if the drawn card is NOT playable
     const activePlayers = getActivePlayers(totalPlayers);
-    const turnCopy = playable ? turn : getNextPlayer(turn, activePlayers, playDirection);
-    
+    const turnCopy = playable
+      ? turn
+      : getNextPlayer(turn, activePlayers, playDirection);
+
     // Add drawn card to current player's deck
     const currentPlayerDeck = getPlayerDeck(turn, gameState);
     const updatedDeck = [...currentPlayerDeck, drawCard];
-    const deckKey = `${turn.toLowerCase().replace(' ', '')}Deck`;
-    
+    const deckKey = `${turn.toLowerCase().replace(" ", "")}Deck`;
+
     const updateState = {
       turn: turnCopy,
       [deckKey]: updatedDeck,
@@ -601,22 +785,26 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       drawButtonPressed: false,
       isExtraTurn: false,
     };
-    
+
     if (isComputerMode) {
       dispatch(updateState);
-      
+
       // For computer mode, if computer draws a playable card, trigger another move
       if (playable && turn === "Player 2") {
-        console.log('Computer drew playable card:', drawCard, 'Will play on next turn cycle');
+        console.log(
+          "Computer drew playable card:",
+          drawCard,
+          "Will play on next turn cycle"
+        );
         setTimeout(() => {
-          setComputerMoveCounter(prev => prev + 1);
+          setComputerMoveCounter((prev) => prev + 1);
         }, GAME_CONFIG.COMPUTER_DRAW_DELAY);
       }
     } else {
       emitSocketEvent("updateGameState", updateState);
     }
   };
-  
+
   /**
    * Handle skip button
    */
@@ -627,47 +815,47 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       drawButtonPressed: false,
       isExtraTurn: false,
     };
-    
+
     updateGameState(newState);
   };
-  
+
   /**
    * Handle winner reward (blockchain transaction)
    */
   const handleWinnerReward = async (winnerName) => {
     try {
       if (rewardGiven) return;
-      
+
       if (!address || !isConnected) {
-        console.log('Wallet not connected. Please connect your wallet.');
-        
+        console.log("Wallet not connected. Please connect your wallet.");
+
         toast({
           title: "Wallet Required",
           description: "A connected wallet is required to receive your reward.",
           variant: "destructive",
           duration: TOAST_DURATION.LONG,
         });
-        
+
         return;
       }
-      
+
       const currentUserAddress = address;
-      console.log('Connected wallet address:', currentUserAddress);
-      
+      console.log("Connected wallet address:", currentUserAddress);
+
       // Only create a claimable balance if the current user is the winner
       const isCurrentUserWinner =
         (winnerName === "Player 1" && currentUser === "Player 1") ||
         (winnerName === "Player 2" && currentUser === "Player 2");
-      
+
       console.log(currentUser, winnerName, isCurrentUserWinner);
-      
+
       if (!isCurrentUserWinner) {
-        console.log('Current user is not the winner');
+        console.log("Current user is not the winner");
         return;
       }
-      
+
       setRewardGiven(true);
-      
+
       try {
         // Check balance before proceeding with transaction
         const hasSufficientBalance = await checkBalance();
@@ -675,20 +863,27 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
           setShowLowBalanceDrawer(true);
           return;
         }
-        
+
         const gameResultData = {
           winnerAddress: currentUserAddress,
           winnerPlayer: winnerName,
-          loserPlayers: ["Player 1", "Player 2"].filter(player => player !== winnerName),
+          loserPlayers: ["Player 1", "Player 2"].filter(
+            (player) => player !== winnerName
+          ),
           gameId: room,
           timestamp: Date.now(),
         };
-        
+
         const gameResultString = JSON.stringify(gameResultData);
         const gameHash = ethers.keccak256(ethers.toUtf8Bytes(gameResultString));
-        
-        console.log('Calling endGame with gameId:', room, 'and gameHash:', gameHash);
-        
+
+        console.log(
+          "Calling endGame with gameId:",
+          room,
+          "and gameHash:",
+          gameHash
+        );
+
         // Note: You'll need to uncomment and configure this when you have the contract ABI
         /*
         const transaction = prepareContractCall({
@@ -724,16 +919,17 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         });
         */
       } catch (error) {
-        console.error('Failed to end game on blockchain:', error);
-        
+        console.error("Failed to end game on blockchain:", error);
+
         toast({
           title: "Blockchain Update Failed",
-          description: "There was an issue recording the game on the blockchain.",
+          description:
+            "There was an issue recording the game on the blockchain.",
           variant: "warning",
           duration: TOAST_DURATION.LONG,
         });
       }
-      
+
       toast({
         title: "Congratulations!",
         description: "You've won the game!",
@@ -741,10 +937,10 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         duration: TOAST_DURATION.LONG,
       });
     } catch (error) {
-      console.error('Error creating claimable balance:', error);
+      console.error("Error creating claimable balance:", error);
     }
   };
-  
+
   /**
    * Trigger winner reward when game ends
    */
@@ -753,16 +949,24 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       handleWinnerReward(winner);
     }
   }, [gameOver, winner, rewardGiven]);
-  
+
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', marginTop: "-27px" }}>
-      <GameBackground 
-        turn={turn} 
-        currentColor={currentColor} 
-        currentUser={currentUser} 
-        totalPlayers={totalPlayers} 
+    <div
+      style={{
+        position: "relative",
+        width: "100vw",
+        height: "100vh",
+        overflow: "hidden",
+        marginTop: "-27px",
+      }}
+    >
+      <GameBackground
+        turn={turn}
+        currentColor={currentColor}
+        currentUser={currentUser}
+        totalPlayers={totalPlayers}
       />
-      
+
       {!gameOver ? (
         <>
           <GameScreen
@@ -785,11 +989,14 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
             onUnoClicked={() => {
               if (!isUnoButtonPressed) {
                 playUnoSound();
-                dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: true });
+                dispatch({
+                  type: "SET_UNO_BUTTON_PRESSED",
+                  isUnoButtonPressed: true,
+                });
               }
             }}
           />
-          
+
           {isDialogOpen && (
             <ColourDialog
               onSubmit={handleDialogSubmit}
@@ -801,12 +1008,12 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       ) : (
         <CenterInfo msg={`Game Over: ${winner} wins!!`} />
       )}
-      
+
       <Toaster />
-      
-      <LowBalanceDrawer 
-        open={showLowBalanceDrawer} 
-        onClose={() => setShowLowBalanceDrawer(false)} 
+
+      <LowBalanceDrawer
+        open={showLowBalanceDrawer}
+        onClose={() => setShowLowBalanceDrawer(false)}
       />
     </div>
   );

@@ -3,3 +3,6 @@ node_modules
 game-logs
 *.log
 game-states.json
+.env.local
+
+/dist

@@ -11,14 +11,23 @@ function Messages({mainPlayer}) {
   const [isMessageReceived, setMessageReceived] = useState(false);
 
   useEffect(() => {
-    socket.on("message", (message) => {
+    const handleMessage = (message) => {
       setMessages((messages) => [...messages, message]);
 
       // Scroll to bottom of chat and show chat box upon message
       const chatBody = document.querySelector(".chat-body");
-      chatBody.scrollTop = chatBody.scrollHeight;
+      if (chatBody) {
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }
       setMessageReceived(true);
-    });
+    };
+
+    socket.on("message", handleMessage);
+
+    // CRITICAL: Cleanup event listener on unmount or reconnection
+    return () => {
+      socket.off("message", handleMessage);
+    };
   }, []);
 
   const toggleChatBox = () => {

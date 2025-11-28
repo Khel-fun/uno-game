@@ -1,19 +1,22 @@
-'use client';
+"use client";
 
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { userAccountState, isUserConnectedState } from './userState';
-import { useEffect, useState } from 'react';
-import { useAccount, useEnsName, useEnsAvatar } from 'wagmi';
-import { useWalletAddress } from '@/utils/onchainWalletUtils';
+import { useRecoilState, useRecoilValue } from "recoil";
+import { userAccountState, isUserConnectedState } from "./userState";
+import { useEffect, useState } from "react";
+import { useAccount, useEnsName, useEnsAvatar } from "wagmi";
+import { useWalletAddress } from "@/utils/onchainWalletUtils";
 
 export function useUserAccount() {
   const [account, setAccount] = useRecoilState(userAccountState);
   const isConnected = useRecoilValue(isUserConnectedState);
   const [bytesAddress, setBytesAddress] = useState<string | null>(null);
-  
+
   // Connect to Wagmi account with ENS support
-  const { address: wagmiAddress, isConnected: wagmiIsConnected } = useWalletAddress();
-  const { data: ensName } = useEnsName({ address: wagmiAddress });
+  const { address: wagmiAddress, isConnected: wagmiIsConnected } =
+    useWalletAddress();
+  const { data: ensName } = useEnsName({
+    address: wagmiAddress as `0x${string}` | undefined,
+  });
   const { data: ensAvatar } = useEnsAvatar({ name: ensName || undefined });
 
   // Update account state when Wagmi account changes
@@ -33,7 +36,7 @@ export function useUserAccount() {
         // All accounts are now Ethereum addresses (start with 0x)
         setBytesAddress(account);
       } catch (error) {
-        console.error('Error processing account address:', error);
+        console.error("Error processing account address:", error);
         setBytesAddress(null);
       }
     } else {

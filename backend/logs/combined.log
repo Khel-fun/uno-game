@@ -721,3 +721,468 @@
 {"level":"info","message":"Game state synced for user xuR6nwSkdbw_yF4yAAAD in room game-75","service":"gameofuno-backend","timestamp":"2025-11-21 09:49:27"}
 {"level":"info","message":"User paAg58-wbPNyyc1gAAAH requesting game state sync for room game-75, game 75","service":"gameofuno-backend","timestamp":"2025-11-21 09:49:27"}
 {"level":"info","message":"Game state synced for user paAg58-wbPNyyc1gAAAH in room game-75","service":"gameofuno-backend","timestamp":"2025-11-21 09:49:27"}
+{"level":"info","message":"Game state manager initialized with persistent storage and periodic cleanup","service":"gameofuno-backend","timestamp":"2025-11-23 00:06:46"}
+{"level":"info","message":"Server started on Port 4000 at 2025-11-22T18:36:46.706Z","service":"gameofuno-backend","timestamp":"2025-11-23 00:06:46"}
+{"level":"info","message":"User wHDSzbyjrQvuMCbAAAAB connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:41"}
+{"level":"info","message":"User 9UQ3VzFgtfjKk-3SAAAD connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:41"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:41"}
+{"level":"info","message":"User UJ3X9a0S_BW0W6zgAAAJ connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:45"}
+{"level":"info","message":"User EPhnxjmL9AfSHA53AAAK connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:45"}
+{"level":"info","message":"User 94ye37azWIkHlApGAAAL connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 00:16:45"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF added to room 107 as Player 1 with address 0xc36Ce6a2310C2c6418D0413c79439c950df97cC0","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"New user RtEU4U4vfYas9HxAAAAF joined as Player 1 in room 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF joined room game-107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF requesting game state sync for room game-107, game 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"Attempting to restore game state by game ID 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"warn","message":"No game state found for room game-107 or game 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF removed from room 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF added to room 107 as Player 1 with address 0xc36Ce6a2310C2c6418D0413c79439c950df97cC0","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"New user RtEU4U4vfYas9HxAAAAF joined as Player 1 in room 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF joined room game-107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF requesting game state sync for room game-107, game 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"Attempting to restore game state by game ID 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"warn","message":"No game state found for room game-107 or game 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:21:54"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 00:35:10"}
+{"level":"info","message":"User RtEU4U4vfYas9HxAAAAF marked as disconnected in room 107","service":"gameofuno-backend","timestamp":"2025-11-23 00:35:10"}
+{"level":"info","message":"User 9UQ3VzFgtfjKk-3SAAAD disconnected: transport close. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-23 00:35:10"}
+{"level":"info","message":"User wHDSzbyjrQvuMCbAAAAB disconnected: transport close. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-23 00:35:10"}
+{"level":"info","message":"Saving game states before shutdown...","service":"gameofuno-backend","timestamp":"2025-11-23 00:35:18"}
+{"level":"info","message":"Loaded 0 game states from persistent storage","service":"gameofuno-backend","timestamp":"2025-11-23 10:47:32"}
+{"level":"info","message":"Game state manager initialized with persistent storage and periodic cleanup","service":"gameofuno-backend","timestamp":"2025-11-23 10:47:32"}
+{"level":"info","message":"Server started on Port 4000 at 2025-11-23T05:17:33.016Z","service":"gameofuno-backend","timestamp":"2025-11-23 10:47:33"}
+{"level":"info","message":"User NngXYdkMwm5qCBRaAAAB connected. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-23 10:47:36"}
+{"level":"info","message":"User gvyMyNJqQ5KSiCfjAAAE connected. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-23 10:50:28"}
+{"level":"info","message":"User TNz6A4LoM6nJiaLUAAAF connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-23 10:50:28"}
+{"level":"info","message":"User TNz6A4LoM6nJiaLUAAAF added to room 108 as Player 1 with address 0x5e3Abe03a8dD8FB160e77a4a8506d70A6de1F301","service":"gameofuno-backend","timestamp":"2025-11-23 10:50:41"}
+{"level":"info","message":"New user TNz6A4LoM6nJiaLUAAAF joined as Player 1 in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:50:41"}
+{"level":"info","message":"User TNz6A4LoM6nJiaLUAAAF joined room game-108","service":"gameofuno-backend","timestamp":"2025-11-23 10:50:41"}
+{"level":"info","message":"User TNz6A4LoM6nJiaLUAAAF requesting game state sync for room game-108, game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:50:41"}
+{"level":"info","message":"Attempting to restore game state by game ID 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:50:41"}
+{"level":"warn","message":"No game state found for room game-108 or game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:50:41"}
+{"level":"info","message":"User NngXYdkMwm5qCBRaAAAB disconnected: transport close. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-23 10:50:55"}
+{"level":"info","message":"User 1UF5b3XEEIFdmBhrAAAH connected. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-23 10:50:56"}
+{"level":"info","message":"User 421NdCbhw2hx_jE1AAAJ connected. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-23 10:50:58"}
+{"level":"info","message":"User 1UF5b3XEEIFdmBhrAAAH added to room 108 as Player 2 with address 0xaF1070a6687F592aDe4bba2127cf2f1dd31270a9","service":"gameofuno-backend","timestamp":"2025-11-23 10:52:34"}
+{"level":"info","message":"New user 1UF5b3XEEIFdmBhrAAAH joined as Player 2 in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:52:34"}
+{"level":"info","message":"User 1UF5b3XEEIFdmBhrAAAH joined room game-108","service":"gameofuno-backend","timestamp":"2025-11-23 10:52:34"}
+{"level":"info","message":"User 1UF5b3XEEIFdmBhrAAAH requesting game state sync for room game-108, game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:52:34"}
+{"level":"info","message":"Attempting to restore game state by game ID 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:52:34"}
+{"level":"warn","message":"No game state found for room game-108 or game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:52:34"}
+{"level":"info","message":"User aThxWqCiXelryZVUAAAL connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 10:53:26"}
+{"level":"info","message":"User o_YWRt_lSe3w-ARAAAAN connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 10:53:30"}
+{"level":"info","message":"User aThxWqCiXelryZVUAAAL added to room 108 as Player 3 with address 0xc36Ce6a2310C2c6418D0413c79439c950df97cC0","service":"gameofuno-backend","timestamp":"2025-11-23 10:54:05"}
+{"level":"info","message":"New user aThxWqCiXelryZVUAAAL joined as Player 3 in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:54:05"}
+{"level":"info","message":"User aThxWqCiXelryZVUAAAL joined room game-108","service":"gameofuno-backend","timestamp":"2025-11-23 10:54:05"}
+{"level":"info","message":"User aThxWqCiXelryZVUAAAL requesting game state sync for room game-108, game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:54:05"}
+{"level":"info","message":"Attempting to restore game state by game ID 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:54:05"}
+{"level":"warn","message":"No game state found for room game-108 or game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:54:05"}
+{"level":"info","message":"User YJsGxzI3n_YTZxM-AAAP connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:20"}
+{"level":"info","message":"User aThxWqCiXelryZVUAAAL disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:20"}
+{"level":"info","message":"User aThxWqCiXelryZVUAAAL marked as disconnected in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:20"}
+{"level":"info","message":"User o_YWRt_lSe3w-ARAAAAN disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:20"}
+{"level":"info","message":"User 3VvwkH5YkYCcWB1zAAAS connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"User 3VvwkH5YkYCcWB1zAAAS joined room game-108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"User NSQtslrBGVdjnzBsAAAT connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"User NSQtslrBGVdjnzBsAAAT attempting to rejoin room 108 with address 0xc36Ce6a2310C2c6418D0413c79439c950df97cC0","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"Reconnected user NSQtslrBGVdjnzBsAAAT as Player 3 in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"User NSQtslrBGVdjnzBsAAAT successfully rejoined room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"Sent updated room data to room 108 with 3 users","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"User 3VvwkH5YkYCcWB1zAAAS added to room 108 as Player 4 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"New user 3VvwkH5YkYCcWB1zAAAS joined as Player 4 in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"User 3VvwkH5YkYCcWB1zAAAS joined room game-108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"User 3VvwkH5YkYCcWB1zAAAS requesting game state sync for room game-108, game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"Attempting to restore game state by game ID 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"warn","message":"No game state found for room game-108 or game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:21"}
+{"level":"info","message":"User 3VvwkH5YkYCcWB1zAAAS disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:23"}
+{"level":"info","message":"User 3VvwkH5YkYCcWB1zAAAS marked as disconnected in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:23"}
+{"level":"info","message":"User NSQtslrBGVdjnzBsAAAT disconnected: transport error. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:23"}
+{"level":"info","message":"User NSQtslrBGVdjnzBsAAAT marked as disconnected in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:23"}
+{"level":"info","message":"User IjePinG1zvX3ZEqtAAAW connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:24"}
+{"level":"info","message":"User IjePinG1zvX3ZEqtAAAW joined room game-108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:24"}
+{"level":"info","message":"User JgJ2VXHn-qsG_FyfAAAX connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:24"}
+{"level":"info","message":"User Player 3 reconnected to room 108 with new socket IjePinG1zvX3ZEqtAAAW","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:24"}
+{"level":"info","message":"User IjePinG1zvX3ZEqtAAAW reconnected as Player 3 in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:24"}
+{"level":"info","message":"User IjePinG1zvX3ZEqtAAAW joined room game-108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:24"}
+{"level":"info","message":"User IjePinG1zvX3ZEqtAAAW requesting game state sync for room game-108, game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:24"}
+{"level":"info","message":"Attempting to restore game state by game ID 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:24"}
+{"level":"warn","message":"No game state found for room game-108 or game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:24"}
+{"level":"info","message":"User IjePinG1zvX3ZEqtAAAW disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:45"}
+{"level":"info","message":"User IjePinG1zvX3ZEqtAAAW marked as disconnected in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:45"}
+{"level":"info","message":"User JgJ2VXHn-qsG_FyfAAAX disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:45"}
+{"level":"info","message":"User o-PRvxaHXzwv9lq3AAAa connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:46"}
+{"level":"info","message":"User o-PRvxaHXzwv9lq3AAAa joined room game-108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:46"}
+{"level":"info","message":"User J6fGWH1uMR9-_YjqAAAb connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:46"}
+{"level":"info","message":"User Player 3 reconnected to room 108 with new socket o-PRvxaHXzwv9lq3AAAa","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:46"}
+{"level":"info","message":"User o-PRvxaHXzwv9lq3AAAa reconnected as Player 3 in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:46"}
+{"level":"info","message":"User o-PRvxaHXzwv9lq3AAAa joined room game-108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:46"}
+{"level":"info","message":"User o-PRvxaHXzwv9lq3AAAa requesting game state sync for room game-108, game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:46"}
+{"level":"info","message":"Attempting to restore game state by game ID 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:46"}
+{"level":"warn","message":"No game state found for room game-108 or game 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:55:46"}
+{"level":"info","message":"User 3VvwkH5YkYCcWB1zAAAS removed from room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:56:23"}
+{"level":"info","message":"User 3VvwkH5YkYCcWB1zAAAS did not reconnect, removing from room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:56:23"}
+{"level":"info","message":"User o-PRvxaHXzwv9lq3AAAa removed from room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:59:40"}
+{"level":"info","message":"User AIji3YrFwbmz8f_TAAAd connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 10:59:40"}
+{"level":"info","message":"User TNz6A4LoM6nJiaLUAAAF removed from room 108","service":"gameofuno-backend","timestamp":"2025-11-23 10:59:43"}
+{"level":"info","message":"User PpLZtoo6_voBnYllAAAf connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-23 10:59:44"}
+{"level":"info","message":"User YJsGxzI3n_YTZxM-AAAP disconnected: transport close. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:01:43"}
+{"level":"info","message":"User gvyMyNJqQ5KSiCfjAAAE disconnected: transport close. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:05:22"}
+{"level":"info","message":"User TNz6A4LoM6nJiaLUAAAF disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:05:22"}
+{"level":"info","message":"User PpLZtoo6_voBnYllAAAf disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:05:22"}
+{"level":"info","message":"User LK0VpJEdjAzDkKwdAAAi connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:05:50"}
+{"level":"info","message":"User 3cNjQ5q7Ey-emZLDAAAj connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:05:50"}
+{"level":"info","message":"User LK0VpJEdjAzDkKwdAAAi disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:07:00"}
+{"level":"info","message":"User 3cNjQ5q7Ey-emZLDAAAj disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:07:00"}
+{"level":"info","message":"User orumk2mbGhvmYKk1AAAm connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:12:44"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:12:44"}
+{"level":"info","message":"User 1UF5b3XEEIFdmBhrAAAH disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:12:48"}
+{"level":"info","message":"User 1UF5b3XEEIFdmBhrAAAH marked as disconnected in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 11:12:48"}
+{"level":"info","message":"User 421NdCbhw2hx_jE1AAAJ disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:12:48"}
+{"level":"info","message":"User HWqx3oxX4ts1lEUuAAAq connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:12:49"}
+{"level":"info","message":"User O1sFJvZxFblWJ5OEAAAr connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:12:49"}
+{"level":"info","message":"User O1sFJvZxFblWJ5OEAAAr attempting to rejoin room 108 with address 0xaF1070a6687F592aDe4bba2127cf2f1dd31270a9","service":"gameofuno-backend","timestamp":"2025-11-23 11:12:49"}
+{"level":"info","message":"Reconnected user O1sFJvZxFblWJ5OEAAAr as Player 2 in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 11:12:49"}
+{"level":"info","message":"User O1sFJvZxFblWJ5OEAAAr successfully rejoined room 108","service":"gameofuno-backend","timestamp":"2025-11-23 11:12:49"}
+{"level":"info","message":"Sent updated room data to room 108 with 1 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:12:49"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn added to room 109 as Player 1 with address 0x5e3Abe03a8dD8FB160e77a4a8506d70A6de1F301","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:01"}
+{"level":"info","message":"New user blo7HyM3XtY6yiCuAAAn joined as Player 1 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:01"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:01"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:01"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:01"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:01"}
+{"level":"info","message":"User GcD6I9hlOAT_Xk1AAAAt connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:09"}
+{"level":"info","message":"User o-PRvxaHXzwv9lq3AAAa disconnected: transport close. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"User J6fGWH1uMR9-_YjqAAAb disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"User AIji3YrFwbmz8f_TAAAd disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv added to room 109 as Player 2 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"New user qN9tVE3P4b856aHUAAAv joined as Player 2 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv added to room 109 as Player 2 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"New user qN9tVE3P4b856aHUAAAv joined as Player 2 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:10"}
+{"level":"info","message":"User ud7dyW7L7-5mopyXAAAx connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:11"}
+{"level":"info","message":"User ud7dyW7L7-5mopyXAAAx attempting to rejoin room 109 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:11"}
+{"level":"info","message":"User ud7dyW7L7-5mopyXAAAx successfully rejoined room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:11"}
+{"level":"info","message":"Sent updated room data to room 109 with 2 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:11"}
+{"level":"info","message":"User O1sFJvZxFblWJ5OEAAAr added to room 109 as Player 3 with address 0xaF1070a6687F592aDe4bba2127cf2f1dd31270a9","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:23"}
+{"level":"info","message":"New user O1sFJvZxFblWJ5OEAAAr joined as Player 3 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:23"}
+{"level":"info","message":"User O1sFJvZxFblWJ5OEAAAr joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:23"}
+{"level":"info","message":"User O1sFJvZxFblWJ5OEAAAr requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:23"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:23"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:23"}
+{"level":"info","message":"User HWqx3oxX4ts1lEUuAAAq disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:38"}
+{"level":"info","message":"User O1sFJvZxFblWJ5OEAAAr disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:38"}
+{"level":"info","message":"User O1sFJvZxFblWJ5OEAAAr marked as disconnected in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:38"}
+{"level":"info","message":"User mFm3DV12qQ0Z0ub4AAAz connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"User mFm3DV12qQ0Z0ub4AAAz joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"User mFm3DV12qQ0Z0ub4AAAz added to room 109 as Player 4 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"New user mFm3DV12qQ0Z0ub4AAAz joined as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"User mFm3DV12qQ0Z0ub4AAAz removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"User mFm3DV12qQ0Z0ub4AAAz added to room 109 as Player 4 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"New user mFm3DV12qQ0Z0ub4AAAz joined as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"User mFm3DV12qQ0Z0ub4AAAz joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"User mFm3DV12qQ0Z0ub4AAAz requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"User 5d4IIkmGxCFBdZwXAAA1 connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"User 5d4IIkmGxCFBdZwXAAA1 attempting to rejoin room 109 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"User 5d4IIkmGxCFBdZwXAAA1 successfully rejoined room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"Sent updated room data to room 109 with 4 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:39"}
+{"level":"info","message":"User mFm3DV12qQ0Z0ub4AAAz disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User mFm3DV12qQ0Z0ub4AAAz marked as disconnected in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User 5d4IIkmGxCFBdZwXAAA1 disconnected: transport error. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User yhldje7Wgtb7UNmtAAA4 connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User yoXm1on_TCC-lWEuAAA5 connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User yhldje7Wgtb7UNmtAAA4 joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User Player 4 reconnected to room 109 with new socket yhldje7Wgtb7UNmtAAA4","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User yhldje7Wgtb7UNmtAAA4 reconnected as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User yhldje7Wgtb7UNmtAAA4 removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User yhldje7Wgtb7UNmtAAA4 added to room 109 as Player 4 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"New user yhldje7Wgtb7UNmtAAA4 joined as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User yhldje7Wgtb7UNmtAAA4 joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User yhldje7Wgtb7UNmtAAA4 requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User yoXm1on_TCC-lWEuAAA5 attempting to rejoin room 109 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User yoXm1on_TCC-lWEuAAA5 successfully rejoined room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"Sent updated room data to room 109 with 4 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:43"}
+{"level":"info","message":"User yhldje7Wgtb7UNmtAAA4 disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User yhldje7Wgtb7UNmtAAA4 marked as disconnected in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User yoXm1on_TCC-lWEuAAA5 disconnected: transport error. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User PQL5TyS43s32EkGrAAA8 connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User -xCQgl5qGKZaJKrrAAA9 connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User PQL5TyS43s32EkGrAAA8 joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User Player 4 reconnected to room 109 with new socket PQL5TyS43s32EkGrAAA8","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User PQL5TyS43s32EkGrAAA8 reconnected as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User -xCQgl5qGKZaJKrrAAA9 attempting to rejoin room 109 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User -xCQgl5qGKZaJKrrAAA9 successfully rejoined room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"Sent updated room data to room 109 with 4 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User PQL5TyS43s32EkGrAAA8 removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User PQL5TyS43s32EkGrAAA8 added to room 109 as Player 4 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"New user PQL5TyS43s32EkGrAAA8 joined as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User -xCQgl5qGKZaJKrrAAA9 attempting to rejoin room 109 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User -xCQgl5qGKZaJKrrAAA9 successfully rejoined room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"Sent updated room data to room 109 with 4 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User PQL5TyS43s32EkGrAAA8 joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User PQL5TyS43s32EkGrAAA8 requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:44"}
+{"level":"info","message":"User PQL5TyS43s32EkGrAAA8 disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:45"}
+{"level":"info","message":"User PQL5TyS43s32EkGrAAA8 marked as disconnected in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:45"}
+{"level":"info","message":"User -xCQgl5qGKZaJKrrAAA9 disconnected: transport error. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:45"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"User Player 4 reconnected to room 109 with new socket 3wq9Dq7d5_tNidp3AABA","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA reconnected as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"User WZtNw8hmRInLXNErAABB connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA added to room 109 as Player 4 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"New user 3wq9Dq7d5_tNidp3AABA joined as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"User WZtNw8hmRInLXNErAABB attempting to rejoin room 109 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"User WZtNw8hmRInLXNErAABB successfully rejoined room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"Sent updated room data to room 109 with 4 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:46"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:52"}
+{"level":"info","message":"User V-BhkwM14S_0y6uJAABD connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:13:52"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn added to room 108 as Player 1 with address 0x5e3Abe03a8dD8FB160e77a4a8506d70A6de1F301","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:00"}
+{"level":"info","message":"New user blo7HyM3XtY6yiCuAAAn joined as Player 1 in room 108","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:00"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn joined room game-108","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:00"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn requesting game state sync for room game-108, game 108","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:00"}
+{"level":"info","message":"Attempting to restore game state by game ID 108","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:00"}
+{"level":"warn","message":"No game state found for room game-108 or game 108","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:00"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:03"}
+{"level":"info","message":"User tuGBj9RDpsjSZeDoAABF connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:03"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn removed from room 108","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:11"}
+{"level":"info","message":"User ecOlsT2gIxUGX0AUAABH connected. Active connections: 10","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:11"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA added to room 109 as Player 3 with address 0xaF1070a6687F592aDe4bba2127cf2f1dd31270a9","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:14"}
+{"level":"info","message":"New user 3wq9Dq7d5_tNidp3AABA joined as Player 3 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:14"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:14"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:14"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:14"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:14"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:23"}
+{"level":"info","message":"User Fq29jVGOsnFBuavmAABJ connected. Active connections: 11","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:23"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:26"}
+{"level":"info","message":"User xkigxmfZb_VfiJSsAABL connected. Active connections: 12","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:26"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn added to room 109 as Player 2 with address 0x5e3Abe03a8dD8FB160e77a4a8506d70A6de1F301","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:35"}
+{"level":"info","message":"New user blo7HyM3XtY6yiCuAAAn joined as Player 2 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:35"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:35"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:35"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:35"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:35"}
+{"level":"info","message":"User O1sFJvZxFblWJ5OEAAAr removed from room 108","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:38"}
+{"level":"info","message":"User O1sFJvZxFblWJ5OEAAAr did not reconnect, removing from room 108","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:38"}
+{"level":"info","message":"User orumk2mbGhvmYKk1AAAm disconnected: transport close. Active connections: 11","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:40"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn disconnected: transport close. Active connections: 10","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:40"}
+{"level":"info","message":"User blo7HyM3XtY6yiCuAAAn marked as disconnected in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:40"}
+{"level":"info","message":"User V-BhkwM14S_0y6uJAABD disconnected: transport close. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:40"}
+{"level":"info","message":"User ecOlsT2gIxUGX0AUAABH disconnected: transport close. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:40"}
+{"level":"info","message":"User uBguq34ZVtP7xG6vAABN connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"User uBguq34ZVtP7xG6vAABN joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"User Player 2 reconnected to room 109 with new socket uBguq34ZVtP7xG6vAABN","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"User uBguq34ZVtP7xG6vAABN reconnected as Player 2 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"User uBguq34ZVtP7xG6vAABN removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"User uBguq34ZVtP7xG6vAABN added to room 109 as Player 2 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"New user uBguq34ZVtP7xG6vAABN joined as Player 2 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"User uBguq34ZVtP7xG6vAABN joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"User uBguq34ZVtP7xG6vAABN requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"User K3sSyHKtmb18wGgYAABP connected. Active connections: 10","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"User K3sSyHKtmb18wGgYAABP attempting to rejoin room 109 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"User K3sSyHKtmb18wGgYAABP successfully rejoined room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"Sent updated room data to room 109 with 2 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:42"}
+{"level":"info","message":"User 3wq9Dq7d5_tNidp3AABA disconnected: transport close. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:46"}
+{"level":"info","message":"User tuGBj9RDpsjSZeDoAABF disconnected: transport close. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:46"}
+{"level":"info","message":"User WZtNw8hmRInLXNErAABB disconnected: transport close. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:46"}
+{"level":"info","message":"User xkigxmfZb_VfiJSsAABL disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:46"}
+{"level":"info","message":"User 8yQzm_Q2VaHPZ_39AABS connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:47"}
+{"level":"info","message":"User 5XadabrFWfS-ba3eAABT connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:47"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv added to room 109 as Player 3 with address 0xc36Ce6a2310C2c6418D0413c79439c950df97cC0","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:55"}
+{"level":"info","message":"New user qN9tVE3P4b856aHUAAAv joined as Player 3 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:55"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:55"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:55"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:55"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:14:55"}
+{"level":"info","message":"User 5XadabrFWfS-ba3eAABT added to room 109 as Player 4 with address 0xaF1070a6687F592aDe4bba2127cf2f1dd31270a9","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:03"}
+{"level":"info","message":"New user 5XadabrFWfS-ba3eAABT joined as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:03"}
+{"level":"info","message":"User 5XadabrFWfS-ba3eAABT joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:03"}
+{"level":"info","message":"User 5XadabrFWfS-ba3eAABT requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:03"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:03"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:03"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:34"}
+{"level":"info","message":"User OSQtKdO4bxtyhBKkAABV connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:34"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv added to room 109 as Player 4 with address 0xc36Ce6a2310C2c6418D0413c79439c950df97cC0","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:42"}
+{"level":"info","message":"New user qN9tVE3P4b856aHUAAAv joined as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:42"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:42"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:42"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:42"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:15:42"}
+{"level":"info","message":"User uBguq34ZVtP7xG6vAABN disconnected: transport close. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:03"}
+{"level":"info","message":"User uBguq34ZVtP7xG6vAABN marked as disconnected in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:03"}
+{"level":"info","message":"User K3sSyHKtmb18wGgYAABP disconnected: transport error. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:03"}
+{"level":"info","message":"User CAJkxgj45w8hH2oZAABY connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"User CAJkxgj45w8hH2oZAABY joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"User CAJkxgj45w8hH2oZAABY added to room 109 as Player 4 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"New user CAJkxgj45w8hH2oZAABY joined as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"User CAJkxgj45w8hH2oZAABY removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"User CAJkxgj45w8hH2oZAABY added to room 109 as Player 4 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"New user CAJkxgj45w8hH2oZAABY joined as Player 4 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"User CAJkxgj45w8hH2oZAABY joined room game-109","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"User CAJkxgj45w8hH2oZAABY requesting game state sync for room game-109, game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"Attempting to restore game state by game ID 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"warn","message":"No game state found for room game-109 or game 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"User OD3Bn_4ng5beW6UtAABZ connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"User OD3Bn_4ng5beW6UtAABZ attempting to rejoin room 109 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"Reconnected user OD3Bn_4ng5beW6UtAABZ as Player 2 in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"User OD3Bn_4ng5beW6UtAABZ successfully rejoined room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"Sent updated room data to room 109 with 5 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:16:04"}
+{"level":"info","message":"User GcD6I9hlOAT_Xk1AAAAt disconnected: transport close. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:26:42"}
+{"level":"info","message":"User OD3Bn_4ng5beW6UtAABZ disconnected: transport close. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:26:57"}
+{"level":"info","message":"User OD3Bn_4ng5beW6UtAABZ marked as disconnected in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:26:57"}
+{"level":"info","message":"User CAJkxgj45w8hH2oZAABY disconnected: transport error. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:26:57"}
+{"level":"info","message":"User CAJkxgj45w8hH2oZAABY marked as disconnected in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:26:57"}
+{"level":"info","message":"User OD3Bn_4ng5beW6UtAABZ removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:27:57"}
+{"level":"info","message":"User OD3Bn_4ng5beW6UtAABZ did not reconnect, removing from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:27:57"}
+{"level":"info","message":"User CAJkxgj45w8hH2oZAABY removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:27:57"}
+{"level":"info","message":"User CAJkxgj45w8hH2oZAABY did not reconnect, removing from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:27:57"}
+{"level":"info","message":"User 8yQzm_Q2VaHPZ_39AABS disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:29:15"}
+{"level":"info","message":"User 5XadabrFWfS-ba3eAABT disconnected: transport close. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-23 11:29:15"}
+{"level":"info","message":"User 5XadabrFWfS-ba3eAABT marked as disconnected in room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:29:15"}
+{"level":"info","message":"User 5XadabrFWfS-ba3eAABT removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:30:15"}
+{"level":"info","message":"User 5XadabrFWfS-ba3eAABT did not reconnect, removing from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:30:15"}
+{"level":"info","message":"User En-0R9erLpGCqfBZAABb connected. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:33"}
+{"level":"info","message":"User 1e9WKj56BUsXHgdbAABd connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:35"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv removed from room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:40"}
+{"level":"info","message":"User _-c8DxxNosk6xMFXAABf connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:40"}
+{"level":"info","message":"User XmNZxBB6Fm3-yj7SAABi connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:46"}
+{"level":"info","message":"User 7VU5N-4Y_0gLuN-LAABj connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:46"}
+{"level":"info","message":"User 7VU5N-4Y_0gLuN-LAABj attempting to rejoin room 109 with address 0xaF1070a6687F592aDe4bba2127cf2f1dd31270a9","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:46"}
+{"level":"info","message":"User 7VU5N-4Y_0gLuN-LAABj successfully rejoined room 109","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:46"}
+{"level":"info","message":"Sent updated room data to room 109 with 1 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:46"}
+{"level":"info","message":"User En-0R9erLpGCqfBZAABb added to room 110 as Player 1 with address 0x5e3Abe03a8dD8FB160e77a4a8506d70A6de1F301","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:50"}
+{"level":"info","message":"New user En-0R9erLpGCqfBZAABb joined as Player 1 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:50"}
+{"level":"info","message":"User En-0R9erLpGCqfBZAABb joined room game-110","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:50"}
+{"level":"info","message":"User En-0R9erLpGCqfBZAABb requesting game state sync for room game-110, game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:50"}
+{"level":"info","message":"Attempting to restore game state by game ID 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:50"}
+{"level":"warn","message":"No game state found for room game-110 or game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:33:50"}
+{"level":"info","message":"User 7VU5N-4Y_0gLuN-LAABj added to room 110 as Player 2 with address 0xaF1070a6687F592aDe4bba2127cf2f1dd31270a9","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:00"}
+{"level":"info","message":"New user 7VU5N-4Y_0gLuN-LAABj joined as Player 2 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:00"}
+{"level":"info","message":"User 7VU5N-4Y_0gLuN-LAABj joined room game-110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:00"}
+{"level":"info","message":"User 7VU5N-4Y_0gLuN-LAABj requesting game state sync for room game-110, game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:00"}
+{"level":"info","message":"Attempting to restore game state by game ID 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:00"}
+{"level":"warn","message":"No game state found for room game-110 or game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:00"}
+{"level":"info","message":"User z86E9Ie0-HmRULXCAABl connected. Active connections: 10","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:12"}
+{"level":"info","message":"User qN9tVE3P4b856aHUAAAv disconnected: transport close. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:12"}
+{"level":"info","message":"User ud7dyW7L7-5mopyXAAAx disconnected: transport close. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:12"}
+{"level":"info","message":"User _-c8DxxNosk6xMFXAABf disconnected: transport close. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:12"}
+{"level":"info","message":"User OSQtKdO4bxtyhBKkAABV disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:12"}
+{"level":"info","message":"User Fq29jVGOsnFBuavmAABJ disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:12"}
+{"level":"info","message":"User D9sUZx45M-8d25kQAABo connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"User D9sUZx45M-8d25kQAABo joined room game-110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"User D9sUZx45M-8d25kQAABo added to room 110 as Player 3 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"New user D9sUZx45M-8d25kQAABo joined as Player 3 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"User ZoGtHto91CuEJspDAABp connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"User D9sUZx45M-8d25kQAABo removed from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"User D9sUZx45M-8d25kQAABo added to room 110 as Player 3 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"New user D9sUZx45M-8d25kQAABo joined as Player 3 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"User D9sUZx45M-8d25kQAABo joined room game-110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"User D9sUZx45M-8d25kQAABo requesting game state sync for room game-110, game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"Attempting to restore game state by game ID 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"warn","message":"No game state found for room game-110 or game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"User ZoGtHto91CuEJspDAABp attempting to rejoin room 110 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"User ZoGtHto91CuEJspDAABp successfully rejoined room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"Sent updated room data to room 110 with 3 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:13"}
+{"level":"info","message":"User D9sUZx45M-8d25kQAABo disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:17"}
+{"level":"info","message":"User D9sUZx45M-8d25kQAABo marked as disconnected in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:17"}
+{"level":"info","message":"User ZoGtHto91CuEJspDAABp disconnected: transport error. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:17"}
+{"level":"info","message":"User 17AZ9G24ocAZeBzmAABs connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"User 17AZ9G24ocAZeBzmAABs joined room game-110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"User Player 3 reconnected to room 110 with new socket 17AZ9G24ocAZeBzmAABs","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"User 17AZ9G24ocAZeBzmAABs reconnected as Player 3 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"User 5a-oZfvHn5xXp9a6AABt connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"User 17AZ9G24ocAZeBzmAABs removed from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"User 17AZ9G24ocAZeBzmAABs added to room 110 as Player 3 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"New user 17AZ9G24ocAZeBzmAABs joined as Player 3 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"User 17AZ9G24ocAZeBzmAABs joined room game-110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"User 17AZ9G24ocAZeBzmAABs requesting game state sync for room game-110, game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"Attempting to restore game state by game ID 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"warn","message":"No game state found for room game-110 or game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"User 5a-oZfvHn5xXp9a6AABt attempting to rejoin room 110 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"User 5a-oZfvHn5xXp9a6AABt successfully rejoined room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"Sent updated room data to room 110 with 3 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:18"}
+{"level":"info","message":"User 17AZ9G24ocAZeBzmAABs disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:26"}
+{"level":"info","message":"User 17AZ9G24ocAZeBzmAABs marked as disconnected in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:26"}
+{"level":"info","message":"User 5a-oZfvHn5xXp9a6AABt disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:26"}
+{"level":"info","message":"User w5j-NNQZs_qB2pkXAABw connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"User w5j-NNQZs_qB2pkXAABw joined room game-110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"User Player 3 reconnected to room 110 with new socket w5j-NNQZs_qB2pkXAABw","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"User w5j-NNQZs_qB2pkXAABw reconnected as Player 3 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"User RRlwEa0AsqKU50fEAABx connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"User w5j-NNQZs_qB2pkXAABw removed from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"User w5j-NNQZs_qB2pkXAABw added to room 110 as Player 3 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"New user w5j-NNQZs_qB2pkXAABw joined as Player 3 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"User w5j-NNQZs_qB2pkXAABw joined room game-110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"User w5j-NNQZs_qB2pkXAABw requesting game state sync for room game-110, game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"Attempting to restore game state by game ID 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"warn","message":"No game state found for room game-110 or game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"User RRlwEa0AsqKU50fEAABx attempting to rejoin room 110 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"User RRlwEa0AsqKU50fEAABx successfully rejoined room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"Sent updated room data to room 110 with 3 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:27"}
+{"level":"info","message":"User En-0R9erLpGCqfBZAABb disconnected: transport close. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:55"}
+{"level":"info","message":"User En-0R9erLpGCqfBZAABb marked as disconnected in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:55"}
+{"level":"info","message":"User 1e9WKj56BUsXHgdbAABd disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:55"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 connected. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 joined room game-110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 added to room 110 as Player 3 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"New user uSx2sh7VRokjoZGqAAB0 joined as Player 3 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 removed from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 added to room 110 as Player 3 with address null","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"New user uSx2sh7VRokjoZGqAAB0 joined as Player 3 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 joined room game-110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 requesting game state sync for room game-110, game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"Attempting to restore game state by game ID 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"warn","message":"No game state found for room game-110 or game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"User HDpCLDYhLkDYobKOAAB1 connected. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"User HDpCLDYhLkDYobKOAAB1 attempting to rejoin room 110 with address undefined","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"Reconnected user HDpCLDYhLkDYobKOAAB1 as Player 1 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"User HDpCLDYhLkDYobKOAAB1 successfully rejoined room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"Sent updated room data to room 110 with 4 users","service":"gameofuno-backend","timestamp":"2025-11-23 11:34:58"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 removed from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:36:26"}
+{"level":"info","message":"User icr3tAQPt7KSE3A_AAB3 connected. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:36:26"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 added to room 110 as Player 4 with address 0x5e3Abe03a8dD8FB160e77a4a8506d70A6de1F301","service":"gameofuno-backend","timestamp":"2025-11-23 11:36:35"}
+{"level":"info","message":"New user uSx2sh7VRokjoZGqAAB0 joined as Player 4 in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:36:35"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 joined room game-110","service":"gameofuno-backend","timestamp":"2025-11-23 11:36:35"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 requesting game state sync for room game-110, game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:36:35"}
+{"level":"info","message":"Attempting to restore game state by game ID 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:36:35"}
+{"level":"warn","message":"No game state found for room game-110 or game 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:36:35"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 removed from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:44:35"}
+{"level":"info","message":"User nQ2F1meaSlCyIhscAAB5 connected. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-23 11:44:35"}
+{"level":"info","message":"User 4IQ5ZMs743p43nueAAB7 connected. Active connections: 10","service":"gameofuno-backend","timestamp":"2025-11-23 11:44:59"}
+{"level":"info","message":"User XmNZxBB6Fm3-yj7SAABi disconnected: transport close. Active connections: 9","service":"gameofuno-backend","timestamp":"2025-11-23 11:45:57"}
+{"level":"info","message":"User 7VU5N-4Y_0gLuN-LAABj disconnected: transport close. Active connections: 8","service":"gameofuno-backend","timestamp":"2025-11-23 11:45:57"}
+{"level":"info","message":"User 7VU5N-4Y_0gLuN-LAABj marked as disconnected in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:45:57"}
+{"level":"info","message":"User w5j-NNQZs_qB2pkXAABw disconnected: transport close. Active connections: 7","service":"gameofuno-backend","timestamp":"2025-11-23 11:46:00"}
+{"level":"info","message":"User w5j-NNQZs_qB2pkXAABw marked as disconnected in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:46:00"}
+{"level":"info","message":"User RRlwEa0AsqKU50fEAABx disconnected: transport error. Active connections: 6","service":"gameofuno-backend","timestamp":"2025-11-23 11:46:00"}
+{"level":"info","message":"User 7VU5N-4Y_0gLuN-LAABj removed from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:46:57"}
+{"level":"info","message":"User 7VU5N-4Y_0gLuN-LAABj did not reconnect, removing from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:46:57"}
+{"level":"info","message":"User w5j-NNQZs_qB2pkXAABw removed from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:47:00"}
+{"level":"info","message":"User w5j-NNQZs_qB2pkXAABw did not reconnect, removing from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 11:47:00"}
+{"level":"info","message":"User HDpCLDYhLkDYobKOAAB1 disconnected: transport close. Active connections: 5","service":"gameofuno-backend","timestamp":"2025-11-23 12:02:57"}
+{"level":"info","message":"User HDpCLDYhLkDYobKOAAB1 marked as disconnected in room 110","service":"gameofuno-backend","timestamp":"2025-11-23 12:02:57"}
+{"level":"info","message":"User uSx2sh7VRokjoZGqAAB0 disconnected: transport error. Active connections: 4","service":"gameofuno-backend","timestamp":"2025-11-23 12:02:57"}
+{"level":"info","message":"User 4IQ5ZMs743p43nueAAB7 disconnected: transport close. Active connections: 3","service":"gameofuno-backend","timestamp":"2025-11-23 12:02:57"}
+{"level":"info","message":"User nQ2F1meaSlCyIhscAAB5 disconnected: transport close. Active connections: 2","service":"gameofuno-backend","timestamp":"2025-11-23 12:02:57"}
+{"level":"info","message":"User icr3tAQPt7KSE3A_AAB3 disconnected: transport close. Active connections: 1","service":"gameofuno-backend","timestamp":"2025-11-23 12:02:57"}
+{"level":"info","message":"User HDpCLDYhLkDYobKOAAB1 removed from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 12:03:57"}
+{"level":"info","message":"User HDpCLDYhLkDYobKOAAB1 did not reconnect, removing from room 110","service":"gameofuno-backend","timestamp":"2025-11-23 12:03:57"}
+{"level":"info","message":"User z86E9Ie0-HmRULXCAABl disconnected: transport close. Active connections: 0","service":"gameofuno-backend","timestamp":"2025-11-23 21:14:36"}
+{"level":"info","message":"Saving game states before shutdown...","service":"gameofuno-backend","timestamp":"2025-11-23 21:14:37"}
