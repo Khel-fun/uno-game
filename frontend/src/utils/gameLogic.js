@@ -63,6 +63,7 @@ export const extractCardDetails = (card) => {
     return {
       color: card.charAt(4),
       number: 100,
+      type: 'SKIP',
     };
   }
   
@@ -70,6 +71,7 @@ export const extractCardDetails = (card) => {
     return {
       color: card.charAt(2),
       number: 200,
+      type: 'DRAW_2',
     };
   }
   
@@ -77,6 +79,7 @@ export const extractCardDetails = (card) => {
     return {
       color: card.charAt(1),
       number: 100,
+      type: 'REVERSE',
     };
   }
   
@@ -84,6 +87,7 @@ export const extractCardDetails = (card) => {
     return {
       color: null,
       number: 500,
+      type: 'WILD',
     };
   }
   
@@ -91,6 +95,7 @@ export const extractCardDetails = (card) => {
     return {
       color: null,
       number: 400,
+      type: 'DRAW_4_WILD',
     };
   }
   
@@ -98,6 +103,7 @@ export const extractCardDetails = (card) => {
   return {
     color: card.charAt(1),
     number: card.charAt(0),
+    type: 'REGULAR',
   };
 };
 
