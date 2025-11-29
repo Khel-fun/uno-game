@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "convex": "^1.29.3",
     "cors": "^2.8.5",
     "diamnet-sdk": "^1.0.2",
     "dotenv": "^16.4.7",

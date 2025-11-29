@@ -43,9 +43,12 @@ function registerReconnectionHandlers(socket, io) {
         socket.emit('reconnected', { room, gameId });
         
         // Send updated room data to all users in the room (including the reconnected user)
-        const updatedRoomUsers = getUsersInRoom(room);
-        io.to(room).emit('roomData', { room, users: updatedRoomUsers });
-        logger.info(`Sent updated room data to room ${room} with ${updatedRoomUsers.length} users`);
+        // Only emit roomData for lobby rooms, not game rooms
+        if (!room.startsWith('game-')) {
+          const updatedRoomUsers = getUsersInRoom(room);
+          io.to(room).emit('roomData', { room, users: updatedRoomUsers });
+          logger.info(`Sent updated room data to room ${room} with ${updatedRoomUsers.length} users`);
+        }
       } else {
         logger.warn(`Room ${room} not found for rejoin`);
         if (callback && typeof callback === 'function') {

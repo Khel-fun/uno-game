@@ -1,3 +1,7 @@
+// Load environment variables from .env.local first, then .env
+require('dotenv').config({ path: '.env.local' });
+require('dotenv').config();
+
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -12,6 +16,7 @@ const {
     setupGracefulShutdown, 
     setupGlobalErrorHandlers 
 } = require('./utils/cleanup');
+const convexClient = require('./services/convexClient');
 
 // Set server timeout to prevent hanging connections
 // Increased to 120 seconds to support long-lived WebSocket connections
@@ -39,6 +44,9 @@ if (process.env.NODE_ENV === "production") {
     });
 }
 
+// Initialize Convex client (optional - for data storage only)
+convexClient.initialize();
+
 // Setup utilities
 setupGracefulShutdown(server);
 setupGlobalErrorHandlers();
@@ -50,4 +58,5 @@ initializeSocketHandlers(io, connectionTracker);
 // Start server
 server.listen(PORT, () => {
     logger.info(`Server started on Port ${PORT} at ${new Date().toISOString()}`);
+    logger.info(`Convex integration: ${convexClient.isEnabled() ? 'ENABLED' : 'DISABLED'}`);
 });

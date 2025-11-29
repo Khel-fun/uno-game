@@ -10,6 +10,9 @@ backend/
 │   └── socket.js              # Socket.IO configuration
 ├── routes/
 │   └── api.js                 # REST API endpoints
+├── services/
+│   ├── convexClient.js        # Convex HTTP client
+│   └── convexStorage.js       # Convex storage service (write-only)
 ├── socket/
 │   ├── index.js               # Socket handler orchestrator
 │   ├── connection.js          # Connection/disconnection handlers
@@ -18,6 +21,11 @@ backend/
 │   └── lobby.js               # Lobby/room management
 ├── utils/
 │   └── cleanup.js             # Cleanup tasks and shutdown handlers
+├── convex/
+│   ├── schema.ts              # Convex database schema
+│   ├── games.ts               # Game mutations
+│   ├── moves.ts               # Move mutations
+│   └── ...                    # Other Convex functions
 ├── index.js                   # Main server entry point
 ├── users.js                   # User management
 ├── gameStateManager.js        # Game state persistence
@@ -54,6 +62,18 @@ backend/
 - `/api/game-state/:gameId` - Retrieve game state by ID
 - `/api/recent-games` - Get list of recent games
 - `/api/health` - Health check endpoint
+
+### Services
+
+**`services/convexClient.js`**
+- Convex HTTP client wrapper
+- Handles connection to Convex deployment
+- Provides mutation execution interface
+
+**`services/convexStorage.js`**
+- Write-only operations to Convex
+- Stores game data for analytics and replay
+- Non-blocking, fail-safe operations
 
 ### Socket Event Handlers
 

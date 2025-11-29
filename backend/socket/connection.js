@@ -45,11 +45,13 @@ function registerConnectionHandlers(socket, io, connectionTracker) {
           if (removedUser) {
             logger.info(`User ${socket.id} did not reconnect, removing from room ${removedUser.room}`);
             
-            // Update room data
-            io.to(removedUser.room).emit('roomData', { 
-              room: removedUser.room, 
-              users: getUsersInRoom(removedUser.room) 
-            });
+            // Update room data (only for lobby rooms, not game rooms)
+            if (!removedUser.room.startsWith('game-')) {
+              io.to(removedUser.room).emit('roomData', { 
+                room: removedUser.room, 
+                users: getUsersInRoom(removedUser.room) 
+              });
+            }
             
             // Notify that player permanently left
             io.to(removedUser.room).emit('playerLeft', {
