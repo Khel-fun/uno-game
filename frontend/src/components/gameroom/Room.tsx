@@ -84,7 +84,7 @@ const convertToGameComponentState = (
     lastCardPlayedBy: "",
     isExtraTurn: false,
     totalPlayers: offChainState.players?.length || 2,
-    playDirection: offChainState.direction === "clockwise" ? 1 : -1,
+    playDirection: offChainState.direction === "clockwise" ? "clockwise" : "counterclockwise",
   };
 };
 
@@ -437,7 +437,7 @@ const Room = () => {
       // Request game state sync if game was started
       if (gameStarted) {
         console.log("Requesting game state sync for started game");
-        socket.emit("requestGameStateSync", { roomId, gameId: id });
+        socket.emit("requestGameStateSync", { roomId, gameId: id, playerAddress: address });
       }
 
       // Reset flag after a short delay to allow future reconnections
@@ -454,7 +454,7 @@ const Room = () => {
 
       // Request game state restoration on page load/refresh
       console.log("Requesting game state restoration for game:", id);
-      socket.emit("requestGameStateSync", { roomId, gameId: id });
+      socket.emit("requestGameStateSync", { roomId, gameId: id, playerAddress: address });
     }
 
     // NOTE: socketManager's 'reconnected' event is the primary reconnection signal

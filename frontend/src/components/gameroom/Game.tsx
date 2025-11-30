@@ -789,13 +789,15 @@ const Game: React.FC<GameProps> = ({
 
     if (isComputerMode) {
       console.log("Initializing computer mode game...");
-      const initialState = initializeComputerGame();
+      const initialState = initializeComputerGame() as Partial<GameState>;
       dispatch(initialState);
     } else if (currentUser === "Player 1") {
       console.log(
         `Player 1 initializing multiplayer game with ${playerCount} players...`
       );
-      const initialState = initializeMultiplayerGame(playerCount);
+      const initialState = initializeMultiplayerGame(
+        playerCount
+      ) as Partial<GameState>;
       emitSocketEvent("initGameState", initialState);
     }
   }, [isComputerMode, currentUser, playerCount, emitSocketEvent]);
