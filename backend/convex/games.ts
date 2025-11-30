@@ -7,22 +7,29 @@ export const create = mutation({
   args: {
     roomId: v.string(),
     players: v.array(v.string()), // Wallet addresses
+    gameNumericId: v.optional(v.string()), // Optional blockchain game ID
   },
   handler: async (ctx, args) => {
     const now = Date.now();
 
-    // Get most recent game by numeric ID
-    const lastGame = await ctx.db
-      .query("games")
-      .withIndex("by_numericId")
-      .order("desc")
-      .first();
-
-    const nextId = lastGame ? parseInt(lastGame.gameNumericId) + 1 : 1;
+    let numericId: string;
+    
+    if (args.gameNumericId) {
+      // Use provided blockchain game ID
+      numericId = args.gameNumericId;
+    } else {
+      // Auto-generate ID (fallback for old code)
+      const lastGame = await ctx.db
+        .query("games")
+        .withIndex("by_numericId")
+        .order("desc")
+        .first();
+      numericId = lastGame ? (parseInt(lastGame.gameNumericId) + 1).toString() : "1";
+    }
 
     return await ctx.db.insert("games", {
       roomId: args.roomId,
-      gameNumericId: nextId.toString(),
+      gameNumericId: numericId,
       players: args.players,
       createdAt: now,
       status: "NotStarted",

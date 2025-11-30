@@ -21,6 +21,8 @@ import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
 import ProfileDropdown from "@/components/profileDropdown"
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 // DIAM wallet integration removed
 
@@ -34,6 +36,10 @@ export default function PlayGame() {
   const { checkBalance } = useBalanceCheck();
   const router = useRouter();
   const chains = useChains();
+  
+  // Convex mutations
+  const createGameInConvex = useMutation(api.games.create);
+  const joinGameInConvex = useMutation(api.players.joinGame);
 
   // Use Wagmi hooks for wallet functionality
   const { address, isConnected,  } = useWalletAddress();
@@ -127,6 +133,19 @@ export default function PlayGame() {
           if (gameCreatedId) {
               const gameId = BigInt(gameCreatedId); // Convert hex to decimal
               setGameId(gameId);
+              console.log("Blockchain gameID: ", gameId);
+    
+              // Create game entry in Convex DB (empty players array - they join via joinGame)
+              try {
+                await createGameInConvex({
+                  roomId: gameId.toString(),
+                  players: [], // Empty - creator must explicitly join like everyone else
+                  gameNumericId: gameId.toString(),
+                });
+                console.log("Game entry created in Convex DB:", gameId.toString());
+              } catch (convexError) {
+                console.error("Failed to create game in Convex:", convexError);
+              }
     
               router.push(`/game/${gameId}`);
           }
@@ -204,6 +223,18 @@ export default function PlayGame() {
             if (gameCreatedId) {
               const gameId = BigInt(gameCreatedId); // Convert hex to decimal
               setGameId(gameId);
+    
+              // Create game entry in Convex DB for computer mode
+              try {
+                await createGameInConvex({
+                  roomId: gameId.toString(),
+                  players: [address as string], // Computer mode: add player immediately
+                  gameNumericId: gameId.toString(),
+                });
+                console.log("Computer game created in Convex DB:", gameId.toString());
+              } catch (convexError) {
+                console.error("Failed to create computer game in Convex:", convexError);
+              }
     
               // Navigate to game room with computer mode flag
               router.push(`/game/${gameId}?mode=computer`);
@@ -284,8 +315,22 @@ export default function PlayGame() {
       });
 
       sendTransaction(transaction, {
-        onSuccess: (result) => {
+        onSuccess: async (result) => {
           console.log("Transaction successful:", result);
+          
+          // Register player in Convex DB after blockchain join succeeds
+          try {
+            await joinGameInConvex({
+              roomId: gameId.toString(),
+              walletAddress: address,
+              displayName: `Player`,
+            });
+            console.log("Player registered in Convex DB for game:", gameId.toString());
+          } catch (convexError) {
+            console.error("Failed to register player in Convex:", convexError);
+            // Continue anyway - they joined on blockchain
+          }
+          
           toast({
             title: "Game joined successfully!",
             description: "Game joined successfully!",

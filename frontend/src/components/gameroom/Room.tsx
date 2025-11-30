@@ -233,33 +233,15 @@ const Room = () => {
       console.log(
         "Computer mode detected, will initialize after contract setup"
       );
-    } else {
-      // Join game using Convex mutation (automatic reconnection!)
-      if (address && !hasJoinedRoom.current) {
-        console.log("Joining room with wallet address:", address);
-        hasJoinedRoom.current = true;
-
-        joinGameMutation({
-          roomId: room as string,
-          walletAddress: address,
-          displayName: `Player`,
-        }).then((result) => {
-          if (result) {
-            console.log("Successfully joined game:", result);
-          }
-        }).catch((error) => {
-          console.error("Failed to join game:", error);
-          setRoomFull(true);
-          hasJoinedRoom.current = false;
-        });
-      }
     }
+    // Multiplayer mode: Player already joined via blockchain transaction in play/page.tsx
+    // Just subscribe to players - Convex will show all players who joined
 
     return function cleanup() {
       // Convex handles cleanup automatically
       hasJoinedRoom.current = false;
     };
-  }, [room, isComputerMode, address, joinGameMutation]);
+  }, [room, isComputerMode]);
 
   /**
    * Sync players from Convex realtime subscription

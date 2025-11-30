@@ -150,17 +150,18 @@ export const joinGame = mutation({
     displayName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Find or create game
+    // Find or create game (roomId IS the blockchain game ID)
     let game = await ctx.db
       .query("games")
       .withIndex("by_roomId", (q) => q.eq("roomId", args.roomId))
       .first();
 
     if (!game) {
-      // Create new game
+      // Create new game - use roomId as both roomId and gameNumericId
+      // since roomId = blockchain game ID from the URL
       const gameId = await ctx.db.insert("games", {
         roomId: args.roomId,
-        gameNumericId: Math.floor(Math.random() * 1000000).toString(),
+        gameNumericId: args.roomId, // Use roomId (blockchain game ID) directly
         players: [],
         createdAt: Date.now(),
         status: "NotStarted",
