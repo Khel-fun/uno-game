@@ -23,6 +23,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
+import ProfileDropdown from "../profileDropdown";
 
 type User = { 
   id: string;
@@ -45,7 +46,7 @@ const Room = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const hasJoinedRoom = useRef(false);
   const { account, bytesAddress } = useUserAccount();
-  const { address } = useWalletAddress();
+  const { address, isConnected: isWalletConnected } = useWalletAddress();
   const [contract, setContract] = useState<UnoGameContract | null>(null)
   const [gameId, setGameId] = useState<bigint | null>(null)
   
@@ -151,9 +152,12 @@ const Room = () => {
       // Set room info for reconnection
       socketManager.setRoomInfo(room as string, id as string);
       
+      // Wait for wallet to initialize before joining
+      // if (!isWalletConnected) return;
+
       // Only join if we haven't already and socket is connected
       if (isConnected && !hasJoinedRoom.current) {
-        socket.emit("join", { room: room }, (error: any) => {
+        socket.emit("join", { room: room, address: address }, (error: any) => {
           if (error) {
             setRoomFull(true);
           } else {
@@ -171,7 +175,9 @@ const Room = () => {
         socket.off();
       }
     };
-  }, [room, isComputerMode, isConnected]);
+  }, [room, isComputerMode, isConnected, isWalletConnected, address]);
+
+  console.log("Wallet connected:", isWalletConnected, account);
 
   useEffect(() => {
     const setup = async () => {
@@ -267,7 +273,7 @@ const Room = () => {
       // Re-join the lobby room to get player list (if game hasn't started)
       if (!gameStarted && !isComputerMode) {
         console.log('Re-joining lobby room:', room);
-        socket.emit("join", { room: room }, (error: any) => {
+        socket.emit("join", { room: room, address: address }, (error: any) => {
           if (error) {
             console.error('Error rejoining lobby:', error);
           } else {
@@ -649,11 +655,13 @@ const Room = () => {
         backgroundAttachment: "fixed",
       }}
     >
-      <button
-        className="glossy-button glossy-button-blue"
-        style={{
-          minWidth: "56px",
-          height: "28px",
+      
+      <div className="absolute top-4 z-10 flex justify-between items-center px-4 w-full">
+        <button
+          className="glossy-button glossy-button-blue"
+          style={{
+            minWidth: "56px",
+            height: "28px",
           fontSize: "0.9rem",
           fontWeight: "600",
           display: "flex",
@@ -664,8 +672,6 @@ const Room = () => {
           borderRadius: "18px",
           boxShadow: "0 8px 16px rgba(0, 105, 227, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)",
           transition: "all 0.2s ease",
-          top: "15px",
-          left: "15px"
         }}
         onClick={() => router.push("/play")}
       >
@@ -673,8 +679,12 @@ const Room = () => {
           <path d="M24 12H5M12 19l-7-7 7-7" />
         </svg>
       </button>
-    <ConnectionStatusIndicator />
-    <Toaster />
+      {isConnected && address && (
+        <ProfileDropdown address={address} />
+      )}
+      </div>
+      <ConnectionStatusIndicator />
+      <Toaster />
       {isComputerMode ? (
         // Computer mode - skip waiting and go directly to game
         (() => {

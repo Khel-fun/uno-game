@@ -12,15 +12,44 @@ function registerLobbyHandlers(socket, io) {
    * Handles when a user joins a game lobby/room
    */
   socket.on('join', (payload, callback) => {
-    let numberOfUsersInRoom = getUsersInRoom(payload.room).length;
+    const usersInRoom = getUsersInRoom(payload.room);
+    let playerName;
 
-    // Assign player name based on current number of users (Player 1-6)
-    const playerName = `Player ${numberOfUsersInRoom + 1}`;
+    // 1. If address provided, check if user already exists in room (reconnect/takeover)
+    if (payload.address) {
+      const existingUser = usersInRoom.find(u => u.address === payload.address);
+      if (existingUser) {
+        playerName = existingUser.name;
+      }
+    }
+
+    // 2. If no player name found yet (new user or anonymous), find first available slot
+    if (!playerName) {
+      for (let i = 1; i <= 6; i++) {
+        const potentialName = `Player ${i}`;
+        const existingUser = usersInRoom.find(u => u.name === potentialName);
+        
+        // Available if:
+        // - Slot is empty
+        // - OR Slot is disconnected AND has no wallet address (anonymous users can be overwritten)
+        // - OR Slot is disconnected AND matches our address (handled by step 1, but safe to include)
+        if (!existingUser || 
+            (!existingUser.connected && (!existingUser.address || existingUser.address === payload.address))) {
+          playerName = potentialName;
+          break;
+        }
+      }
+    }
+
+    if (!playerName) {
+      return callback({ error: 'Room is full' });
+    }
 
     const { error, newUser } = addUser({
       id: socket.id,
       name: playerName,
       room: payload.room,
+      address: payload.address,
     });
 
     if (error) return callback(error);

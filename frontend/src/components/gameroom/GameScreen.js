@@ -5,8 +5,10 @@ import MainPlayerView from "./MainPlayerView";
 import bgMusic from "../../assets/sounds/game-bg-music.mp3";
 import useSound from "use-sound";
 import { useSoundProvider } from "../../context/SoundProvider";
-import StyledButton from "../styled-button";
+import { useSocketConnection } from "@/context/SocketConnectionContext";
 import { useRouter } from "next/navigation";
+import { useWalletAddress } from "@/utils/onchainWalletUtils";
+import ProfileDropdown from "../profileDropdown";
 
 const GameScreen = ({
   currentUser,
@@ -62,6 +64,8 @@ const GameScreen = ({
   const [skipTimer, setSkipTimer] = useState(null);
   const [skipTimeRemaining, setSkipTimeRemaining] = useState(10);
   const skipTimerRef = useRef(null);
+  const { isConnected, isReconnecting } = useSocketConnection();
+  const { address, isConnected: isWalletConnected } = useWalletAddress();
   
   // Turn timer state
   const [turnTimeRemaining, setTurnTimeRemaining] = useState(10);
@@ -191,29 +195,34 @@ const GameScreen = ({
           zIndex: "50"
         }}
       >
-        <button
-          className="glossy-button glossy-button-blue"
-          style={{
-            minWidth: "56px",
-            height: "28px",
-            fontSize: "0.9rem",
-            fontWeight: "600",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "4px",
-            padding: "0 12px",
-            borderRadius: "18px",
-            boxShadow: "0 8px 16px rgba(0, 105, 227, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)",
-            transition: "all 0.2s ease",
-          }}
-          onClick={() => router.push("/play")}
-        >
-          <svg width="24" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M24 12H5M12 19l-7-7 7-7" />
-          </svg>
-          {/* Back */}
-        </button>
+        {/* <div className="absolute top-4 flex justify-between items-center px-4 z-10 w-full">
+          <button
+            className="glossy-button glossy-button-blue"
+            style={{
+              minWidth: "56px",
+              height: "28px",
+              fontSize: "0.9rem",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "4px",
+              padding: "0 12px",
+              borderRadius: "18px",
+              boxShadow: "0 8px 16px rgba(0, 105, 227, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)",
+              transition: "all 0.2s ease",
+            }}
+            onClick={() => router.push("/play")}
+          >
+            <svg width="24" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M24 12H5M12 19l-7-7 7-7" />
+            </svg>
+          Back 
+          </button>
+          {isConnected && address && (
+              <ProfileDropdown address={address} />
+            )}
+        </div> */}
 
         {/* <span>
           <StyledButton className="bg-green-500 mr-2" onClick={toggleMute}>

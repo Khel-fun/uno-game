@@ -1241,7 +1241,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2, prel
   const cleanedTurn = turn == currentUser ? "current" : "opponent"
 
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', marginTop: "-27px" }}>
+    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
       <GameBackground turn={turn} currentColor={currentColor} currentUser={currentUser} totalPlayers={totalPlayers} />
       {/* <MemoizedHeader roomCode={room} /> */}
       {!gameOver ? (

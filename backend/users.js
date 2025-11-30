@@ -1,25 +1,40 @@
 const logger = require('./logger');
 const users = []
 
-const addUser = ({id, name, room}) => {
+const addUser = ({id, name, room, address}) => {
    const numberOfUsersInRoom = users.filter(user => user.room === room && user.connected !== false).length
    if(numberOfUsersInRoom === 6) {
       logger.info(`Room ${room} is full, user ${id} rejected`);
       return { error: 'Room full' };
    }
 
-   // Check if user is reconnecting (same name in same room)
-   const existingUser = users.find(u => u.name === name && u.room === room && u.connected === false);
+   // Check if user is reconnecting
+   // Priority: Address match (if provided) > Name match (only for disconnected users)
+   let existingUser;
+   
+   if (address) {
+     // If address is provided, find user with same address in room (connected or disconnected)
+     existingUser = users.find(u => u.room === room && u.address === address);
+   } 
+   
+   // Fallback to name match for anonymous users or if address not found
+   if (!existingUser) {
+     existingUser = users.find(u => u.name === name && u.room === room && u.connected === false);
+   }
+
    if (existingUser) {
-      // User is reconnecting, update their socket ID
+      // User is reconnecting/taking over, update their socket ID
       existingUser.id = id;
       existingUser.connected = true;
       existingUser.disconnectedAt = null;
-      logger.info(`User ${name} reconnected to room ${room} with new socket ${id}`);
+      // Update address if provided
+      if (address) existingUser.address = address;
+      
+      logger.info(`User ${existingUser.name} reconnected to room ${room} with new socket ${id}`);
       return { newUser: existingUser, reconnected: true };
    }
 
-   const newUser = { id, name, room, connected: true, disconnectedAt: null };
+   const newUser = { id, name, room, address, connected: true, disconnectedAt: null };
    users.push(newUser);
    logger.info(`User ${id} added to room ${room} as ${name}`);
    return { newUser };
