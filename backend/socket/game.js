@@ -1,7 +1,8 @@
 const logger = require('../logger');
-const gameLogger = require('../gameLogger');
-const gameStateManager = require('../gameStateManager');
 const { getUser, getUsersInRoom } = require('../users');
+const gameStateManager = require('../gameStateManager');
+const { MAX_PLAYERS } = require('../constants');
+const gameLogger = require('../gameLogger');
 
 /**
  * Register game-related socket event handlers
@@ -192,12 +193,12 @@ function registerGameHandlers(socket, io) {
       };
       
       // Deal 5 cards to each player
-      for (let i = 1; i <= numPlayers && i <= 6; i++) {
+      for (let i = 1; i <= numPlayers && i <= MAX_PLAYERS; i++) {
         gameState[`player${i}Deck`] = shuffledCards.splice(0, 5);
       }
       
       // Initialize empty decks for unused player slots
-      for (let i = numPlayers + 1; i <= 6; i++) {
+      for (let i = numPlayers + 1; i <= MAX_PLAYERS; i++) {
         gameState[`player${i}Deck`] = [];
       }
       

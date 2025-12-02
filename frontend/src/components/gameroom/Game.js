@@ -19,6 +19,7 @@ import { ethers } from "ethers";
 import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
 import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
 import { useSocketConnection } from "@/context/SocketConnectionContext";
+import { MAX_PLAYERS } from "@/constants/gameConstants";
 
 //NUMBER CODES FOR ACTION CARDS
 //SKIP - 100
@@ -308,12 +309,12 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         };
 
         // Deal 5 cards to each player
-        for (let i = 1; i <= playerCount && i <= 4; i++) {
+        for (let i = 1; i <= playerCount && i <= MAX_PLAYERS; i++) {
           gameState[`player${i}Deck`] = shuffledCards.splice(0, 5);
         }
 
         // Initialize empty decks for unused player slots
-        for (let i = playerCount + 1; i <= 4; i++) {
+        for (let i = playerCount + 1; i <= MAX_PLAYERS; i++) {
           gameState[`player${i}Deck`] = [];
         }
 

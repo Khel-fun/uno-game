@@ -23,6 +23,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
+import { MAX_PLAYERS } from "@/constants/gameConstants";
 
 type User = { 
   id: string;
@@ -807,7 +808,7 @@ const Room = () => {
                 }}>
                   {users.length === 1 && currentUser !== "Player 1"
                     ? "Player 1 has left the game." 
-                    : `waiting for other players to join (${users.length}/4)`}
+                    : `waiting for other players to join (${users.length}/${MAX_PLAYERS})`}
                 </div>
               </div>
             </div>
@@ -929,7 +930,7 @@ const Room = () => {
                       marginBottom: "2rem",
                       fontStyle: "italic"
                     }}>
-                      waiting for other players to join ({users.length}/4)<br />minimum 2 players required to start
+                      waiting for other players to join ({users.length}/{MAX_PLAYERS})<br />minimum 2 players required to start
                     </div>
                   </div>
 

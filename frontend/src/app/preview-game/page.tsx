@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PACK_OF_CARDS } from "@/utils/packOfCards";
+import { MAX_PLAYERS } from "@/constants/gameConstants";
 
 const PreviewGame = () => {
   const [playerCount, setPlayerCount] = useState(3);
@@ -69,7 +70,7 @@ const PreviewGame = () => {
     const currentPlayerNum = 1; // Player 1 is always the current user
     // Calculate relative opponent index (starts from 0)
     let relativeIndex = turnPlayerNum - currentPlayerNum;
-    if (relativeIndex < 0) relativeIndex += 4; // Wrap around for 4 players max
+    if (relativeIndex < 0) relativeIndex += MAX_PLAYERS; // Wrap around for max players
     playerIndex = relativeIndex - 1; // Adjust to start from 0
   }
 

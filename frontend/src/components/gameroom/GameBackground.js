@@ -1,4 +1,5 @@
 import React from 'react';
+import { MAX_PLAYERS } from '@/constants/gameConstants';
 
 const GameBackground = ({ turn, currentColor, currentUser, totalPlayers }) => {
   // Determine if it's current user's turn or opponent's turn
@@ -11,7 +12,7 @@ const GameBackground = ({ turn, currentColor, currentUser, totalPlayers }) => {
     const currentPlayerNum = parseInt(currentUser.split(' ')[1]);
     // Calculate relative opponent index (starts from 0)
     let relativeIndex = turnPlayerNum - currentPlayerNum;
-    if (relativeIndex < 0) relativeIndex += 4; // Wrap around for 4 players max
+    if (relativeIndex < 0) relativeIndex += MAX_PLAYERS; // Wrap around for max players
     playerIndex = relativeIndex - 1; // Adjust to start from 0
   }
   
