@@ -71,7 +71,6 @@ class SocketManager {
 
     this.socket.on('connect', () => {
       console.log('✅ Socket connected successfully - ID:', this.socket?.id);
-      console.log('🔗 Connected to:', this.config.url);
       this.updateStatus('connected');
       this.reconnectionInfo.attempts = 0;
       this.reconnectionInfo.isReconnecting = false;
@@ -115,7 +114,6 @@ class SocketManager {
     this.socket.on('pong', () => {
       const timestamp = new Date().toISOString();
       this.lastPongTime = Date.now();
-      console.log(`[Heartbeat] ✅ Received pong at ${timestamp} - Missed heartbeats reset to 0`);
       this.missedHeartbeats = 0;
     });
     */
@@ -140,7 +138,6 @@ class SocketManager {
       if (this.socket?.connected) {
         const timestamp = new Date().toISOString();
         const timeSinceLastPong = Date.now() - this.lastPongTime;
-        console.log(`[Heartbeat] 📤 Sending ping at ${timestamp} - Current missed: ${this.missedHeartbeats}, Time since last pong: ${timeSinceLastPong}ms`);
         
         this.socket.emit('ping');
         this.missedHeartbeats++;
@@ -151,7 +148,6 @@ class SocketManager {
           this.socket.disconnect();
           this.attemptReconnect();
         } else if (this.missedHeartbeats > this.maxMissedHeartbeats) {
-          console.warn(`[Heartbeat] ⚠️  Missed ${this.missedHeartbeats} heartbeats but only ${timeSinceLastPong}ms since last pong - giving more time`);
         }
       }
     }, this.config.heartbeatInterval);
@@ -159,7 +155,6 @@ class SocketManager {
 
   private stopHeartbeat(): void {
     if (this.heartbeatTimer) {
-      console.log('[Heartbeat] 🛑 Stopping heartbeat timer');
       clearInterval(this.heartbeatTimer);
       this.heartbeatTimer = null;
     }
@@ -225,7 +220,6 @@ class SocketManager {
     this.reconnectionInfo.pendingActions = [];
     
     actions.forEach(action => {
-      console.log('Processing pending action:', action.event);
       this.emit(action.event, action.data, action.callback);
     });
   }

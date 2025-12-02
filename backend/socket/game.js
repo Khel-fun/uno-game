@@ -43,56 +43,63 @@ function registerGameHandlers(socket, io) {
     // Save game state for reconnection support
     gameStateManager.saveGameState(roomId, newState, cardHashMap);
     
+    // Emit the gameStarted event to all clients in the room with a room-specific event name
+    io.to(roomId).emit(`gameStarted-${roomId}`, { newState, cardHashMap });
+
     // Store in Convex (write-only, non-blocking)
     let convexGameId = null;
     if (newState && newState.players) {
-      // Store game creation
-      convexGameId = await convexStorage.storeGameCreation(roomId, newState);
-      
-      // Store game start with full state
-      if (convexGameId) {
-        // Get current card from playedCardsPile (last card played)
-        const currentCard = newState.playedCardsPile && newState.playedCardsPile.length > 0 
-          ? newState.playedCardsPile[newState.playedCardsPile.length - 1] 
-          : null;
+      try {
+        // Store game creation
+        convexGameId = await convexStorage.storeGameCreation(roomId, newState);
+        
+        // Store game start with full state
+        if (convexGameId) {
+          // Get current card from playedCardsPile (last card played)
+          const currentCard = newState.playedCardsPile && newState.playedCardsPile.length > 0 
+            ? newState.playedCardsPile[newState.playedCardsPile.length - 1] 
+            : null;
+            
+          // Extract player hands for initial storage
+          const playerHands = {};
+          Object.keys(newState).forEach(key => {
+            if (key.match(/player\d+Deck/)) {
+              playerHands[key] = newState[key];
+            }
+          });
+            
+          // Pass cardHashMap in the state object for storage
+          const fullState = {
+            ...newState,
+            cardHashMap: cardHashMap,
+            currentCard: currentCard,
+            playerHands: playerHands
+          };
           
-        // Extract player hands for initial storage
-        const playerHands = {};
-        Object.keys(newState).forEach(key => {
-          if (key.match(/player\d+Deck/)) {
-            playerHands[key] = newState[key];
-          }
-        });
+          await convexStorage.storeGameStart(convexGameId, fullState);
           
-        // Pass cardHashMap in the state object for storage
-        const fullState = {
-          ...newState,
-          cardHashMap: cardHashMap,
-          currentCard: currentCard,
-          playerHands: playerHands
-        };
-        
-        await convexStorage.storeGameStart(convexGameId, fullState);
-        
-        // Store game-player relationships in gamePlayers table
-        await convexStorage.storeGamePlayers(convexGameId, newState.players);
-        
-        // Store card mappings in cardMappings table if available
-        if (cardHashMap) {
-          await convexStorage.storeCardMappings(convexGameId, cardHashMap);
-        }
-        
-        // Store initial player hands in hands table
-        if (newState.playerHands) {
-          for (const [playerAddress, cardHashes] of Object.entries(newState.playerHands)) {
-            await convexStorage.storePlayerHand(convexGameId, playerAddress, cardHashes);
+          // Store game-player relationships in gamePlayers table
+          await convexStorage.storeGamePlayers(convexGameId, newState.players);
+          
+          // Store card mappings in cardMappings table if available
+          if (cardHashMap) {
+            await convexStorage.storeCardMappings(convexGameId, cardHashMap);
           }
+          
+          // Store initial player hands in hands table
+          if (newState.playerHands) {
+            for (const [playerAddress, cardHashes] of Object.entries(newState.playerHands)) {
+              await convexStorage.storePlayerHand(convexGameId, playerAddress, cardHashes);
+            }
+          }
+          
+          // Store mapping for future moves
+          roomToConvexGameId.set(roomId, convexGameId);
+          
+          logger.info(`Convex game ID ${convexGameId} stored for room ${roomId}`);
         }
-        
-        // Store mapping for future moves
-        roomToConvexGameId.set(roomId, convexGameId);
-        
-        logger.info(`Convex game ID ${convexGameId} stored for room ${roomId}`);
+      } catch (err) {
+        logger.error('Error storing game start in Convex:', err);
       }
     }
     
@@ -115,9 +122,6 @@ function registerGameHandlers(socket, io) {
         });
       }
     }
-
-    // Emit the gameStarted event to all clients in the room with a room-specific event name
-    io.to(roomId).emit(`gameStarted-${roomId}`, { newState, cardHashMap });
   });
 
   /**
@@ -127,6 +131,9 @@ function registerGameHandlers(socket, io) {
   socket.on('playCard', async (data) => {
     const { roomId, action, newState } = data;
     logger.info(`Card played in room ${roomId}`);
+    
+    // Broadcast the cardPlayed event to all clients in the room immediately
+    io.to(roomId).emit(`cardPlayed-${roomId}`, { action, newState });
     
     // Save updated game state for reconnection support
     if (newState) {
@@ -142,75 +149,49 @@ function registerGameHandlers(socket, io) {
     
     // Store move in Convex (write-only, non-blocking)
     if (action && newState && convexGameId) {
-      logger.debug(`Storing move for room ${roomId}, convexGameId: ${convexGameId}, turn: ${newState.turnCount}`);
-      // Store the move/action
-      await convexStorage.storeMove(
-        convexGameId,
-        Number(newState.turnCount),
-        action.player,
-        action.type,
-        action.cardHash
-      );
-      
-      // Store updated player hands
-      if (newState.playerHands) {
-        for (const [playerAddress, cardHashes] of Object.entries(newState.playerHands)) {
-          await convexStorage.storePlayerHand(convexGameId, playerAddress, cardHashes);
-        }
-      }
-      
-      // Store state snapshot
-      await convexStorage.storeGameStateSnapshot(convexGameId, Number(newState.turnCount), {
-        stateHash: newState.stateHash || '',
-        currentPlayerIndex: newState.currentPlayerIndex,
-        directionClockwise: newState.directionClockwise,
-        currentColor: newState.currentColor,
-        currentValue: newState.currentValue,
-        lastPlayedCardHash: newState.lastPlayedCardHash,
-        deckHash: newState.deckHash,
-      });
-      
-      // Update game state in Convex
-      await convexStorage.storeGameStateUpdate(convexGameId, {
-        currentPlayerIndex: newState.currentPlayerIndex,
-        turnCount: Number(newState.turnCount),
-        directionClockwise: newState.directionClockwise,
-        currentColor: newState.currentColor,
-        currentValue: newState.currentValue,
-        lastPlayedCardHash: newState.lastPlayedCardHash,
-      });
-    }
-    
-    // Log card play action
-    if (action && newState) {
-      const nextPlayerIndex = (newState.currentPlayerIndex) % newState.players.length;
-      
-      if (action.type === 'playCard' && action.cardHash) {
-        gameLogger.logCardPlay(
-          newState.id.toString(),
+      try {
+        logger.debug(`Storing move for room ${roomId}, convexGameId: ${convexGameId}, turn: ${newState.turnCount}`);
+        // Store the move/action
+        await convexStorage.storeMove(
+          convexGameId,
           Number(newState.turnCount),
           action.player,
-          action.cardHash,
-          `${newState.currentColor} ${newState.currentValue}`,
-          newState.currentColor,
-          newState.currentValue,
-          newState.players[nextPlayerIndex]
+          action.type,
+          action.cardHash
         );
-      } else if (action.type === 'drawCard') {
-        // Log draw action
-        gameLogger.log({
-          timestamp: new Date().toISOString(),
-          gameId: newState.id.toString(),
-          turnNumber: Number(newState.turnCount),
-          player: action.player,
-          action: 'drawCard',
-          nextPlayer: newState.players[nextPlayerIndex]
+        
+        // Store updated player hands
+        if (newState.playerHands) {
+          for (const [playerAddress, cardHashes] of Object.entries(newState.playerHands)) {
+            await convexStorage.storePlayerHand(convexGameId, playerAddress, cardHashes);
+          }
+        }
+        
+        // Store state snapshot
+        await convexStorage.storeGameStateSnapshot(convexGameId, Number(newState.turnCount), {
+          stateHash: newState.stateHash || '',
+          currentPlayerIndex: newState.currentPlayerIndex,
+          directionClockwise: newState.directionClockwise,
+          currentColor: newState.currentColor,
+          currentValue: newState.currentValue,
+          lastPlayedCardHash: newState.lastPlayedCardHash,
+          deckHash: newState.deckHash,
         });
+        
+        // Update game state in Convex
+        await convexStorage.storeGameStateUpdate(convexGameId, {
+          currentPlayerIndex: newState.currentPlayerIndex,
+          turnCount: Number(newState.turnCount),
+          directionClockwise: newState.directionClockwise,
+          currentColor: newState.currentColor,
+          currentValue: newState.currentValue,
+          lastPlayedCardHash: newState.lastPlayedCardHash,
+          currentCard: newState.currentCard
+        });
+      } catch (err) {
+        logger.error('Error storing move in Convex:', err);
       }
     }
-
-    // Broadcast the cardPlayed event to all clients in the room
-    io.to(roomId).emit(`cardPlayed-${roomId}`, { action, newState });
   });
 
   /**
@@ -280,55 +261,60 @@ function registerGameHandlers(socket, io) {
           logger.info(`Convex game ID: ${convexGameId}, user.room: ${gameRoomId}, gameState.turn: ${mergedState.turn}`);
         }
         
-        const turnNumber = Number(mergedState.turn.trim().split(" ")[-1]);
+        const turnNumber = Number(mergedState.turn.trim().split(" ")[1]);
         logger.info(`Turn split result: ${mergedState.turn.trim().split(" ")}, turnNumber: ${turnNumber}`);
-        // Store in Convex if available
-        if (convexGameId && mergedState.turn !== undefined) {
-          logger.debug(`Storing game state update for room ${gameRoomId}, turn: ${mergedState.turn}`);
-          
-          // Get current card from playedCardsPile (last card played)
-          const currentCard = mergedState.playedCardsPile && mergedState.playedCardsPile.length > 0 
-            ? mergedState.playedCardsPile[mergedState.playedCardsPile.length - 1] 
-            : null;
-            
-          // Extract player hands
-          const playerHands = {};
-          Object.keys(mergedState).forEach(key => {
-            if (key.match(/player\d+Deck/)) {
-              playerHands[key] = mergedState[key];
-            }
-          });
-            
-          // Derive currentPlayerIndex from turn (e.g. "Player 1" -> 0)
-          const currentPlayerIndex = turnNumber > 0 ? turnNumber - 1 : 0;
-          
-          // Extract direction if available, default to undefined (will keep existing value in DB)
-          const directionClockwise = mergedState.directionClockwise !== undefined ? mergedState.directionClockwise : undefined;
-          
-          // Update current game state in games table
-          // We only update the current state, avoiding snapshot creation for every move as requested
-          logger.info(`Updating Convex game state with: currentPlayerIndex=${currentPlayerIndex}, turnCount=${turnNumber}, clockwise=${directionClockwise}, color=${mergedState.currentColor}, value=${mergedState.currentNumber || mergedState.currentValue}, currentCard=${currentCard}`);
-          
-          await convexStorage.storeGameStateUpdate(convexGameId, {
-            currentPlayerIndex: currentPlayerIndex,
-            turnCount: turnNumber,
-            directionClockwise: directionClockwise,
-            currentColor: mergedState.currentColor,
-            currentValue: mergedState.currentNumber || mergedState.currentValue, // Frontend sends currentNumber
-            currentCard: currentCard,
-            lastPlayedCardHash: mergedState.lastPlayedCardHash || '',
-            deckHash: mergedState.deckHash || '',
-            playerHands: JSON.stringify(playerHands)
-          });
-        }
         
-        // Add a timestamp to track latency
+        // Add a timestamp to track latency - Emit IMMEDIATELY
         const enhancedGameState = {
           ...mergedState,
           _serverTimestamp: Date.now(),
           _room: gameRoomId
         };
         io.to(gameRoomId).emit('updateGameState', enhancedGameState);
+
+        // Store in Convex if available
+        if (convexGameId && mergedState.turn !== undefined) {
+          try {
+            logger.debug(`Storing game state update for room ${gameRoomId}, turn: ${mergedState.turn}`);
+            
+            // Get current card from playedCardsPile (last card played)
+            const currentCard = mergedState.playedCardsPile && mergedState.playedCardsPile.length > 0 
+              ? mergedState.playedCardsPile[mergedState.playedCardsPile.length - 1] 
+              : null;
+              
+            // Extract player hands
+            const playerHands = {};
+            Object.keys(mergedState).forEach(key => {
+              if (key.match(/player\d+Deck/)) {
+                playerHands[key] = mergedState[key];
+              }
+            });
+              
+            // Derive currentPlayerIndex from turn (e.g. "Player 1" -> 0)
+            const currentPlayerIndex = turnNumber > 0 ? turnNumber - 1 : 0;
+            
+            // Extract direction if available, default to undefined (will keep existing value in DB)
+            const directionClockwise = mergedState.directionClockwise !== undefined ? mergedState.directionClockwise : undefined;
+            
+            // Update current game state in games table
+            // We only update the current state, avoiding snapshot creation for every move as requested
+            logger.info(`Updating Convex game state with: currentPlayerIndex=${currentPlayerIndex}, turnCount=${turnNumber}, clockwise=${directionClockwise}, color=${mergedState.currentColor}, value=${mergedState.currentNumber || mergedState.currentValue}, currentCard=${currentCard}`);
+            
+            await convexStorage.storeGameStateUpdate(convexGameId, {
+              currentPlayerIndex: currentPlayerIndex,
+              turnCount: turnNumber,
+              directionClockwise: directionClockwise,
+              currentColor: mergedState.currentColor,
+              currentValue: mergedState.currentNumber || mergedState.currentValue, // Frontend sends currentNumber
+              currentCard: currentCard,
+              lastPlayedCardHash: mergedState.lastPlayedCardHash || '',
+              deckHash: mergedState.deckHash || '',
+              playerHands: JSON.stringify(playerHands)
+            });
+          } catch (err) {
+            logger.error('Error storing game state update in Convex:', err);
+          }
+        }
       }
     } catch (error) {
       logger.error(`Error updating game state for socket ${socket.id}:`, error);

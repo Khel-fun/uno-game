@@ -12,7 +12,6 @@ import {useWalletAddress} from '@/utils/onchainWalletUtils';
 
 export default function TokenInfoBar() {
     const { address } = useWalletAddress();
-    console.log(address)
 
     return (
         <div className={`w-[100%] xl:max-w-[1280px] flex justify-between items-center mx-auto pt-5 px-3 bg-[#b49fc9]`}>

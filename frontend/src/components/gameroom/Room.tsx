@@ -66,12 +66,6 @@ const Room = () => {
 
   // Initialize computer game - simplified approach
   const initializeComputerGame = async () => {
-    console.log('Initializing computer game...');
-    console.log('Current gameStarted state:', gameStarted);
-    console.log('Current contract:', contract);
-    console.log('Current account:', account);
-    console.log('Current offChainGameState:', offChainGameState);
-    console.log('Current gameId:', gameId);
     
     // Verify all required data is available
     if (!contract) {
@@ -99,11 +93,8 @@ const Room = () => {
     }
     
     try {
-      console.log('Initializing computer game directly without blockchain transaction...');
-      
       // Skip the blockchain startGame transaction for computer mode
       // Just initialize the game state directly
-      console.log('Computer game initialized - skipping blockchain transaction');
       
       toast({
         title: "Computer game initialized",
@@ -114,7 +105,6 @@ const Room = () => {
       
       // Initialize the game state after the transaction is confirmed
       const newState = startGame(offChainGameState, socket);
-      console.log('New Computer Game State:', newState);
       
       const startingPlayer = newState.players[newState.currentPlayerIndex];
       setPlayerToStart(startingPlayer);
@@ -122,10 +112,8 @@ const Room = () => {
       // Create the action but don't commit it to the blockchain for computer mode
       const action: Action = { type: 'startGame', player: bytesAddress! };
       const actionHash = hashAction(action);
-      console.log('Computer game action hash (not committed to blockchain):', actionHash);
       
       // Skip the blockchain commitMove transaction for computer mode
-      console.log('Skipping blockchain commitMove transaction for computer mode');
 
       // Set the game as started and update the state
       setGameStarted(true);
@@ -145,9 +133,6 @@ const Room = () => {
         { id: "computer", name: "Computer", room: room as string }
       ]);
       setCurrentUser("Player 1");
-      
-      // We'll initialize the computer game after contract setup
-      console.log('Computer mode detected, will initialize after contract setup');
     } else {
       // Set room info for reconnection
       socketManager.setRoomInfo(room as string, id as string);
@@ -177,15 +162,11 @@ const Room = () => {
     };
   }, [room, isComputerMode, isConnected, isWalletConnected, address]);
 
-  console.log("Wallet connected:", isWalletConnected, account);
-
   useEffect(() => {
     const setup = async () => {
       if (account) {
         try {
-          console.log('Setting up contract with account:', account);
           const contractResult = await getContractNew();
-          console.log('Contract result:', contractResult);
           
           if (!contractResult.contract) {
             console.error('Failed to initialize contract');
@@ -193,20 +174,22 @@ const Room = () => {
             return;
           }
           
-          console.log('Contract initialized:', contractResult.contract);
           setContract(contractResult.contract);
           
           if (contractResult.contract && id) {
             const bigIntId = BigInt(id as string);
-            console.log('Setting game ID:', bigIntId.toString());
             setGameId(bigIntId);
             
-            console.log('Fetching game state...');
             const gameState = await fetchGameState(contractResult.contract, bigIntId, account);
             // Set the offChainGameState from the game state
             if (gameState) {
-              console.log('Game state fetched successfully');
               setOffChainGameState(gameState);
+              
+              // If game is already started on-chain, set local state
+              if (gameState.isStarted) {
+                setGameStarted(true);
+              }
+              
               // Note: For computer mode, we'll initialize the game in a separate useEffect
               // after all state is properly set, without blockchain transactions
               // For non-computer mode, we'll wait for the gameStarted event from the server
@@ -227,23 +210,9 @@ const Room = () => {
   // Separate useEffect to initialize computer game when all dependencies are available
   // For computer mode, we initialize the game without blockchain transactions
   useEffect(() => {
-    console.log('Computer game initialization check:', {
-      isComputerMode,
-      hasContract: !!contract,
-      hasOffChainGameState: !!offChainGameState,
-      hasGameId: !!gameId,
-      gameStarted
-    });
-    
     if (isComputerMode && contract && offChainGameState && gameId && !gameStarted) {
-      console.log('All required data available, initializing computer game (without blockchain transactions)...');
-      console.log('Contract details available (but not used for transactions):', contract);
-      console.log('Game ID:', gameId.toString());
-      console.log('Off-chain state:', offChainGameState);
-      
       // Small delay to ensure state is fully updated
       setTimeout(() => {
-        console.log('Executing initializeComputerGame after delay');
         initializeComputerGame();
       }, 2000);
     }
@@ -253,8 +222,6 @@ const Room = () => {
     if (!socket || !id) return;
 
     const roomId = `game-${id}`;
-    
-    console.log(`Joining room: ${roomId}`);
     
     // Only join room if connected
     if (isConnected) {
@@ -267,25 +234,34 @@ const Room = () => {
     
     // Handle reconnection - rejoin room when connection is restored
     const handleReconnect = () => {
-      console.log('Reconnected, rejoining room:', roomId);
+      console.log('Reconnected, rejoining room:', room);
+      
+      if (isComputerMode) {
+        // Computer mode doesn't need to rejoin lobby
+        return;
+      }
+      
+      // Reset the join flag so we can rejoin
+      hasJoinedRoom.current = false;
+      
+      // Rejoin the lobby room to restore user list
+      socket.emit("join", { room: room, address: address }, (error: any) => {
+        if (error) {
+          console.error('Error rejoining room:', error);
+          setRoomFull(true);
+        } else {
+          console.log('Successfully rejoined room, user list should update');
+          hasJoinedRoom.current = true;
+        }
+      });
+      
+      // Also rejoin the game room for game events
       socket.emit("joinRoom", roomId);
       
-      // Re-join the lobby room to get player list (if game hasn't started)
-      if (!gameStarted && !isComputerMode) {
-        console.log('Re-joining lobby room:', room);
-        socket.emit("join", { room: room, address: address }, (error: any) => {
-          if (error) {
-            console.error('Error rejoining lobby:', error);
-          } else {
-            console.log('Successfully rejoined lobby, should receive roomData');
-          }
-        });
-      }
-      
-      // Request game state sync if game was started
-      if (gameStarted) {
-        socket.emit('requestGameStateSync', { roomId, gameId: id });
-      }
+      // Always request game state sync on reconnection
+      // This ensures we get the latest state even if game started while disconnected
+      console.log('Requesting game state sync after reconnection');
+      socket.emit('requestGameStateSync', { roomId, gameId: id });
     };
     
     socket.on('connect', handleReconnect);
@@ -294,14 +270,8 @@ const Room = () => {
     
     // Set up game started event listener
     socket.on(`gameStarted-${roomId}`, (data: { newState: OffChainGameState; cardHashMap: any; }) => {
-        console.log(`Game started event received for room ${roomId}:`, data);
-        
         try {
           const { newState, cardHashMap } = data;
-          
-          console.log('Received newState:', newState);
-          console.log('Received cardHashMap:', cardHashMap);
-          console.log('Current account:', account);
           
           if (!newState) {
             console.error('Error: Received empty game state in gameStarted event');
@@ -309,29 +279,18 @@ const Room = () => {
           }
 
           if (cardHashMap) {
-            console.log('Updating global card hash map');
             updateGlobalCardHashMap(cardHashMap);
-          } else {
-            console.warn('Warning: No cardHashMap received in gameStarted event');
           }
 
-          console.log('Setting game as started');
           setGameStarted(true);
-
-          console.log('Updating off-chain game state');
           setOffChainGameState(newState);
 
           if (account) {
-            console.log('Updating player hand for account:', account);
-            console.log('Player hands in newState:', newState.playerHands);
-            
             const playerHandHashes = newState.playerHands[account];
-            console.log('Player hand hashes:', playerHandHashes);
             
             if (playerHandHashes) {
               setPlayerHand(playerHandHashes);
               storePlayerHand(BigInt(id as string), account, playerHandHashes);
-              console.log('Player hand updated and stored');
             } else {
               console.error(`Error: No hand found for player ${account} in the game state`);
             }
@@ -341,7 +300,6 @@ const Room = () => {
 
           if (newState.players && newState.currentPlayerIndex !== undefined) {
             const startingPlayer = newState.players[newState.currentPlayerIndex];
-            console.log('Setting player to start:', startingPlayer);
             setPlayerToStart(startingPlayer);
           } else {
             console.error('Error: Cannot determine starting player from game state');
@@ -367,7 +325,6 @@ const Room = () => {
         console.log('Received game state sync:', data);
         
         if (data.error) {
-          console.log('No saved game state found, starting fresh');
           return;
         }
         
@@ -431,7 +388,7 @@ const Room = () => {
       socket.off(`cardPlayed-${roomId}`);
       socket.off(`gameStateSync-${roomId}`);
     };
-  }, [id, socket, isConnected, gameStarted]);
+  }, [id, socket, isConnected]);
 
   useEffect(() => {
     const handleRoomData = ({ users }: { users: User[] }) => {
@@ -456,16 +413,12 @@ const Room = () => {
 
   const fetchGameState = async (contract: UnoGameContract, gameId: bigint, account: string) => {
     try {
-      console.log('Fetching game state for game ID:', gameId.toString());
-      console.log('Using contract:', contract);
-      
       if (!contract || !contract.getGame) {
         throw new Error('Invalid contract or missing getGame method');
       }
       
       // Call the getGame method on the ethers.js contract
       const gameData = await contract.getGame(gameId);
-      console.log('Raw game data:', gameData);
       
       if (!gameData) {
         throw new Error('No game data returned from contract');
@@ -473,7 +426,6 @@ const Room = () => {
       
       // Extract the data from the result
       const [id, players, status, startTime, endTime, gameHash, moves] = gameData;
-      console.log('On chain game state: ', { id, players, status, startTime, endTime, gameHash, moves })
 
       const formattedGameData = {
         id,
@@ -484,8 +436,6 @@ const Room = () => {
         gameHash,
         moves
       };
-
-      console.log('Formatted game data:', formattedGameData);
 
       let offChainGameState: OffChainGameState = {
         id: id, // Use the destructured variables directly
@@ -523,7 +473,6 @@ const Room = () => {
 
       // Update the state with the new game state
       setOffChainGameState(offChainGameState)
-      console.log('Off chain game state: ', offChainGameState)
 
       // Return the game state for further processing
       return offChainGameState;
@@ -535,7 +484,6 @@ const Room = () => {
   }
 
   const handleStartGame = async () => {
-    console.log('Starting game with:', { address, account, offChainGameState, gameId })
     if (!address || !account || !offChainGameState || !gameId) {
       console.error('Missing required data to start game')
       setError('Missing required data to start game')
@@ -550,8 +498,6 @@ const Room = () => {
     }
 
     try {
-      console.log('Starting game on contract...')
-      
       // Use writeContract to require user signature
       // writeContract({
       //   address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,

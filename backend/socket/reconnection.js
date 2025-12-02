@@ -87,6 +87,16 @@ function registerReconnectionHandlers(socket, io) {
       }
       
       if (gameState) {
+        // Check if this is the old multiplayer format (has 'turn' property)
+        // If so, add isStarted flag so client knows to render the game
+        if (gameState.turn && !gameState.isStarted) {
+          logger.info(`Adding isStarted flag to multiplayer game state for room ${roomId}`);
+          gameState = {
+            ...gameState,
+            isStarted: true // Mark as started so client renders the game board
+          };
+        }
+        
         // Send state back to the requesting client
         socket.emit(`gameStateSync-${roomId}`, {
           newState: gameState,

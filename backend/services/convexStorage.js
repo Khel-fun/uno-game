@@ -49,8 +49,8 @@ class ConvexStorageService {
         turnCount: Number(gameState.turnCount) || 0,
         directionClockwise: Boolean(gameState.directionClockwise),
         currentColor: gameState.currentColor,
-        currentValue: gameState.currentValue,
-        currentCard: gameState.currentCard,
+        currentValue: gameState.currentValue !== undefined && gameState.currentValue !== null ? String(gameState.currentValue) : undefined,
+        currentCard: gameState.currentCard || undefined,
         lastPlayedCardHash: gameState.lastPlayedCardHash,
         deckHash: gameState.deckHash,
         discardPileHash: gameState.discardPileHash,
@@ -86,8 +86,8 @@ class ConvexStorageService {
         turnCount: stateUpdates.turnCount !== undefined ? Number(stateUpdates.turnCount) : undefined,
         directionClockwise: stateUpdates.directionClockwise !== undefined ? Boolean(stateUpdates.directionClockwise) : undefined,
         currentColor: stateUpdates.currentColor,
-        currentValue: stateUpdates.currentValue,
-        currentCard: stateUpdates.currentCard,
+        currentValue: stateUpdates.currentValue !== undefined && stateUpdates.currentValue !== null ? String(stateUpdates.currentValue) : undefined,
+        currentCard: stateUpdates.currentCard || undefined, // Convert null/empty to undefined for optional string
         lastPlayedCardHash: stateUpdates.lastPlayedCardHash,
         deckHash: stateUpdates.deckHash,
         discardPileHash: stateUpdates.discardPileHash,
@@ -121,7 +121,7 @@ class ConvexStorageService {
    * @param {string} actionType - Type of action (playCard, drawCard, etc.)
    * @param {string} cardHash - Card hash (if applicable)
    */
-  async storeMove(gameId, turnNumber, playerAddress, actionType, cardHash = null) {
+  async storeMove(gameId, turnNumber, playerAddress, actionType, cardHash = undefined) {
     if (!convexClient.isEnabled()) return null;
 
     try {
@@ -161,7 +161,7 @@ class ConvexStorageService {
         currentPlayerIndex: Number(stateData.currentPlayerIndex),
         directionClockwise: Boolean(stateData.directionClockwise),
         currentColor: stateData.currentColor,
-        currentValue: stateData.currentValue,
+        currentValue: stateData.currentValue !== undefined && stateData.currentValue !== null ? String(stateData.currentValue) : undefined,
         lastPlayedCardHash: stateData.lastPlayedCardHash,
         deckHash: stateData.deckHash,
       });
