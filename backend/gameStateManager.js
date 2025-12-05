@@ -165,12 +165,11 @@ const saveGameState = (roomId, gameState, cardHashMap = null) => {
  * Get game state for a room
  * Uses Redis if enabled, falls back to in-memory storage
  * @param {string} roomId - The room identifier
- * @returns {object|null} The game state or null if not found
+ * @returns {Promise<object|null>} The game state or null if not found
  */
-const getGameState = (roomId) => {
+const getGameState = async (roomId) => {
     // Use Redis storage if enabled (async operation)
     if (isRedisEnabled()) {
-        // Return a promise that callers may need to handle
         return redisStorage.getGameState(roomId);
     }
 
@@ -188,9 +187,9 @@ const getGameState = (roomId) => {
  * Get game state by game ID (searches across all rooms)
  * Uses Redis if enabled, falls back to in-memory storage
  * @param {string} gameId - The game identifier
- * @returns {object|null} The game state or null if not found
+ * @returns {Promise<object|null>} The game state or null if not found
  */
-const getGameStateByGameId = (gameId) => {
+const getGameStateByGameId = async (gameId) => {
     // Use Redis storage if enabled
     if (isRedisEnabled()) {
         return redisStorage.getGameStateByGameId(gameId);
@@ -216,9 +215,9 @@ const getGameStateByGameId = (gameId) => {
  * Get card hash map for a room
  * Uses Redis if enabled, falls back to in-memory storage
  * @param {string} roomId - The room identifier
- * @returns {object|null} The card hash map or null if not found
+ * @returns {Promise<object|null>} The card hash map or null if not found
  */
-const getCardHashMap = (roomId) => {
+const getCardHashMap = async (roomId) => {
     // Use Redis storage if enabled
     if (isRedisEnabled()) {
         return redisStorage.getCardHashMap(roomId);
@@ -237,14 +236,18 @@ const getCardHashMap = (roomId) => {
  * Delete game state for a room
  * Uses Redis if enabled, falls back to in-memory storage
  * @param {string} roomId - The room identifier
+ * @returns {Promise<boolean>} Success status
  */
-const deleteGameState = (roomId) => {
+const deleteGameState = async (roomId) => {
     // Use Redis storage if enabled
     if (isRedisEnabled()) {
-        redisStorage.deleteGameState(roomId).catch(err => {
+        try {
+            await redisStorage.deleteGameState(roomId);
+            return true;
+        } catch (err) {
             logger.error(`Error deleting game state from Redis for room ${roomId}:`, err);
-        });
-        return true;
+            return false;
+        }
     }
 
     // Fallback to in-memory storage
@@ -261,9 +264,9 @@ const deleteGameState = (roomId) => {
  * Check if a room has a game state
  * Uses Redis if enabled, falls back to in-memory storage
  * @param {string} roomId - The room identifier
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
-const hasGameState = (roomId) => {
+const hasGameState = async (roomId) => {
     // Use Redis storage if enabled
     if (isRedisEnabled()) {
         return redisStorage.hasGameState(roomId);
@@ -276,9 +279,9 @@ const hasGameState = (roomId) => {
 /**
  * Get all active room IDs
  * Uses Redis if enabled, falls back to in-memory storage
- * @returns {string[]} Array of room IDs
+ * @returns {Promise<string[]>} Array of room IDs
  */
-const getActiveRooms = () => {
+const getActiveRooms = async () => {
     // Use Redis storage if enabled
     if (isRedisEnabled()) {
         return redisStorage.getActiveRooms();
