@@ -76,12 +76,40 @@ export default function PlayGame() {
 
   useEffect(() => {
     if (!socket.current) {
-      socket.current = io(CONNECTION, {
-        transports: ["websocket"],
+      const newSocket = io(CONNECTION, {
+        transports: ["websocket", "polling"],
+        reconnection: true, // Enable automatic reconnection
+        reconnectionAttempts: 10, // Try to reconnect 10 times
+        reconnectionDelay: 1000, // Start with 1 second delay
+        reconnectionDelayMax: 5000, // Max 5 seconds between attempts
+        timeout: 30000, // Connection timeout: 30 seconds
       }) as any; // Type assertion to fix the type mismatch
 
+      socket.current = newSocket;
       console.log("Socket connection established");
+
+      // Handle reconnection events
+      newSocket.on("connect", () => {
+        console.log("Socket connected/reconnected");
+      });
+
+      newSocket.on("disconnect", (reason: string) => {
+        console.log("Socket disconnected:", reason);
+      });
+
+      newSocket.on("connect_error", (error: Error) => {
+        console.error("Socket connection error:", error.message);
+      });
     }
+
+    // Cleanup on unmount
+    return () => {
+      if (socket.current) {
+        socket.current.off("connect");
+        socket.current.off("disconnect");
+        socket.current.off("connect_error");
+      }
+    };
   }, [socket]);
 
   useEffect(() => {

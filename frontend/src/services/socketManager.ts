@@ -40,8 +40,8 @@ class SocketManager {
       reconnectAttempts: config.reconnectAttempts || 10,
       reconnectDelay: config.reconnectDelay || 1000,
       reconnectDelayMax: config.reconnectDelayMax || 30000,
-      heartbeatInterval: config.heartbeatInterval || 8000, // Changed from 5000 to 8000 to align better with server's 10s interval
-      timeout: config.timeout || 20000, // Increased from 10000 to 20000 to match server pingTimeout
+      heartbeatInterval: config.heartbeatInterval || 20000, // Align with server's 25s ping interval
+      timeout: config.timeout || 30000, // Match server's connectTimeout
       ...config
     };
   }

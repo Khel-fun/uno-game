@@ -2,7 +2,7 @@ const Redis = require('ioredis');
 const logger = require('../logger');
 const dotenv = require("dotenv")
 
-dotenv.config(".env")
+dotenv.config({ path: ".env" })
 
 // Redis configuration with fallbacks
 const REDIS_HOST = process.env.REDIS_HOST || 'localhost';
