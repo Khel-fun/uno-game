@@ -1,31 +1,25 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import io, { Socket } from "socket.io-client";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useUserAccount } from "@/userstate/useUserAccount";
 import { WalletConnection } from "@/components/WalletConnection";
-import { useAccount, useConnect, useWalletClient, useWriteContract, useWaitForTransactionReceipt} from "wagmi";
-import BottomNavigation from "@/components/BottomNavigation";
-import GameCard from "./gameCard";
+import { useConnect, useWalletClient } from "wagmi";
 import Link from "next/link";
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { useChains } from 'wagmi'
 import { client } from "@/utils/thirdWebClient";
 import { baseSepolia } from "@/lib/chains";
 import { unoGameABI } from "@/constants/unogameabi";
-import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
+import { useReadContract, useSendTransaction } from "thirdweb/react";
 import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
 import ProfileDropdown from "@/components/profileDropdown"
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
-
-const CONNECTION =
-  process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
-  "https://zkuno-669372856670.us-central1.run.app";
+import socket, { socketManager } from "@/services/socket";
+import { useSocketConnection } from "@/context/SocketConnectionContext";
 
 // DIAM wallet integration removed
 
@@ -39,14 +33,15 @@ export default function PlayGame() {
   const { checkBalance } = useBalanceCheck();
   const router = useRouter();
   const chains = useChains();
+  
+  // Use global socket connection status
+  const { isConnected: isSocketConnected, status: socketStatus } = useSocketConnection();
 
   // Use Wagmi hooks for wallet functionality
-  const { address, isConnected,  } = useWalletAddress();
+  const { address, isConnected } = useWalletAddress();
   const { data: walletClient } = useWalletClient();
   const { account: recoilAccount } = useUserAccount();
   const { mutate: sendTransaction } = useSendTransaction();
-
-  const socket = useRef<Socket | null>(null);
 
   const { toast } = useToast();
 
@@ -74,63 +69,21 @@ export default function PlayGame() {
     return () => clearInterval(interval);
   }, [refetchGames]);
 
+  // Setup socket event listeners using global socket manager
   useEffect(() => {
-    if (!socket.current) {
-      const newSocket = io(CONNECTION, {
-        transports: ["websocket", "polling"],
-        reconnection: true, // Enable automatic reconnection
-        reconnectionAttempts: 10, // Try to reconnect 10 times
-        reconnectionDelay: 1000, // Start with 1 second delay
-        reconnectionDelayMax: 5000, // Max 5 seconds between attempts
-        timeout: 30000, // Connection timeout: 30 seconds
-      }) as any; // Type assertion to fix the type mismatch
-
-      socket.current = newSocket;
-      console.log("Socket connection established");
-
-      // Handle reconnection events
-      newSocket.on("connect", () => {
-        console.log("Socket connected/reconnected");
-      });
-
-      newSocket.on("disconnect", (reason: string) => {
-        console.log("Socket disconnected:", reason);
-      });
-
-      newSocket.on("connect_error", (error: Error) => {
-        console.error("Socket connection error:", error.message);
-      });
-    }
-
-    // Cleanup on unmount
-    return () => {
-      if (socket.current) {
-        socket.current.off("connect");
-        socket.current.off("disconnect");
-        socket.current.off("connect_error");
-      }
+    // Add listener for gameRoomCreated event
+    const handleGameRoomCreated = () => {
+      console.log("Game room created event received");
+      refetchGames();
     };
-  }, [socket]);
+    
+    socketManager.on("gameRoomCreated", handleGameRoomCreated);
 
-  useEffect(() => {
-    if (socket.current) {
-      console.log("Socket connection established");
-      // Add listener for gameRoomCreated event
-      socket.current.on("gameRoomCreated", () => {
-        console.log("Game room created event received");
-        refetchGames();
-      });
-
-      // Cleanup function
-      return () => {
-        if (socket.current) {
-          socket.current.off("gameRoomCreated");
-        }
-      };
-    }
-  }, [socket, refetchGames]);
-
-  const ISSERVER = typeof window === "undefined";
+    // Cleanup function
+    return () => {
+      socketManager.off("gameRoomCreated", handleGameRoomCreated);
+    };
+  }, [refetchGames]);
 
   const openHandler = () => {
     setOpen(false);
@@ -268,14 +221,12 @@ export default function PlayGame() {
               const gameId = BigInt(gameCreatedId); // Convert hex to decimal
               setGameId(gameId);
     
-              // Emit socket event to create computer game room
-              if (socket.current) {
-                socket.current.emit("createComputerGame", {
-                  gameId: gameId.toString(),
-                  playerAddress: address
-                });
-                console.log("Socket event emitted for computer game creation");
-              }
+              // Emit socket event to create computer game room using global socket manager
+              socketManager.emit("createComputerGame", {
+                gameId: gameId.toString(),
+                playerAddress: address
+              });
+              console.log("Socket event emitted for computer game creation");
     
               // Navigate to game room with computer mode flag
               router.push(`/game/${gameId}?mode=computer`);
