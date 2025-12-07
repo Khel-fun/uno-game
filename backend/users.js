@@ -58,7 +58,6 @@ class UserManager {
       existingConnected.id = id;
       existingConnected.connected = true;
       existingConnected.disconnectedAt = null;
-      this.users.set(id, existingConnected);
       logger.info('addOrReuseUser: reused connected user', { id, room, walletAddress });
       return { user: existingConnected, reused: true };
     }

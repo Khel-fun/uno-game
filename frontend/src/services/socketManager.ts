@@ -51,11 +51,13 @@ class SocketManager {
       return this.socket;
     }
 
+    console.log(this.socket?.connected)
+    console.log(this.currentStatus)
     this.updateStatus('connecting');
     
     this.socket = io(this.config.url, {
       forceNew: true,
-      reconnection: false, // We'll handle reconnection manually
+      reconnection: true, // We'll handle reconnection manually
       timeout: this.config.timeout,
       transports: ['websocket', 'polling'],
     });
@@ -72,7 +74,7 @@ class SocketManager {
 
     this.socket.on('connect', () => {
       // console.log('✅ Socket connected successfully - ID:', this.socket?.id);
-      // console.log('🔗 Connected to:', this.config.url);
+      console.log('🔗 Connected to:', this.config.url);
       this.updateStatus('connected');
       this.reconnectionInfo.attempts = 0;
       this.reconnectionInfo.isReconnecting = false;

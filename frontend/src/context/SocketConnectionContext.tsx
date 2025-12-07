@@ -31,6 +31,12 @@ export const SocketConnectionProvider: React.FC<SocketConnectionProviderProps> =
   const [isReconnecting, setIsReconnecting] = useState(false);
 
   useEffect(() => {
+    // Sync state immediately in case socket connected before mount
+    const currentStatus = socketManager.getStatus();
+    setStatus(currentStatus);
+    setIsConnected(currentStatus === 'connected');
+    setIsReconnecting(currentStatus === 'reconnecting');
+
     // Subscribe to status changes
     const unsubscribe = socketManager.onStatusChange((newStatus) => {
       setStatus(newStatus);
@@ -38,7 +44,7 @@ export const SocketConnectionProvider: React.FC<SocketConnectionProviderProps> =
       setIsReconnecting(newStatus === 'reconnecting');
     });
 
-    // Initial connection
+    // Initial connection if not already connected
     if (!socketManager.isConnected()) {
       socketManager.connect();
     }

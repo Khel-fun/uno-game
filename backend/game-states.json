@@ -1,237 +1,140 @@
 [
   {
     "state": {
+      "gameOver": true,
+      "winner": "Player 2",
+      "turn": "Player 1",
+      "playedCardsPile": [
+        "3G",
+        "5G",
+        "8G",
+        "D4W",
+        "2Y",
+        "6Y",
+        "9Y",
+        "7Y",
+        "4Y",
+        "D2Y",
+        "D2Y",
+        "D4W",
+        "3B",
+        "6B",
+        "1B"
+      ],
+      "currentColor": "B",
+      "currentNumber": "1",
+      "drawCardPile": [
+        "8B",
+        "skipG",
+        "3Y",
+        "3Y",
+        "9G",
+        "W",
+        "skipY",
+        "9Y",
+        "7B",
+        "W",
+        "0Y",
+        "5Y",
+        "5B",
+        "_Y",
+        "_B",
+        "5B",
+        "4Y",
+        "D2R",
+        "8G",
+        "8B",
+        "9G",
+        "7R",
+        "4G",
+        "8Y",
+        "8R",
+        "1G",
+        "4G",
+        "9B",
+        "D2B",
+        "1Y",
+        "0B",
+        "9R",
+        "D4W",
+        "2R",
+        "6G",
+        "1R",
+        "3R",
+        "6B",
+        "2B",
+        "5R",
+        "_R",
+        "4B",
+        "7R",
+        "skipY",
+        "_B",
+        "7B",
+        "1Y",
+        "4R",
+        "6Y",
+        "skipB",
+        "skipB",
+        "6R",
+        "6R",
+        "8Y",
+        "2G",
+        "W",
+        "skipR",
+        "1G",
+        "7G",
+        "D2G",
+        "7Y",
+        "8R",
+        "D2G",
+        "_G",
+        "5Y",
+        "0G",
+        "2B",
+        "5G",
+        "D4W",
+        "2R",
+        "2Y",
+        "_R",
+        "4B",
+        "1B",
+        "7G",
+        "2G",
+        "5R",
+        "_Y",
+        "W"
+      ],
+      "isExtraTurn": false,
+      "player2Deck": [],
+      "player1Deck": [
+        "4R",
+        "D2R",
+        "1R",
+        "D2B",
+        "skipG",
+        "skipR",
+        "9B",
+        "3R",
+        "_G",
+        "3G",
+        "6G",
+        "0R",
+        "9R",
+        "3B"
+      ],
+      "roomId": "game-220",
+      "_serverTimestamp": 1765104470477
+    },
+    "updatedAt": 1765104470477,
+    "roomId": "game-220"
+  },
+  {
+    "state": {
       "turn": "Player 1",
       "roomId": "game-260",
       "_serverTimestamp": 1765101081297
     },
     "updatedAt": 1765101081297,
     "roomId": "game-260"
-  },
-  {
-    "state": {
-      "id": "258",
-      "players": [
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB",
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b"
-      ],
-      "isActive": true,
-      "currentPlayerIndex": 0,
-      "lastActionTimestamp": "1765100068",
-      "turnCount": "0",
-      "directionClockwise": true,
-      "playerHandsHash": {
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB": "0xe6ca764027d617f97146447af385f2b630278b6dc2773e45089f211386a6cb6c",
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b": "0x702f2a3d399d3f2b3139eba3b6d9b2c2ee6952f2a1db73c99baf1b36556d1bd9"
-      },
-      "playerHands": {
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB": [
-          "0x69b892cb5734efe3abaa5dc50d3fa59c666a6037d176ae220462abc117b94212",
-          "0xe38d7c79e2ad5010b456b5bbae2dfc5aab45351feb74d3205576082a8b80907a",
-          "0x1bafc575d4a7660651bc2229537a13344579b5ce55bac3d4a3ad381a7ba0c471",
-          "0xab989ca5d3ed9f17379697aaa084cf6e67437c5fba95da4749342875754c3c83",
-          "0x817b2abfa69d35bc4232eeecdd512f0233450bc63765ab099affe0c8f53fb53f",
-          "0x69b892cb5734efe3abaa5dc50d3fa59c666a6037d176ae220462abc117b94212",
-          "0xe37603e8fd4a1ff9fe6be9b63b011fe6befae59014c2489e8da739a4c65f270d"
-        ],
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b": [
-          "0xea4914f40194dbf4e8446e085cd2741748a2194a8b682313f2bc5c20aa7e443f",
-          "0xb8c1e9e635c6c6b33514f9d0dca78dcd59961677c0efbe85ab9700d58ee75bb8",
-          "0x8366e3929693bbb0fdb4db485ffd46e535dafc9aabb55cf10ef937a90677200a",
-          "0xbcb94464a618758da06c25134dd66816b3e420a094f755005276dc780bc535a2",
-          "0x5c39dcfd9b7ef0065579746f490eb1d0dd7ff91c21f85b2584160755a6b8e3a3",
-          "0xde4f2a4bfd0d7c5c3d1dc3f0a3bf35b0168757671ca05ab091c219eae7eb9b6e",
-          "0xd2532e2d6aece71614274adabd2a25e35aa455c968de077929abd6d970459e8d"
-        ]
-      },
-      "deckHash": "0x9490e7fc79082297d0d228ca2f3f915ffc0be7b727a40450420667c356720b4b",
-      "discardPileHash": "0xde8eee2015af95174a30c5bcbb9b3ae471cf40abad840a2f8d3aa2201656dbd6",
-      "currentColor": "green",
-      "currentValue": "6",
-      "lastPlayedCardHash": "0x05e1114f5e734dfd45ef97aaf9e2db8d8d6d8a393d450e74ab0df7908ba13ccb",
-      "stateHash": "0x4065ae0fcf09e502d6ce460da30aaa2f3847534257c23378aa7266d2f668c895",
-      "isStarted": true
-    },
-    "updatedAt": 1765100093504,
-    "gameId": "258",
-    "roomId": "game-258"
-  },
-  {
-    "state": {
-      "id": "257",
-      "players": [
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB"
-      ],
-      "isActive": true,
-      "currentPlayerIndex": 0,
-      "lastActionTimestamp": "1765099652",
-      "turnCount": "0",
-      "directionClockwise": true,
-      "playerHandsHash": {
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB": "0x4dade5bdef4ec38cdd844077623ccc96112403c435305f1a0f40d21313e144a7"
-      },
-      "playerHands": {
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB": [
-          "0x2d10989a97d802c3d0cbd612e899bb6abf4aabe7430ff8e70f9d08a91acec67b",
-          "0xea4914f40194dbf4e8446e085cd2741748a2194a8b682313f2bc5c20aa7e443f",
-          "0x05e1114f5e734dfd45ef97aaf9e2db8d8d6d8a393d450e74ab0df7908ba13ccb",
-          "0x9df6869a9f040ef5e6e6179e2eb1cc90faac13a064c9698b2ddfbd74b59807b0",
-          "0xfd76de1903656f9ec6d5ef16a8443ae408dea9e8e5544553b05f2c4e9b128b11",
-          "0x077f32a467fa90a65458d5c025a802899ada0224c2b6bf718ba1de2616b9b5a6",
-          "0xea4914f40194dbf4e8446e085cd2741748a2194a8b682313f2bc5c20aa7e443f"
-        ]
-      },
-      "deckHash": "0xe66df2c2b041a3f8015c9f6e014a5d0e9295c35dd3f261e7edbab683cbc5f04f",
-      "discardPileHash": "0x39fc98ea7c164b58511e20f39855f4372ed0ceb36ba36a115d8f6695cc5e1a86",
-      "currentColor": "red",
-      "currentValue": "3",
-      "lastPlayedCardHash": "0x817b2abfa69d35bc4232eeecdd512f0233450bc63765ab099affe0c8f53fb53f",
-      "stateHash": "0xb49df0b028cd3d4e59f2b46ac709d85d2484166f39d5f89ada8de1b6a5669500",
-      "isStarted": true
-    },
-    "updatedAt": 1765099704092,
-    "gameId": "257",
-    "roomId": "game-257"
-  },
-  {
-    "state": {
-      "id": "256",
-      "players": [
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b"
-      ],
-      "isActive": true,
-      "currentPlayerIndex": 0,
-      "lastActionTimestamp": "1765099458",
-      "turnCount": "0",
-      "directionClockwise": true,
-      "playerHandsHash": {
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b": "0xb4f69ab6c159545f8874ef636e9a8252f6e5c9da659edb84ffecf08a75a86d99"
-      },
-      "playerHands": {
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b": [
-          "0x01ae72969679544305497ee0a82976cbd2e1d251989fbf66428912993b069f76",
-          "0x95a50b3c57c0050aa0661c9c30719d75e18de5ccd2cc3d31207462dc05da8c45",
-          "0x95a50b3c57c0050aa0661c9c30719d75e18de5ccd2cc3d31207462dc05da8c45",
-          "0xab989ca5d3ed9f17379697aaa084cf6e67437c5fba95da4749342875754c3c83",
-          "0xea4914f40194dbf4e8446e085cd2741748a2194a8b682313f2bc5c20aa7e443f",
-          "0x2d10989a97d802c3d0cbd612e899bb6abf4aabe7430ff8e70f9d08a91acec67b",
-          "0xb8c1e9e635c6c6b33514f9d0dca78dcd59961677c0efbe85ab9700d58ee75bb8"
-        ]
-      },
-      "deckHash": "0xc5cd65800678c4ab66ae209a28419f591876babe589350603c375e4cb0ad008d",
-      "discardPileHash": "0xa9d7cf2bc383feb4bfbfaee2d8c1e9108d9b273c3193305054d637b7a399e6dc",
-      "currentColor": "green",
-      "currentValue": "5",
-      "lastPlayedCardHash": "0xbe7b89090d5e89fca73e40eda07ca0fdca47f92978562a292ed7a1532a1f7731",
-      "stateHash": "0x96e223349fb1a461b8374e5d3e865adbf2dec5eac5a11dce797f830223300317",
-      "isStarted": true
-    },
-    "updatedAt": 1765099476262,
-    "gameId": "256",
-    "roomId": "game-256"
-  },
-  {
-    "state": {
-      "id": "253",
-      "players": [
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b",
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b",
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB",
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b",
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB",
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB",
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b"
-      ],
-      "isActive": true,
-      "currentPlayerIndex": 3,
-      "lastActionTimestamp": "1765087762",
-      "turnCount": "0",
-      "directionClockwise": true,
-      "playerHandsHash": {
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b": "0x3a02e500d43ceccf07bf0d84539c81a4f7ca388e9b9b793411f68550229f8d7e",
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB": "0xc12c0b23ff2a3b95067e272568f48a5efb5ee57d0f0401bcd0b1c6f300f01c8e"
-      },
-      "playerHands": {
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b": [
-          "0xbe7b89090d5e89fca73e40eda07ca0fdca47f92978562a292ed7a1532a1f7731",
-          "0xb8c1e9e635c6c6b33514f9d0dca78dcd59961677c0efbe85ab9700d58ee75bb8",
-          "0xfd76de1903656f9ec6d5ef16a8443ae408dea9e8e5544553b05f2c4e9b128b11",
-          "0xb81fb16e2466ee7a5eef2e9988c58d45a504f7381cee97d6d577e8b7f582b352",
-          "0xde4f2a4bfd0d7c5c3d1dc3f0a3bf35b0168757671ca05ab091c219eae7eb9b6e",
-          "0x338b2cc1487b44d7acbc0e3f38fd750f6dbd642c6323f95cfcd24a741166db85",
-          "0xbf3e33837d09cfd0d1cd12131834a0602e22cce7d287931b3091eeb4a6c82076"
-        ],
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB": [
-          "0x7ba14ac7e9e9ead6f25896029fc6c7514f593654d2fb936dc90b43f9dcf757d8",
-          "0x2d10989a97d802c3d0cbd612e899bb6abf4aabe7430ff8e70f9d08a91acec67b",
-          "0xb8c1e9e635c6c6b33514f9d0dca78dcd59961677c0efbe85ab9700d58ee75bb8",
-          "0x9df6869a9f040ef5e6e6179e2eb1cc90faac13a064c9698b2ddfbd74b59807b0",
-          "0xefefb90b099ae45d03c7708a5dc328691f6ee5767ad3874922fbd0c7e52bb008",
-          "0x95a50b3c57c0050aa0661c9c30719d75e18de5ccd2cc3d31207462dc05da8c45",
-          "0xd2532e2d6aece71614274adabd2a25e35aa455c968de077929abd6d970459e8d"
-        ]
-      },
-      "deckHash": "0x2da764f9a1be80ba6ec9e2823d326b76a48e56558445f3cceefbc2b0f513f908",
-      "discardPileHash": "0xbbdfcf3872b7d5edf19bf18d2fd407d9d9e3d4afd5e67d10041771993c999ae6",
-      "currentColor": "red",
-      "currentValue": "0",
-      "lastPlayedCardHash": "0x182bdcb9566f041a6c330a8412acb345d65c64858f92d949eb4d29eb2ef20316",
-      "stateHash": "0xff5fba466e0de8bf014ad7aeddfb0a0a7784859fc980430581a461cf7a9c1de5",
-      "isStarted": true
-    },
-    "updatedAt": 1765098580100,
-    "gameId": "253",
-    "roomId": "game-253"
-  },
-  {
-    "state": {
-      "id": "254",
-      "players": [
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b",
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b",
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB",
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB",
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b"
-      ],
-      "isActive": true,
-      "currentPlayerIndex": 3,
-      "lastActionTimestamp": "1765095606",
-      "turnCount": "0",
-      "directionClockwise": true,
-      "playerHandsHash": {
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b": "0x01e8053d8c40e58932b9784f0e01099e60278aced52c3e4007bcb1a177fe771d",
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB": "0x525f09e8c3b37cde1900503da5e36c23bce7db76fecc4a60073fb35ba4a47bfb"
-      },
-      "playerHands": {
-        "0xfb749E1f494E4e5e91A012B039807e3e1892637b": [
-          "0xa1209d88cfa5246ce533dbaca0fc1c4f270efbc4ccff586ee5ae554c225363c9",
-          "0x69b892cb5734efe3abaa5dc50d3fa59c666a6037d176ae220462abc117b94212",
-          "0x92d70a1910fa2888b1428d7e78c9e6e4404ee0e643f04c410a61f0b973dcc956",
-          "0xb81fb16e2466ee7a5eef2e9988c58d45a504f7381cee97d6d577e8b7f582b352",
-          "0x338b2cc1487b44d7acbc0e3f38fd750f6dbd642c6323f95cfcd24a741166db85",
-          "0x07037955e92cbeed60d94d9817c56d46884c7c3cc5385dbea5c97c3ce5fd494a",
-          "0xde4f2a4bfd0d7c5c3d1dc3f0a3bf35b0168757671ca05ab091c219eae7eb9b6e"
-        ],
-        "0x030e255635dfE3eB318943B726870535BFe6B9FB": [
-          "0x077f32a467fa90a65458d5c025a802899ada0224c2b6bf718ba1de2616b9b5a6",
-          "0xeb1abc239c8747f267a63235a38d9b77b8e7f123955329c427cfd3fa03687e65",
-          "0x886d384f5c6f06f1acd1e6b8dcdc579e4fec19cdb407ed2fc289ef3c2b5f1c63",
-          "0x1bafc575d4a7660651bc2229537a13344579b5ce55bac3d4a3ad381a7ba0c471",
-          "0xbf3e33837d09cfd0d1cd12131834a0602e22cce7d287931b3091eeb4a6c82076",
-          "0x9df6869a9f040ef5e6e6179e2eb1cc90faac13a064c9698b2ddfbd74b59807b0",
-          "0x0139ab0fdd5600ecf935686aea080b1f411f5dec44092660cc18401aa8a7fbd8"
-        ]
-      },
-      "deckHash": "0xb449a5bafc5d0ddb277993fe3060cea863a9cd4b8bd7873b0e4b2110890b07f9",
-      "discardPileHash": "0x9e90ce6ae4c31becdb0fc025668cba11c19fcf6cd16e981d5526f1427e48505e",
-      "currentColor": "green",
-      "currentValue": "3",
-      "lastPlayedCardHash": "0x006759f60d067e878a02a6bc458b0d700d231e0079c05b50b4d249c2b5d38da9",
-      "stateHash": "0xea0db025118ce843e767f9199631bb402b810b64dac5feb78ec79b3733db56bf",
-      "isStarted": true
-    },
-    "updatedAt": 1765097539445,
-    "gameId": "254",
-    "roomId": "game-254"
   }
 ]

@@ -101,8 +101,8 @@ const Room = () => {
       // We'll initialize the computer game after contract setup
       // console.log('Computer mode detected, will initialize after contract setup');
     } else {
-      // Set room info for reconnection
-      socketManager.setRoomInfo(room as string, id as string);
+      // Set room info for reconnection (game-* room id)
+      socketManager.setRoomInfo(`game-${room}`, id as string);
       
       // Only join if we haven't already and socket is connected
       if (isConnected && !hasJoinedRoom.current) {
