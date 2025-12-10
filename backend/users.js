@@ -1,93 +1,140 @@
 const logger = require('./logger');
-const users = []
+const { MAX_PLAYERS, RECONNECTION_GRACE_MS } = require('./constants');
 
-const addUser = ({id, name, room}) => {
-   const numberOfUsersInRoom = users.filter(user => user.room === room && user.connected !== false).length
-   if(numberOfUsersInRoom === 6) {
-      logger.info(`Room ${room} is full, user ${id} rejected`);
+class UserManager {
+  constructor() {
+    this.users = new Map(); // socketId -> user
+  }
+
+  getUsersInRoom(room) {
+    return Array.from(this.users.values()).filter((u) => u.room === room);
+  }
+
+  getUser(id) {
+    return this.users.get(id);
+  }
+
+  nextPlayerNumber(room) {
+    const present = new Set(
+      this.getUsersInRoom(room)
+        .filter((u) => u.playerNumber != null)
+        .map((u) => u.playerNumber)
+    );
+    for (let i = 1; i <= MAX_PLAYERS; i++) {
+      if (!present.has(i)) return i;
+    }
+    return null;
+  }
+
+  addOrReuseUser({ id, room, walletAddress }) {
+    logger.info('addOrReuseUser: incoming', { id, room, walletAddress });
+    
+    const existingDisconnected = this.getUsersInRoom(room).find(
+      (u) =>
+        u.walletAddress &&
+        walletAddress &&
+        u.walletAddress.toLowerCase() === walletAddress.toLowerCase() &&
+        !u.connected
+    );
+    logger.info('addOrReuseUser: existingDisconnected?', { found: !!existingDisconnected, existingDisconnected });
+
+    if (existingDisconnected) {
+      existingDisconnected.id = id;
+      existingDisconnected.connected = true;
+      existingDisconnected.disconnectedAt = null;
+      this.users.set(id, existingDisconnected);
+      logger.info('addOrReuseUser: reused disconnected user', { id, room, walletAddress });
+      return { user: existingDisconnected, reused: true };
+    }
+
+    const existingConnected = this.getUsersInRoom(room).find(
+      (u) =>
+        u.walletAddress &&
+        walletAddress &&
+        u.walletAddress.toLowerCase() === walletAddress.toLowerCase()
+    );
+
+    if (existingConnected) {
+      existingConnected.id = id;
+      existingConnected.connected = true;
+      existingConnected.disconnectedAt = null;
+      logger.info('addOrReuseUser: reused connected user', { id, room, walletAddress });
+      return { user: existingConnected, reused: true };
+    }
+
+    // Enforce capacity
+    const usersInRoom = this.getUsersInRoom(room).filter((u) => u.connected);
+    if (usersInRoom.length >= MAX_PLAYERS) {
+      logger.warn('addOrReuseUser: room full', { room, usersInRoom: usersInRoom.length });
       return { error: 'Room full' };
-   }
+    }
 
-   // Check if user is reconnecting (same name in same room)
-   const existingUser = users.find(u => u.name === name && u.room === room && u.connected === false);
-   if (existingUser) {
-      // User is reconnecting, update their socket ID
-      existingUser.id = id;
-      existingUser.connected = true;
-      existingUser.disconnectedAt = null;
-      logger.info(`User ${name} reconnected to room ${room} with new socket ${id}`);
-      return { newUser: existingUser, reconnected: true };
-   }
+    const playerNumber = this.nextPlayerNumber(room);
+    logger.info('addOrReuseUser: assigning playerNumber', { room, playerNumber });
 
-   const newUser = { id, name, room, connected: true, disconnectedAt: null };
-   users.push(newUser);
-   logger.info(`User ${id} added to room ${room} as ${name}`);
-   return { newUser };
-}
+    const user = {
+      id,
+      name: `Player ${playerNumber}`,
+      playerNumber,
+      room,
+      walletAddress: walletAddress || null,
+      connected: true,
+      disconnectedAt: null,
+    };
+    this.users.set(id, user);
+    logger.info('addOrReuseUser: created new user', { id, room, walletAddress, playerNumber });
+    return { user, reused: false };
+  }
 
-const removeUser = id => {
-   const removeIndex = users.findIndex(user => user.id === id);
+  markDisconnected(id) {
+    const user = this.users.get(id);
+    if (!user) return null;
+    user.connected = false;
+    user.disconnectedAt = Date.now();
+    return user;
+  }
 
-   if(removeIndex!==-1) {
-       const removedUser = users.splice(removeIndex, 1)[0];
-       logger.info(`User ${id} removed from room ${removedUser.room}`);
-       return removedUser;
-   }
-   logger.debug(`Attempted to remove non-existent user ${id}`);
-   return null;
-}
+  removeUser(id) {
+    const user = this.users.get(id);
+    if (!user) return null;
+    this.users.delete(id);
+    return user;
+  }
 
-// Mark user as disconnected instead of removing immediately
-const markUserDisconnected = id => {
-   const user = users.find(user => user.id === id);
-   if (user) {
-      user.connected = false;
-      user.disconnectedAt = Date.now();
-      logger.info(`User ${id} marked as disconnected in room ${user.room}`);
-      return user;
-   }
-   return null;
-}
-
-// Clean up users who have been disconnected for too long
-const cleanupDisconnectedUsers = (maxDisconnectTime = 60000) => {
-   const now = Date.now();
-   const toRemove = users.filter(user => 
-      user.connected === false && 
-      user.disconnectedAt && 
-      (now - user.disconnectedAt) > maxDisconnectTime
-   );
-   
-   toRemove.forEach(user => {
-      const index = users.findIndex(u => u.id === user.id);
-      if (index !== -1) {
-         users.splice(index, 1);
-         logger.info(`Cleaned up disconnected user ${user.id} from room ${user.room}`);
+  cleanupDisconnected() {
+    const now = Date.now();
+    for (const [id, user] of this.users.entries()) {
+      if (!user.connected && user.disconnectedAt && now - user.disconnectedAt > RECONNECTION_GRACE_MS) {
+        this.users.delete(id);
       }
-   });
-   
-   return toRemove;
+    }
+  }
+
+  reconnectUser({ room, walletAddress, newId }) {
+    const candidates = this.getUsersInRoom(room).filter((u) => !u.connected);
+
+    let match = null;
+    if (walletAddress) {
+      match = candidates.find(
+        (u) =>
+          u.walletAddress &&
+          u.walletAddress.toLowerCase() === walletAddress.toLowerCase()
+      );
+    }
+    if (!match) {
+      match = candidates[0];
+    }
+
+    if (!match) return null;
+
+    // Reassign id and mark connected
+    this.users.delete(match.id);
+    match.id = newId;
+    match.connected = true;
+    match.disconnectedAt = null;
+    this.users.set(newId, match);
+    return match;
+  }
 }
 
-// Find user by name and room (for reconnection)
-const findUserByNameAndRoom = (name, room) => {
-   return users.find(user => user.name === name && user.room === room);
-}
-
-const getUser = id => {
-   return users.find(user => user.id === id)
-}
-
-const getUsersInRoom = room => {
-   return users.filter(user => user.room === room)
-}
-
-module.exports = { 
-   addUser, 
-   removeUser, 
-   getUser, 
-   getUsersInRoom, 
-   markUserDisconnected, 
-   cleanupDisconnectedUsers,
-   findUserByNameAndRoom 
-}
+module.exports = new UserManager();

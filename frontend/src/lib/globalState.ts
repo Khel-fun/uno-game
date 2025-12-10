@@ -4,7 +4,7 @@ let globalCardHashMap: Map<string, Card> = new Map();
 
 export function updateGlobalCardHashMap(newCardHashMap: Record<string, Card>) {
   globalCardHashMap = new Map(Object.entries(newCardHashMap));
-  console.log('Updated global cardHashMap:', globalCardHashMap);
+  // console.log('Updated global cardHashMap:', globalCardHashMap);
 }
 
 export function getGlobalCardHashMap(): Map<string, Card> {

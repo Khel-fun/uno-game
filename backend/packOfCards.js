@@ -1,113 +1,29 @@
-//pack of 108 cards (_ = reverse)
-const PACK_OF_CARDS = [
-  "0R",
-  "1R",
-  "1R",
-  "2R",
-  "2R",
-  "3R",
-  "3R",
-  "4R",
-  "4R",
-  "5R",
-  "5R",
-  "6R",
-  "6R",
-  "7R",
-  "7R",
-  "8R",
-  "8R",
-  "9R",
-  "9R",
-  "skipR",
-  "skipR",
-  "_R",
-  "_R",
-  "D2R",
-  "D2R",
-  "0G",
-  "1G",
-  "1G",
-  "2G",
-  "2G",
-  "3G",
-  "3G",
-  "4G",
-  "4G",
-  "5G",
-  "5G",
-  "6G",
-  "6G",
-  "7G",
-  "7G",
-  "8G",
-  "8G",
-  "9G",
-  "9G",
-  "skipG",
-  "skipG",
-  "_G",
-  "_G",
-  "D2G",
-  "D2G",
-  "0B",
-  "1B",
-  "1B",
-  "2B",
-  "2B",
-  "3B",
-  "3B",
-  "4B",
-  "4B",
-  "5B",
-  "5B",
-  "6B",
-  "6B",
-  "7B",
-  "7B",
-  "8B",
-  "8B",
-  "9B",
-  "9B",
-  "skipB",
-  "skipB",
-  "_B",
-  "_B",
-  "D2B",
-  "D2B",
-  "0Y",
-  "1Y",
-  "1Y",
-  "2Y",
-  "2Y",
-  "3Y",
-  "3Y",
-  "4Y",
-  "4Y",
-  "5Y",
-  "5Y",
-  "6Y",
-  "6Y",
-  "7Y",
-  "7Y",
-  "8Y",
-  "8Y",
-  "9Y",
-  "9Y",
-  "skipY",
-  "skipY",
-  "_Y",
-  "_Y",
-  "D2Y",
-  "D2Y",
-  "W",
-  "W",
-  "W",
-  "W",
-  "D4W",
-  "D4W",
-  "D4W",
-  "D4W",
-];
+// Basic UNO-like card pack definition used for state mapping
+const colors = ['R', 'G', 'B', 'Y']; // Red, Green, Blue, Yellow
+const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const specials = ['skip', '_', 'D2']; // Skip, Reverse, Draw 2
+const wilds = ['W', 'D4W']; // Wild, Wild Draw 4
 
-module.exports = PACK_OF_CARDS;
+function buildDeck() {
+  const deck = [];
+  colors.forEach((color) => {
+    numbers.forEach((num) => {
+      // One 0 per color, two of 1-9
+      deck.push(`${num}${color}`);
+      if (num !== '0') deck.push(`${num}${color}`);
+    });
+    specials.forEach((sp) => {
+      deck.push(`${sp}${color}`);
+      deck.push(`${sp}${color}`);
+    });
+  });
+  wilds.forEach((w) => {
+    deck.push(w);
+    deck.push(w);
+    deck.push(w);
+    deck.push(w);
+  });
+  return deck;
+}
+
+module.exports = { buildDeck };

@@ -1,10 +1,9 @@
-/**
- * Game Constants
- * Shared constants used across the backend
- */
-
-const MAX_PLAYERS = 3;
-
 module.exports = {
-  MAX_PLAYERS
+  MAX_PLAYERS: 6,
+  RECONNECTION_GRACE_MS: 60_000,
+  GAME_STATE_TTL_MS: 60 * 60 * 1000, // 1 hour
+  USER_CLEANUP_INTERVAL_MS: 30 * 1000,
+  GAME_CLEANUP_INTERVAL_MS: 5 * 60 * 1000,
+  FILE_PERSIST_INTERVAL_MS: 30 * 1000,
+  MAX_STORED_GAMES: 10,
 };

@@ -38,7 +38,7 @@ export function useWallet() {
   // Handle network change
   useEffect(() => {
     if (chainId) {
-      console.log(`Connected to chain ID: ${chainId}`);
+      // console.log(`Connected to chain ID: ${chainId}`);
     }
   }, [chainId]);
 

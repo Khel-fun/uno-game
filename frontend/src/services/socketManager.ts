@@ -40,8 +40,8 @@ class SocketManager {
       reconnectAttempts: config.reconnectAttempts || 10,
       reconnectDelay: config.reconnectDelay || 1000,
       reconnectDelayMax: config.reconnectDelayMax || 30000,
-      heartbeatInterval: config.heartbeatInterval || 8000, // Changed from 5000 to 8000 to align better with server's 10s interval
-      timeout: config.timeout || 20000, // Increased from 10000 to 20000 to match server pingTimeout
+      heartbeatInterval: config.heartbeatInterval || 20000, // Align with server's 25s ping interval
+      timeout: config.timeout || 30000, // Match server's connectTimeout
       ...config
     };
   }
@@ -51,11 +51,13 @@ class SocketManager {
       return this.socket;
     }
 
+    console.log(this.socket?.connected)
+    console.log(this.currentStatus)
     this.updateStatus('connecting');
     
     this.socket = io(this.config.url, {
       forceNew: true,
-      reconnection: false, // We'll handle reconnection manually
+      reconnection: true, // We'll handle reconnection manually
       timeout: this.config.timeout,
       transports: ['websocket', 'polling'],
     });
@@ -67,10 +69,11 @@ class SocketManager {
   }
 
   private setupEventHandlers(): void {
+    console.log(this.socket)
     if (!this.socket) return;
 
     this.socket.on('connect', () => {
-      console.log('✅ Socket connected successfully - ID:', this.socket?.id);
+      // console.log('✅ Socket connected successfully - ID:', this.socket?.id);
       console.log('🔗 Connected to:', this.config.url);
       this.updateStatus('connected');
       this.reconnectionInfo.attempts = 0;
@@ -87,7 +90,7 @@ class SocketManager {
     });
 
     this.socket.on('disconnect', (reason: string) => {
-      console.log('Socket disconnected:', reason);
+      // console.log('Socket disconnected:', reason);
       this.updateStatus('disconnected');
       
       // Stop heartbeat when disconnected
@@ -115,14 +118,14 @@ class SocketManager {
     this.socket.on('pong', () => {
       const timestamp = new Date().toISOString();
       this.lastPongTime = Date.now();
-      console.log(`[Heartbeat] ✅ Received pong at ${timestamp} - Missed heartbeats reset to 0`);
+      // console.log(`[Heartbeat] ✅ Received pong at ${timestamp} - Missed heartbeats reset to 0`);
       this.missedHeartbeats = 0;
     });
     */
 
     // Custom reconnection success event
     this.socket.on('reconnected', (data: any) => {
-      console.log('Successfully reconnected to room:', data);
+      // console.log('Successfully reconnected to room:', data);
       this.reconnectionInfo.lastRoom = data.room;
       this.reconnectionInfo.lastGameId = data.gameId;
     });
@@ -140,7 +143,7 @@ class SocketManager {
       if (this.socket?.connected) {
         const timestamp = new Date().toISOString();
         const timeSinceLastPong = Date.now() - this.lastPongTime;
-        console.log(`[Heartbeat] 📤 Sending ping at ${timestamp} - Current missed: ${this.missedHeartbeats}, Time since last pong: ${timeSinceLastPong}ms`);
+        // console.log(`[Heartbeat] 📤 Sending ping at ${timestamp} - Current missed: ${this.missedHeartbeats}, Time since last pong: ${timeSinceLastPong}ms`);
         
         this.socket.emit('ping');
         this.missedHeartbeats++;
@@ -159,7 +162,7 @@ class SocketManager {
 
   private stopHeartbeat(): void {
     if (this.heartbeatTimer) {
-      console.log('[Heartbeat] 🛑 Stopping heartbeat timer');
+      // console.log('[Heartbeat] 🛑 Stopping heartbeat timer');
       clearInterval(this.heartbeatTimer);
       this.heartbeatTimer = null;
     }
@@ -168,6 +171,7 @@ class SocketManager {
   */
 
   private attemptReconnect(): void {
+    console.log(this.socket)
     if (this.reconnectionInfo.isReconnecting || 
         this.reconnectionInfo.attempts >= this.config.reconnectAttempts!) {
       if (this.reconnectionInfo.attempts >= this.config.reconnectAttempts!) {
@@ -187,7 +191,7 @@ class SocketManager {
       this.config.reconnectDelayMax!
     );
 
-    console.log(`Attempting to reconnect (attempt ${this.reconnectionInfo.attempts}/${this.config.reconnectAttempts}) in ${delay}ms...`);
+    // console.log(`Attempting to reconnect (attempt ${this.reconnectionInfo.attempts}/${this.config.reconnectAttempts}) in ${delay}ms...`);
 
     setTimeout(() => {
       if (this.socket && !this.socket.connected) {
@@ -201,14 +205,14 @@ class SocketManager {
   private rejoinRoom(): void {
     if (!this.socket || !this.reconnectionInfo.lastRoom) return;
 
-    console.log('Attempting to rejoin room:', this.reconnectionInfo.lastRoom);
+    // console.log('Attempting to rejoin room:', this.reconnectionInfo.lastRoom);
     
     this.socket.emit('rejoinRoom', {
       room: this.reconnectionInfo.lastRoom,
       gameId: this.reconnectionInfo.lastGameId,
     }, (response: any) => {
       if (response.success) {
-        console.log('Successfully rejoined room');
+        // console.log('Successfully rejoined room');
         // Emit custom event for components to sync state
         this.socket!.emit('roomRejoined', {
           room: this.reconnectionInfo.lastRoom,
@@ -225,7 +229,7 @@ class SocketManager {
     this.reconnectionInfo.pendingActions = [];
     
     actions.forEach(action => {
-      console.log('Processing pending action:', action.event);
+      // console.log('Processing pending action:', action.event);
       this.emit(action.event, action.data, action.callback);
     });
   }
@@ -244,7 +248,7 @@ class SocketManager {
       }
     } else {
       // Buffer the action if disconnected
-      console.log('Buffering action for reconnection:', event);
+      // console.log('Buffering action for reconnection:', event);
       this.reconnectionInfo.pendingActions.push({ event, data, callback });
     }
   }
@@ -323,7 +327,7 @@ class SocketManager {
 
 // Create singleton instance
 const socketManager = new SocketManager({
-  url: process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'https://zkuno-669372856670.us-central1.run.app',
+  url: process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'http://localhost:4000',
 });
 
 export default socketManager;

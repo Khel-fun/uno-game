@@ -43,7 +43,6 @@ export function createDeck(): Card[] {
     deck.push({ color: 'wild', value: 'wild_draw4' });
   }
   
-  console.log('Cards in deck: ', deck.length);
   return deck;
 }
 
@@ -65,7 +64,6 @@ export function shuffleDeck(deck: Card[], seed: number): Card[] {
     shuffled[currentIndex] = shuffled[randomIndex];
     shuffled[randomIndex] = temporaryValue;
   }
-  console.log('Card count shuffled deck: ', shuffled.length);
   return shuffled;
 }
 
@@ -109,8 +107,8 @@ export function convertBigIntsToStrings(obj: any): any {
 export function startGame(state: OffChainGameState, socket?: any): OffChainGameState {
   const newState = { ...state };
   deck = shuffleDeck(createDeck(), Number(state.id));
-  console.log(deck)
-  console.log(deck.length)
+  // console.log(deck)
+  // console.log(deck.length)
   let tempCardHashMap: Map<string, Card> = new Map();
   tempCardHashMap.clear()
 
@@ -118,7 +116,7 @@ export function startGame(state: OffChainGameState, socket?: any): OffChainGameS
     const hash = hashCard(card);
     tempCardHashMap.set(hash, card);
   });
-  console.log('Temp Card Deck Size: ',tempCardHashMap.size)
+  // console.log('Temp Card Deck Size: ',tempCardHashMap.size)
   // Update the global cardHashMap
   updateGlobalCardHashMap(Object.fromEntries(tempCardHashMap));
   // Deal hands
@@ -133,7 +131,7 @@ export function startGame(state: OffChainGameState, socket?: any): OffChainGameS
     });
     newState.playerHandsHash[player] = hashCards(hand);
     newState.playerHands[player] = handHashes;
-    console.log(`Player ${player} hand: `, handHashes)
+    // console.log(`Player ${player} hand: `, handHashes)
   });
 
   // Set up discard pile
@@ -171,10 +169,10 @@ export function startGame(state: OffChainGameState, socket?: any): OffChainGameS
       cardHashMap: cardHashMapObject
     });
 
-    console.log(`Emitted gameStarted-${roomId} event with:`, {
-      newState: convertBigIntsToStrings(newState),
-      cardHashMap: Object.keys(cardHashMapObject).length + ' cards'
-    });
+    // console.log(`Emitted gameStarted-${roomId} event with:`, {
+    //   newState: convertBigIntsToStrings(newState),
+    //   cardHashMap: Object.keys(cardHashMapObject).length + ' cards'
+    // });
   }
 
   return newState;
@@ -222,18 +220,18 @@ export function applyActionToOffChainState(state: OffChainGameState, action: Act
           // Handle special cards
           if (playedCard.value === 'skip') {
             skipNextPlayer = true;
-            console.log('Skip card played - next player will be skipped');
+            // console.log('Skip card played - next player will be skipped');
           } else if (playedCard.value === 'reverse') {
             reverseDirection = true;
-            console.log('Reverse card played - direction will be reversed');
+            // console.log('Reverse card played - direction will be reversed');
           } else if (playedCard.value === 'draw2') {
             drawCards = 2;
             skipNextPlayer = true; // Player who draws also skips turn
-            console.log('Draw 2 card played - next player draws 2 and skips');
+            // console.log('Draw 2 card played - next player draws 2 and skips');
           } else if (playedCard.value === 'wild_draw4') {
             drawCards = 4;
             skipNextPlayer = true; // Player who draws also skips turn
-            console.log('Wild Draw 4 card played - next player draws 4 and skips');
+            // console.log('Wild Draw 4 card played - next player draws 4 and skips');
           }
           
           // Note: Card play logging is handled in the backend via socket events
@@ -273,7 +271,7 @@ export function applyActionToOffChainState(state: OffChainGameState, action: Act
             if (err.message === "Deck is empty") {
               // Handle empty deck - in production this would reshuffle discard pile
               // For now, create some cards to continue the game
-              console.log("Deck is empty - creating emergency cards");
+              // console.log("Deck is empty - creating emergency cards");
               const emergencyCards = createDeck().slice(0, 20); // Get 20 cards
               deck.push(...emergencyCards);
               
@@ -298,7 +296,7 @@ export function applyActionToOffChainState(state: OffChainGameState, action: Act
                   );
                 }
                 
-                console.log("Draw action retry successful.");
+                // console.log("Draw action retry successful.");
               } catch (retryErr) {
                   console.error("Error during draw action retry:", retryErr);
                   throw new Error("Failed to draw card after reshuffling");
@@ -361,18 +359,18 @@ export function hashState(state: OffChainGameState): string {
   // Ensure players is an array and not a Proxy object
   const players = state.players ? Array.from(state.players) : [];
 
-  console.log("Processing state for hashing:", {
-    id: state.id,
-    players,
-    isStarted,
-    lastActionTimestamp,
-    playerHandsHash,
-    deckHash,
-    discardPileHash,
-    currentColor,
-    currentValue,
-    lastPlayedCardHash
-  });
+  // console.log("Processing state for hashing:", {
+  //   id: state.id,
+  //   players,
+  //   isStarted,
+  //   lastActionTimestamp,
+  //   playerHandsHash,
+  //   deckHash,
+  //   discardPileHash,
+  //   currentColor,
+  //   currentValue,
+  //   lastPlayedCardHash
+  // });
   
   const encodedState = abiCoder.encode(
     ['uint256', 'bytes32[]', 'uint8', 'uint256', 'string', 'string', 'string', 'string', 'string', 'string'],
@@ -430,7 +428,7 @@ function decryptHand(encryptedHand: string, gameId: bigint, playerAddress: strin
   const key = `${gameId}_${playerAddress}`;
   const bytes = CryptoJS.AES.decrypt(encryptedHand, key);
   const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-  console.log('Decrypted string:', decryptedString);
+  // console.log('Decrypted string:', decryptedString);
   if (!decryptedString) {
     console.error('Decryption resulted in an empty string');
     return [];
@@ -445,7 +443,7 @@ function decryptHand(encryptedHand: string, gameId: bigint, playerAddress: strin
 
 export function storePlayerHand(gameId: bigint, playerAddress: string, handHashes: string[]): void {
   const key = `game_${gameId}_player_${playerAddress}`;
-  console.log('Storing player hand:', { gameId, playerAddress, handHashes });
+  // console.log('Storing player hand:', { gameId, playerAddress, handHashes });
   const hand = handHashes;
   const encryptedHand = encryptHand(hand, gameId, playerAddress);
   localStorage.setItem(key, encryptedHand);
@@ -455,10 +453,10 @@ export function getPlayerHand(gameId: bigint, playerAddress: string): string[] {
   const key = `game_${gameId}_player_${playerAddress}`;
   const encryptedHand = localStorage.getItem(key);
   if (encryptedHand) {
-    console.log('Retrieved encrypted hand for player:', playerAddress);
+    // console.log('Retrieved encrypted hand for player:', playerAddress);
     return decryptHand(encryptedHand, gameId, playerAddress);
   }
-  console.log('No hand found for player:', playerAddress);
+  // console.log('No hand found for player:', playerAddress);
   return [];
 }
 
@@ -469,9 +467,9 @@ export function getPlayerHandCards(gameId: bigint, playerAddress: string): Card[
 }
 
 export function getCardFromHash(cardHash: string): Card | undefined {
-  console.log('Getting card for hash:', cardHash);
-  console.log('Global cardHashMap:', getGlobalCardHashMap());
+  // console.log('Getting card for hash:', cardHash);
+  // console.log('Global cardHashMap:', getGlobalCardHashMap());
   const card = getCardFromGlobalHashMap(cardHash);
-  console.log('Retrieved card:', card);
+  // console.log('Retrieved card:', card);
   return card;
 }

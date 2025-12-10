@@ -16,7 +16,7 @@ async function verifyContract(provider: ethers.Provider, address: string) {
   if (code === '0x') {
     throw new Error('No contract deployed at the specified address');
   }
-  console.log('Contract verified at address:', address);
+  // console.log('Contract verified at address:', address);
 }
 
 export async function getContractNew() {
@@ -43,7 +43,7 @@ export async function getContractNew() {
       contractABI,
       wallet
     ) as ethers.Contract & UnoGameContract;
-    console.log('Contract connected with wallet:', wallet.address);
+    // console.log('Contract connected with wallet:', wallet.address);
 
     return { contract: gameContract, wallet: wallet.address };
   } catch (error) {

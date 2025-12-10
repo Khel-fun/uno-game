@@ -39,4 +39,5 @@ next-env.d.ts
 
 # game logs
 /game-logs
+node_modules
 *.md

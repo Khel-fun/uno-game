@@ -7,6 +7,8 @@ import { AlertCircle, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 export const ConnectionStatusIndicator: React.FC = () => {
   const { status, isConnected, isReconnecting, reconnect } = useSocketConnection();
 
+  console.log('Socket status:', status, isConnected, isReconnecting);
+
   // Don't show anything if connected
   if (isConnected) {
     return null;

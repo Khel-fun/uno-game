@@ -1,31 +1,24 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import io, { Socket } from "socket.io-client";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useUserAccount } from "@/userstate/useUserAccount";
 import { WalletConnection } from "@/components/WalletConnection";
-import { useAccount, useConnect, useWalletClient, useWriteContract, useWaitForTransactionReceipt} from "wagmi";
-import BottomNavigation from "@/components/BottomNavigation";
-import GameCard from "./gameCard";
+import { useConnect, useWalletClient } from "wagmi";
 import Link from "next/link";
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { useChains } from 'wagmi'
 import { client } from "@/utils/thirdWebClient";
 import { baseSepolia } from "@/lib/chains";
 import { unoGameABI } from "@/constants/unogameabi";
-import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
+import { useReadContract, useSendTransaction } from "thirdweb/react";
 import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
 import ProfileDropdown from "@/components/profileDropdown"
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
-
-const CONNECTION =
-  process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
-  "https://zkuno-669372856670.us-central1.run.app";
+import socket, { socketManager } from "@/services/socket";
 
 // DIAM wallet integration removed
 
@@ -39,14 +32,12 @@ export default function PlayGame() {
   const { checkBalance } = useBalanceCheck();
   const router = useRouter();
   const chains = useChains();
-
+  
   // Use Wagmi hooks for wallet functionality
-  const { address, isConnected,  } = useWalletAddress();
+  const { address, isConnected } = useWalletAddress();
   const { data: walletClient } = useWalletClient();
   const { account: recoilAccount } = useUserAccount();
   const { mutate: sendTransaction } = useSendTransaction();
-
-  const socket = useRef<Socket | null>(null);
 
   const { toast } = useToast();
 
@@ -74,35 +65,20 @@ export default function PlayGame() {
     return () => clearInterval(interval);
   }, [refetchGames]);
 
+  // Setup socket event listeners using global socket manager
   useEffect(() => {
-    if (!socket.current) {
-      socket.current = io(CONNECTION, {
-        transports: ["websocket"],
-      }) as any; // Type assertion to fix the type mismatch
+    // Add listener for gameRoomCreated event
+    const handleGameRoomCreated = () => {
+      refetchGames();
+    };
+    
+    socketManager.on("gameRoomCreated", handleGameRoomCreated);
 
-      console.log("Socket connection established");
-    }
-  }, [socket]);
-
-  useEffect(() => {
-    if (socket.current) {
-      console.log("Socket connection established");
-      // Add listener for gameRoomCreated event
-      socket.current.on("gameRoomCreated", () => {
-        console.log("Game room created event received");
-        refetchGames();
-      });
-
-      // Cleanup function
-      return () => {
-        if (socket.current) {
-          socket.current.off("gameRoomCreated");
-        }
-      };
-    }
-  }, [socket, refetchGames]);
-
-  const ISSERVER = typeof window === "undefined";
+    // Cleanup function
+    return () => {
+      socketManager.off("gameRoomCreated", handleGameRoomCreated);
+    };
+  }, [refetchGames]);
 
   const openHandler = () => {
     setOpen(false);
@@ -128,7 +104,6 @@ export default function PlayGame() {
 
     try {
       setCreateLoading(true);
-      console.log("Creating game...");
 
       const transaction = prepareContractCall({
         contract: {
@@ -143,7 +118,6 @@ export default function PlayGame() {
 
       sendTransaction(transaction, {
         onSuccess: async(result) => {
-          console.log("Transaction successful:", result);
           toast({
             title: "Game created successfully!",
             description: "Game created successfully!",
@@ -204,8 +178,6 @@ export default function PlayGame() {
       }
 
       try {
-        
-        console.log("Creating computer game...");
 
         const transaction = prepareContractCall({
           contract: {
@@ -220,7 +192,6 @@ export default function PlayGame() {
   
         sendTransaction(transaction, {
           onSuccess: async (result) => {
-            console.log("Transaction successful:", result);
             toast({
               title: "Game created successfully!",
               description: "Game created successfully!",
@@ -240,14 +211,11 @@ export default function PlayGame() {
               const gameId = BigInt(gameCreatedId); // Convert hex to decimal
               setGameId(gameId);
     
-              // Emit socket event to create computer game room
-              if (socket.current) {
-                socket.current.emit("createComputerGame", {
-                  gameId: gameId.toString(),
-                  playerAddress: address
-                });
-                console.log("Socket event emitted for computer game creation");
-              }
+              // Emit socket event to create computer game room using global socket manager
+              socketManager.emit("createComputerGame", {
+                gameId: gameId.toString(),
+                playerAddress: address
+              });
     
               // Navigate to game room with computer mode flag
               router.push(`/game/${gameId}?mode=computer`);
@@ -314,7 +282,6 @@ export default function PlayGame() {
 
     try {
       setJoiningGameId(gameId);
-      console.log(`Joining game ${gameId.toString()}...`);
 
       const transaction = prepareContractCall({
         contract: {
@@ -329,7 +296,6 @@ export default function PlayGame() {
 
       sendTransaction(transaction, {
         onSuccess: (result) => {
-          console.log("Transaction successful:", result);
           toast({
             title: "Game joined successfully!",
             description: "Game joined successfully!",
@@ -364,11 +330,11 @@ export default function PlayGame() {
   // Handle transaction confirmation
   // useEffect(() => {
   //   if (isConfirmed && hash) {
-  //     console.log("Transaction confirmed with hash:", hash);
+  //     // console.log("Transaction confirmed with hash:", hash);
       
   //     // Check if this was a create game transaction
   //     if (createLoading) {
-  //       console.log("Game created successfully");
+  //       // console.log("Game created successfully");
         
   //       if (socket && socket.current) {
   //         socket.current.emit("createGameRoom");
@@ -386,7 +352,7 @@ export default function PlayGame() {
       
   //     // Check if this was a join game transaction
   //     if (joiningGameId !== null) {
-  //       console.log(`Joined game ${joiningGameId.toString()} successfully`);
+  //       // console.log(`Joined game ${joiningGameId.toString()} successfully`);
         
   //       const gameIdToJoin = joiningGameId;
   //       setJoiningGameId(null);

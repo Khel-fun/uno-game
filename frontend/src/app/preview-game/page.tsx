@@ -543,7 +543,7 @@ const PreviewGame = () => {
                     boxShadow: "0 0 15px rgba(14, 165, 233, 0.5)"
                   }}
                   alt={`cards-front ${playedCard}`}
-                  src={`../assets/cards-front/${playedCard}.webp`}
+                  src={`/assets/cards-front/${playedCard}.webp`}
                 />
               </div>
 
@@ -674,7 +674,7 @@ const PreviewGame = () => {
                   }}
                   alt={`cards-front ${item}`}
                   className={currentTurn === "Player 1" ? "glow" : ""}
-                  src={`../assets/cards-front/${item}.webp`}
+                  src={`/assets/cards-front/${item}.webp`}
                 />
               </div>
             );

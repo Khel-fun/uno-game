@@ -14,6 +14,6 @@ contract DeployUNOGame is Script {
         address deployer = vm.addr(deployerPrivateKey);
         UnoGame unoGame = new UnoGame();
         vm.stopBroadcast();
-        console.log("UNOGame deployed at:", address(unoGame));
+        // console.log("UNOGame deployed at:", address(unoGame));
     }
 }

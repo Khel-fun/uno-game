@@ -57,7 +57,7 @@ const MainPlayerView = ({
                 alt={`cards-front ${item}`}
                 className={turn === mainPlayer ? "glow" : ""}
                 onClick={() => turn === mainPlayer ? onCardPlayedHandler(item) : null}
-                src={`../assets/cards-front/${item}.webp`}
+                src={`/assets/cards-front/${item}.webp`}
               />
             </div>
           );

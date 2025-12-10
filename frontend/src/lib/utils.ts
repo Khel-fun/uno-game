@@ -18,7 +18,7 @@ export function decodeBase64To32Bytes(base64String: string) {
   let hexString = ethers.hexlify(decodedBytes);
 
   // hexString = encode72to64(hexString)
-  // console.log(hexString)
+  // // console.log(hexString)
   const bytesFromHex = ethers.keccak256(hexString)
 
   return bytesFromHex;

@@ -1,60 +1,43 @@
+const { clearRemoval } = require('./timers');
 const logger = require('../logger');
-const { addUser, removeUser, getUser, getUsersInRoom } = require('../users');
 
-/**
- * Register lobby and room-related socket event handlers
- * @param {Socket} socket - Socket.IO socket instance
- * @param {Server} io - Socket.IO server instance
- */
-function registerLobbyHandlers(socket, io) {
-  /**
-   * Join Lobby Handler
-   * Handles when a user joins a game lobby/room
-   */
-  socket.on('join', (payload, callback) => {
-    let numberOfUsersInRoom = getUsersInRoom(payload.room).length;
+module.exports = function lobbyHandler(io, socket, { userManager }) {
+  socket.on('join', ({ room, walletAddress }, callback) => {
+    const result = userManager.addOrReuseUser({ id: socket.id, room, walletAddress });
 
-    // Assign player name based on current number of users (Player 1-6)
-    const playerName = `Player ${numberOfUsersInRoom + 1}`;
+    if (result.error) {
+      callback?.(result.error);
+      return;
+    }
 
-    const { error, newUser } = addUser({
-      id: socket.id,
-      name: playerName,
-      room: payload.room,
-    });
+    const { user, reused } = result;
+    clearRemoval(user.id);
+    socket.join(room);
+    logger.info('User %s joined room %s', user.name, room);
 
-    if (error) return callback(error);
+    // Emit data to joining user
+    socket.emit('currentUserData', { name: user.name });
 
-    socket.join(newUser.room);
+    // Emit room data to all
+    const users = userManager.getUsersInRoom(room);
+    io.to(room).emit('roomData', { room, users });
 
-    io.to(newUser.room).emit('roomData', { room: newUser.room, users: getUsersInRoom(newUser.room) });
-    socket.emit('currentUserData', { name: newUser.name });
-    logger.debug(newUser);
-    callback();
+    callback?.(null, { reused });
   });
 
-  /**
-   * Quit Room Handler
-   * Handles when a user quits a room
-   */
   socket.on('quitRoom', () => {
-    const user = removeUser(socket.id);
+    const user = userManager.removeUser(socket.id);
     if (user) {
-      io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) });
+      socket.leave(user.room);
+      const users = userManager.getUsersInRoom(user.room);
+      io.to(user.room).emit('roomData', { room: user.room, users });
     }
   });
 
-  /**
-   * Send Message Handler
-   * Handles chat messages in the lobby/room
-   */
-  socket.on('sendMessage', (payload, callback) => {
-    const user = getUser(socket.id);
-    if (user) {
-      io.to(user.room).emit('message', { user: user.name, text: payload.message });
-      callback();
-    }
+  socket.on('sendMessage', ({ message }, callback) => {
+    const user = userManager.getUser(socket.id);
+    if (!user) return;
+    io.to(user.room).emit('message', { user: user.name, text: message });
+    callback?.();
   });
-}
-
-module.exports = { registerLobbyHandlers };
+};

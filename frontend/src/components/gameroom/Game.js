@@ -1,6 +1,5 @@
 import React, { useEffect, useReducer, useState, useRef } from "react";
-import socket, { socketManager } from "../../services/socket";
-import MemoizedHeader from "./Header";
+import socket from "../../services/socket";
 import CenterInfo from "./CenterInfo";
 import GameScreen from "./GameScreen";
 import GameBackground from "./GameBackground";
@@ -10,30 +9,19 @@ import { useSoundProvider } from "../../context/SoundProvider";
 import ColourDialog from "./colourDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { useAccount, useWalletClient } from "wagmi";
-// import { addClaimableBalance, claimableBalancesApi } from '@/utils/supabase';
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
 import { ethers } from "ethers";
-import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
-import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
+import { useSendTransaction } from "thirdweb/react";
+import { prepareContractCall } from "thirdweb";
 import { useSocketConnection } from "@/context/SocketConnectionContext";
 import { MAX_PLAYERS } from "@/constants/gameConstants";
+import { unoGameABI } from "@/constants/unogameabi";
 
-//NUMBER CODES FOR ACTION CARDS
-//SKIP - 100
-//DRAW 2 - 200
-//WILD - 500
-//DRAW 4 WILD - 400
-
-const checkGameOver = (playerDeck) => {
-  return playerDeck.length === 1;
-};
-
-const checkWinner = (playerDeck, player) => {
-  return playerDeck.length === 1 ? player : "";
-};
+// Card codes: SKIP=100, DRAW2=200, DRAW4=400, WILD=500
+const checkGameOver = (deck) => deck.length === 1;
+const checkWinner = (deck, player) => (deck.length === 1 ? player : "");
 
 const initialGameState = {
   gameOver: false,
@@ -59,6 +47,26 @@ const initialGameState = {
 
 const gameReducer = (state, action) => ({ ...state, ...action });
 
+// Card parsing helpers
+const parseCard = (card) => {
+  if (card.startsWith('skip')) return { color: card.charAt(4), number: 100 };
+  if (card.startsWith('D2')) return { color: card.charAt(2), number: 200 };
+  if (card.startsWith('_')) return { color: card.charAt(1), number: 100 };
+  if (card === 'W') return { color: null, number: 500 };
+  if (card === 'D4W') return { color: null, number: 400 };
+  return { color: card.charAt(1), number: card.charAt(0) };
+};
+
+const isWildCard = (card) => card === 'W' || card === 'D4W';
+const isSkipCard = (card) => card.startsWith('skip');
+const isReverseCard = (card) => card.startsWith('_');
+const isDraw2Card = (card) => card.startsWith('D2');
+const isValidPlay = (card, currentColor, currentNumber) => {
+  if (isWildCard(card)) return true;
+  const { color, number } = parseCard(card);
+  return color === currentColor || String(number) === String(currentNumber);
+};
+
 const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) => {
   const [gameState, dispatch] = useReducer(gameReducer, initialGameState);
 
@@ -73,9 +81,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
   const { isConnected: socketConnected, isReconnecting } = useSocketConnection();
   const pendingActionsRef = useRef([]);
 
-  // Use Wagmi hooks for wallet functionality
   const { address, isConnected } = useWalletAddress();
-  const { data: walletClient } = useWalletClient();
 
   const { mutate: sendTransaction } = useSendTransaction();
 
@@ -103,14 +109,20 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
 
   const { toast } = useToast();
 
+  // Socket.io room format (must match Room.tsx)
+  const socketRoomId = `game-${room}`;
+
   // Helper function to emit socket events with buffering support
   const emitSocketEvent = (eventName, data) => {
+    // Automatically add roomId for game state events
+    const payload = (eventName === "updateGameState" || eventName === "initGameState") 
+      ? { ...data, roomId: socketRoomId } 
+      : data;
+    
     if (socketConnected) {
-      socket.emit(eventName, data);
+      socket.emit(eventName, payload);
     } else {
-      console.log(`Socket disconnected, buffering event: ${eventName}`);
-      pendingActionsRef.current.push({ eventName, data });
-      
+      pendingActionsRef.current.push({ eventName, data: payload });
       toast({
         title: "Connection issue",
         description: "Your action will be sent when connection is restored",
@@ -123,7 +135,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
   // Process pending actions when reconnected
   useEffect(() => {
     if (socketConnected && pendingActionsRef.current.length > 0) {
-      console.log(`Processing ${pendingActionsRef.current.length} pending actions`);
+      // console.log(`Processing ${pendingActionsRef.current.length} pending actions`);
       
       pendingActionsRef.current.forEach(({ eventName, data }) => {
         socket.emit(eventName, data);
@@ -152,78 +164,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     }
   }, [socketConnected, isReconnecting]);
 
-  // Computer AI logic
-  const getValidMoves = (computerDeck, currentColor, currentNumber) => {
-    return computerDeck.filter(card => {
-      // Wild cards can always be played
-      if (card.includes("W") || card.includes("D4W")) return true;
-      
-      // Match color or number
-      const cardColor = card.charAt(1);
-      const cardNumber = card.charAt(0);
-      
-      return cardColor === currentColor || cardNumber === currentNumber;
-    });
-  };
-
-  const computerMakeMove = () => {
-    const validMoves = getValidMoves(player2Deck, currentColor, currentNumber);
-    
-    if (validMoves.length > 0) {
-      // Prioritize special cards if available
-      const specialCards = validMoves.filter(card => 
-        card.includes("skip") || card.includes("D2") || card === "W" || card === "D4W"
-      );
-      
-      if (specialCards.length > 0) {
-        return specialCards[0]; // Play the first special card found
-      }
-      
-      // Otherwise play a regular card
-      return validMoves[0];
-    } else {
-      // Check if draw pile is empty and needs reshuffling
-      if (drawCardPile.length === 0 && playedCardsPile.length > 1) {
-        // Don't need to actually reshuffle here, as that will happen in onCardDrawnHandler
-        console.log('Computer notices draw pile is empty, will trigger reshuffle on draw');
-      }
-      
-      // Draw a card if no valid moves
-      // With new rule, if the drawn card is playable, the computer will play it automatically
-      // This is handled in onCardDrawnHandler with the isPlayable check and setTimeout
-      return "draw";
-    }
-  };
-
-  // Handle computer turn with delay for better UX
-  useEffect(() => {
-    if (isComputerMode && turn === "Player 2" && !gameOver) {
-      const computerTurnDelay = setTimeout(() => {
-        // Check if computer should declare UNO (when it has 2 cards and will play one)
-        if (player2Deck.length === 2) {
-          playUnoSound();
-        }
-        
-        const computerMove = computerMakeMove();
-        
-        if (computerMove === "draw") {
-          // Computer draws a card
-          // If the drawn card is playable, the computer will automatically play it
-          // This is handled in onCardDrawnHandler with the isPlayable check and setTimeout
-          onCardDrawnHandler();
-          // Note: We don't need to do anything else here because onCardDrawnHandler
-          // will handle playing the card if it's playable
-        } else {
-          // Computer plays a card from its existing hand
-          onCardPlayedHandler(computerMove);
-        }
-      }, 3000); // 3 second delay for better UX
-
-      return () => clearTimeout(computerTurnDelay);
-    }
-  }, [turn, isComputerMode, gameOver, computerMoveCounter]); // Added computerMoveCounter to re-trigger after special cards
-
-  //handles the sounds with our custom sound provider
+  // Sound hooks
   const {
     playUnoSound,
     playCardPlayedSound,
@@ -242,180 +183,127 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     500: playWildCardSound,
   };
 
-  //runs once on component mount
+  // Computer AI: find valid moves and pick best one
+  const getValidMoves = (deck) => deck.filter(card => isValidPlay(card, currentColor, currentNumber));
+
+  const computerMakeMove = () => {
+    const validMoves = getValidMoves(player2Deck);
+    if (validMoves.length === 0) return "draw";
+    const special = validMoves.find(c => isSkipCard(c) || isDraw2Card(c) || isWildCard(c));
+    return special || validMoves[0];
+  };
+
+  // Computer turn with delay
   useEffect(() => {
-    console.log('Game component mounted, isComputerMode:', isComputerMode);
+    if (!isComputerMode || turn !== "Player 2" || gameOver) return;
     
+    const timer = setTimeout(() => {
+      if (player2Deck.length === 2) playUnoSound();
+      const move = computerMakeMove();
+      move === "draw" ? onCardDrawnHandler() : onCardPlayedHandler(move);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [turn, isComputerMode, gameOver, computerMoveCounter]);
+
+  // Find a valid starting card (not an action card)
+  const findStartingCard = (cards) => {
+    let idx = Math.floor(Math.random() * cards.length);
+    while (ACTION_CARDS.includes(cards[idx]) && cards.length > 0) {
+      idx = Math.floor(Math.random() * cards.length);
+    }
+    return idx;
+  };
+
+  // Initialize game on mount
+  useEffect(() => {
     if (isComputerMode) {
-      console.log('Initializing computer mode game...');
-      // For computer mode, initialize game state directly
-      const shuffledCards = shuffleArray(PACK_OF_CARDS);
-      console.log('Shuffled cards:', shuffledCards.length);
+      const shuffled = shuffleArray(PACK_OF_CARDS);
+      const p1Deck = shuffled.splice(0, 5);
+      const p2Deck = shuffled.splice(0, 5);
+      const startIdx = findStartingCard(shuffled);
+      const startCard = shuffled.splice(startIdx, 1);
 
-      //extract first 7 elements to player1Deck (standard Uno starting hand)
-      const player1Deck = shuffledCards.splice(0, 5);
-
-      //extract first 7 elements to player2Deck (computer)
-      const player2Deck = shuffledCards.splice(0, 5);
-
-      //extract random card from shuffledCards and check if its not an action card
-      let startingCardIndex = Math.floor(Math.random() * (shuffledCards.length - ACTION_CARDS.length));
-
-      while (ACTION_CARDS.includes(shuffledCards[startingCardIndex])) {
-        startingCardIndex = Math.floor(Math.random() * (shuffledCards.length - ACTION_CARDS.length));
-      }
-
-      //extract the card from that startingCardIndex into the playedCardsPile
-      const playedCardsPile = shuffledCards.splice(startingCardIndex, 1);
-
-      //store all remaining cards into drawCardPile
-      const drawCardPile = [...shuffledCards];
-
-      console.log('Computer mode game state initialized:', {
-        player1Deck: player1Deck.length,
-        player2Deck: player2Deck.length,
-        playedCard: playedCardsPile[0],
-        drawPile: drawCardPile.length
-      });
-
-      // Initialize game state directly for computer mode
       dispatch({
         gameOver: false,
         turn: "Player 1",
-        player1Deck: player1Deck,
-        player2Deck: player2Deck,
-        currentColor: playedCardsPile[0].charAt(1),
-        currentNumber: playedCardsPile[0].charAt(0),
-        playedCardsPile: playedCardsPile,
-        drawCardPile: drawCardPile,
-        totalPlayers: 2, // Computer mode is always 2 players
-        playDirection: 1, // Start with clockwise direction
+        player1Deck: p1Deck,
+        player2Deck: p2Deck,
+        currentColor: startCard[0].charAt(1),
+        currentNumber: startCard[0].charAt(0),
+        playedCardsPile: startCard,
+        drawCardPile: shuffled,
+        totalPlayers: 2,
+        playDirection: 1,
       });
-    } else {
-      // For multiplayer mode, Player 1 initializes the game
-      if (currentUser === "Player 1") {
-        console.log(`Player 1 initializing multiplayer game with ${playerCount} players...`);
-        //shuffle PACK_OF_CARDS array
-        const shuffledCards = shuffleArray(PACK_OF_CARDS);
+    } else{
+      // Multiplayer: Player 1 initializes
+      const shuffled = shuffleArray(PACK_OF_CARDS);
+      const state = {
+        gameOver: false,
+        turn: "Player 1",
+        totalPlayers: playerCount,
+        playDirection: 1,
+      };
 
-        // Initialize game state object
-        const gameState = {
-          gameOver: false,
-          turn: "Player 1",
-          currentColor: "",
-          currentNumber: "",
-          playedCardsPile: [],
-          drawCardPile: [],
-        };
-
-        // Deal 5 cards to each player
-        for (let i = 1; i <= playerCount && i <= MAX_PLAYERS; i++) {
-          gameState[`player${i}Deck`] = shuffledCards.splice(0, 5);
-        }
-
-        // Initialize empty decks for unused player slots
-        for (let i = playerCount + 1; i <= MAX_PLAYERS; i++) {
-          gameState[`player${i}Deck`] = [];
-        }
-
-        //extract random card from shuffledCards and check if its not an action card
-        let startingCardIndex = Math.floor(Math.random() * shuffledCards.length);
-
-        while (ACTION_CARDS.includes(shuffledCards[startingCardIndex]) && shuffledCards.length > 0) {
-          startingCardIndex = Math.floor(Math.random() * shuffledCards.length);
-        }
-
-        //extract the card from that startingCardIndex into the playedCardsPile
-        const playedCardsPile = shuffledCards.splice(startingCardIndex, 1);
-
-        //store all remaining cards into drawCardPile
-        const drawCardPile = [...shuffledCards];
-
-        gameState.playedCardsPile = playedCardsPile;
-        gameState.currentColor = playedCardsPile[0].charAt(1);
-        gameState.currentNumber = playedCardsPile[0].charAt(0);
-        gameState.drawCardPile = drawCardPile;
-        gameState.totalPlayers = playerCount; // Store the initial player count
-        gameState.playDirection = 1; // Start with clockwise direction
-
-        console.log('Initialized game state:', {
-          playerCount,
-          totalPlayers: gameState.totalPlayers,
-          decks: Object.keys(gameState).filter(k => k.includes('Deck')).map(k => `${k}: ${gameState[k].length} cards`)
-        });
-
-        //send initial state to server
-        emitSocketEvent("initGameState", gameState);
+      // Deal 5 cards to each player
+      for (let i = 1; i <= playerCount && i <= MAX_PLAYERS; i++) {
+        state[`player${i}Deck`] = shuffled.splice(0, 5);
       }
+      for (let i = playerCount + 1; i <= MAX_PLAYERS; i++) {
+        state[`player${i}Deck`] = [];
+      }
+
+      const startIdx = findStartingCard(shuffled);
+      const startCard = shuffled.splice(startIdx, 1);
+      state.playedCardsPile = startCard;
+      state.currentColor = startCard[0].charAt(1);
+      state.currentNumber = startCard[0].charAt(0);
+      state.drawCardPile = shuffled;
+
+      emitSocketEvent("initGameState", state);
     }
   }, [isComputerMode]);
 
+  // Socket event listeners
   useEffect(() => {
-    socket.on(
-      "initGameState",
-      (gameState) => {
-        // Dispatch all game state properties dynamically
-        dispatch(gameState);
-        playShufflingSound();
-      }
-    );
+    socket.on("initGameState", (state) => {
+      dispatch(state);
+      playShufflingSound();
+    });
 
-    socket.on(
-      "updateGameState",
-      (gameState) => {
-        const { gameOver, winner, currentNumber } = gameState;
-        
-        gameOver && playGameOverSound();
-        //check for special card and play their sound else play regular sound
-        currentNumber && (currentNumber in playSoundMap ? playSoundMap[currentNumber]() : playCardPlayedSound());
-        
-        // Dispatch all game state updates
-        dispatch({
-          ...gameState,
-          isUnoButtonPressed: false,
-          drawButtonPressed: gameState.drawButtonPressed || false
-        });
+    socket.on("updateGameState", (state) => {
+      if (state.gameOver) playGameOverSound();
+      if (state.currentNumber in playSoundMap) {
+        playSoundMap[state.currentNumber]();
+      } else if (state.currentNumber) {
+        playCardPlayedSound();
       }
-    );
+      dispatch({ ...state, isUnoButtonPressed: false, drawButtonPressed: state.drawButtonPressed || false });
+    });
+
+    return () => {
+      socket.off("initGameState");
+      socket.off("updateGameState");
+    };
   }, []);
 
-  // Helper function to get player deck by player name
-  const getPlayerDeck = (playerName) => {
-    switch(playerName) {
-      case "Player 1": return player1Deck;
-      case "Player 2": return player2Deck;
-      case "Player 3": return player3Deck;
-      case "Player 4": return player4Deck;
-      case "Player 5": return player5Deck;
-      case "Player 6": return player6Deck;
-      default: return [];
-    }
+  // Player deck lookup
+  const decks = { player1Deck, player2Deck, player3Deck, player4Deck, player5Deck, player6Deck };
+  const getPlayerDeck = (name) => decks[name.toLowerCase().replace(' ', '') + 'Deck'] || [];
+
+  // Turn rotation helpers
+  const getNextPlayer = (current, players, dir = playDirection) => {
+    const idx = players.indexOf(current);
+    return players[(idx + dir + players.length) % players.length];
   };
 
-  // Helper function to get next player in turn rotation
-  // direction: 1 for clockwise (default), -1 for counter-clockwise
-  const getNextPlayer = (currentPlayer, allPlayers, direction = playDirection) => {
-    const currentIndex = allPlayers.indexOf(currentPlayer);
-    const nextIndex = (currentIndex + direction + allPlayers.length) % allPlayers.length;
-    return allPlayers[nextIndex];
-  };
-
-  // Helper function to get all active players based on initial player count
   const getActivePlayers = () => {
-    const players = [];
-    const numPlayers = totalPlayers || playerCount;
-    for (let i = 1; i <= numPlayers; i++) {
-      players.push(`Player ${i}`);
-    }
-    return players;
+    const n = totalPlayers || playerCount;
+    return Array.from({ length: n }, (_, i) => `Player ${i + 1}`);
   };
 
-  //remove the played card from player's deck and add it to playedCardsPile (immutably)
-  //then update turn, currentColor and currentNumber
-  //also checks for the card played and update opponentDeck accordingly
-  //also checks for UNO pressed if not add 2 cards to playerDeck as penalty
-  //play the relevant sound when particular card is played
-  //This is generic helper method and can be used for any player
+  // Core card play logic
   const cardPlayedByPlayer = ({
     cardPlayedBy,
     played_card,
@@ -425,107 +313,53 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     isDraw4 = false,
     toggleTurn = true,
   }) => {
-    //check who is the current player
     const playerDeck = getPlayerDeck(cardPlayedBy);
     const activePlayers = getActivePlayers();
     const nextPlayerName = getNextPlayer(cardPlayedBy, activePlayers);
     const nextPlayerDeck = getPlayerDeck(nextPlayerName);
-    
-    console.log('Turn rotation:', {
-      cardPlayedBy,
-      activePlayers,
-      nextPlayerName,
-      totalPlayers,
-      currentPlayerDeckSize: playerDeck.length,
-      nextPlayerDeckSize: nextPlayerDeck.length
-    });
 
-    //remove the played card from player's deck and add it to playedCardsPile and update their deck(immutably)
+    // Remove played card from player's deck
     const removeIndex = playerDeck.indexOf(played_card);
     let updatedPlayerDeck = [...playerDeck.slice(0, removeIndex), ...playerDeck.slice(removeIndex + 1)];
 
-    //make a drawcardpile copy for managing draw2,draw4 and UNO penalty
     let copiedDrawCardPileArray = [...drawCardPile];
     let updatedPlayedCardsPile = [...playedCardsPile, played_card];
     let nextPlayerDeckCopy = [...nextPlayerDeck];
-    
-    // Helper function to draw a card with reshuffle if needed
+
+    // Draw with auto-reshuffle when pile empty
     const drawCardWithReshuffle = () => {
-      // Check if draw pile is empty and needs reshuffling
-      if (copiedDrawCardPileArray.length === 0) {
-        // Keep the top card (the one just played)
+      if (copiedDrawCardPileArray.length === 0 && updatedPlayedCardsPile.length > 1) {
         const topCard = updatedPlayedCardsPile[updatedPlayedCardsPile.length - 1];
-        
-        // Take all other cards from the discard pile
-        const cardsToReshuffle = updatedPlayedCardsPile.slice(0, updatedPlayedCardsPile.length - 1);
-        
-        // If we have cards to reshuffle
-        if (cardsToReshuffle.length > 0) {
-          // Shuffle these cards
-          copiedDrawCardPileArray = shuffleArray([...cardsToReshuffle]);
-          updatedPlayedCardsPile = [topCard];
-          
-          // Play shuffling sound
-          playShufflingSound();
-          
-          console.log('Reshuffled discard pile into draw pile during penalty. New draw pile size:', copiedDrawCardPileArray.length);
-        }
+        const cardsToReshuffle = updatedPlayedCardsPile.slice(0, -1);
+        copiedDrawCardPileArray = shuffleArray([...cardsToReshuffle]);
+        updatedPlayedCardsPile = [topCard];
+        playShufflingSound();
       }
-      
-      // Draw a card if possible
-      if (copiedDrawCardPileArray.length > 0) {
-        return copiedDrawCardPileArray.pop();
-      }
-      
-      return null; // No card available
+      return copiedDrawCardPileArray.length > 0 ? copiedDrawCardPileArray.pop() : null;
     };
-    
-    // if it is a draw2 or draw4 move pop cards from drawCardPile
-    // and add them to next player's deck (immutably)
+
+    // Handle Draw 2/4 penalty to next player
     if (isDraw2 || isDraw4) {
-      // Draw 2 cards for Draw 2
-      const card1 = drawCardWithReshuffle();
-      if (card1) nextPlayerDeckCopy.push(card1);
-      
-      const card2 = drawCardWithReshuffle();
-      if (card2) nextPlayerDeckCopy.push(card2);
-      
-      // Draw 2 more cards for Draw 4
-      if (isDraw4) {
-        const card3 = drawCardWithReshuffle();
-        if (card3) nextPlayerDeckCopy.push(card3);
-        
-        const card4 = drawCardWithReshuffle();
-        if (card4) nextPlayerDeckCopy.push(card4);
+      for (let i = 0; i < (isDraw4 ? 4 : 2); i++) {
+        const card = drawCardWithReshuffle();
+        if (card) nextPlayerDeckCopy.push(card);
       }
     }
 
-    //if it is special card which persists turn like skip, draw4 card don't change the turn
-    //else change turn after every play
-    let turnCopy = cardPlayedBy;
-    if (toggleTurn) {
-      turnCopy = nextPlayerName;
-    }
+    const turnCopy = toggleTurn ? nextPlayerName : cardPlayedBy;
 
-    //did player press UNO when 2 cards were remaining in their deck
-    //if not then add 2 cards as penalty else continue
-    // In computer mode, computer (Player 2) automatically calls UNO, so skip penalty for computer
+    // UNO penalty check (skip for computer)
     const isComputerPlayer = isComputerMode && cardPlayedBy === "Player 2";
     if (playerDeck.length === 2 && !isUnoButtonPressed && !isComputerPlayer) {
       alert("Oops! You forgot to press UNO. You drew 2 cards as penalty.");
-      //pull out last two cards from draw card pile and add them to player's deck
-      const penaltyCard1 = drawCardWithReshuffle();
-      if (penaltyCard1) updatedPlayerDeck.push(penaltyCard1);
-      
-      const penaltyCard2 = drawCardWithReshuffle();
-      if (penaltyCard2) updatedPlayerDeck.push(penaltyCard2);
-    } 
-    
-    // Reset Uno button after checking for penalty
-    // This ensures the penalty check sees the correct UNO button state
-    dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: false }); 
-    
-    // Create a more explicit update of player decks to prevent card transfer issues
+      for (let i = 0; i < 2; i++) {
+        const card = drawCardWithReshuffle();
+        if (card) updatedPlayerDeck.push(card);
+      }
+    }
+
+    dispatch({ isUnoButtonPressed: false });
+
     const newGameState = {
       gameOver: checkGameOver(playerDeck),
       winner: checkWinner(playerDeck, cardPlayedBy),
@@ -534,343 +368,128 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       currentColor: colorOfPlayedCard,
       currentNumber: numberOfPlayedCard,
       drawCardPile: copiedDrawCardPileArray,
-      isExtraTurn: !toggleTurn, // Set to true when player gets extra turn from special card
+      isExtraTurn: !toggleTurn,
     };
 
-    // Update the deck for the player who played the card
-    newGameState[`${cardPlayedBy.toLowerCase().replace(' ', '')}Deck`] = updatedPlayerDeck;
-    
-    // Update the deck for the next player (if they received cards from Draw 2/4)
+    // Update decks
+    const toDeckKey = (name) => name.toLowerCase().replace(' ', '') + 'Deck';
+    newGameState[toDeckKey(cardPlayedBy)] = updatedPlayerDeck;
     if (isDraw2 || isDraw4) {
-      newGameState[`${nextPlayerName.toLowerCase().replace(' ', '')}Deck`] = nextPlayerDeckCopy;
+      newGameState[toDeckKey(nextPlayerName)] = nextPlayerDeckCopy;
     }
-    
-    // Preserve all other player decks
     activePlayers.forEach(player => {
-      const deckKey = `${player.toLowerCase().replace(' ', '')}Deck`;
-      if (!newGameState[deckKey]) {
-        newGameState[deckKey] = getPlayerDeck(player);
-      }
-    });
-      
-    console.log('Deck changes:', {
-      cardPlayedBy,
-      nextPlayer: nextPlayerName,
-      activePlayers,
-      updatedPlayerDeckLength: updatedPlayerDeck.length,
-      nextPlayerDeckLength: nextPlayerDeckCopy.length
+      const key = toDeckKey(player);
+      if (!newGameState[key]) newGameState[key] = getPlayerDeck(player);
     });
 
     if (isComputerMode) {
-      // Handle locally for computer mode
       dispatch(newGameState);
-      
-      // Play appropriate sound
       numberOfPlayedCard in playSoundMap ? playSoundMap[numberOfPlayedCard]() : playCardPlayedSound();
-      
-      // Check for game over
-      if (newGameState.gameOver) {
-        playGameOverSound();
-      }
+      if (newGameState.gameOver) playGameOverSound();
     } else {
-      // Send new state to server for multiplayer mode
       emitSocketEvent("updateGameState", newGameState);
     }
   };
 
-  //driver functions
+  // Handle card play
   const onCardPlayedHandler = (played_card) => {
-    // This function handles playing a card, either from the player's hand or a card that was just drawn
-    // With the new rule, if a player draws a card that matches the current color, number, or is a wild card,
-    // they can play it immediately and this function will be called
-    
-    //extract player who played the card
     const cardPlayedBy = turn;
-
-    // Update the last player who played a card
-    dispatch({
-      lastCardPlayedBy: cardPlayedBy
-    });
-
-    //extract the card played
-    const cardPlayed = played_card;
+    dispatch({ lastCardPlayedBy: cardPlayedBy });
     switch (played_card) {
-      //if card played was a skip card
       case "skipR":
       case "skipG":
       case "skipB":
       case "skipY": {
-        //extract color of played skip card
         const colorOfPlayedCard = played_card.charAt(4);
         const numberOfPlayedCard = 100;
-        // Normalize the values for comparison
-        const normalizedCurrentNumber = String(currentNumber);
-        const normalizedPlayedNumber = String(numberOfPlayedCard);
         
-        // Check for color match or number match
-        const isColorMatch = currentColor === colorOfPlayedCard;
-        const isNumberMatch = normalizedCurrentNumber === normalizedPlayedNumber;
-        
-        if (isColorMatch || isNumberMatch) {
-          console.log('Valid skip card move:', { isColorMatch, isNumberMatch });
-          
-          // Skip card: skip the next player and move to the player after them
-          // Direction does NOT change
-          const activePlayers = getActivePlayers();
-          const nextPlayer = getNextPlayer(cardPlayedBy, activePlayers, playDirection);
-          const playerAfterSkipped = getNextPlayer(nextPlayer, activePlayers, playDirection);
-          
-          console.log('Skip card played:', {
-            cardPlayedBy,
-            skippedPlayer: nextPlayer,
-            nextTurn: playerAfterSkipped,
-            direction: playDirection
-          });
-          
-          // Manually set the turn to skip a player
-          cardPlayedByPlayer({
-            cardPlayedBy,
-            played_card,
-            colorOfPlayedCard,
-            numberOfPlayedCard,
-            toggleTurn: false, // We'll manually set the turn
-          });
-          
-          // After the card is played, update the turn to the player after the skipped one
-          setTimeout(() => {
-            if (isComputerMode) {
-              dispatch({ turn: playerAfterSkipped });
-            } else {
-              emitSocketEvent("updateGameState", { turn: playerAfterSkipped });
-            }
-          }, 0);
-        }
-        //if no color or number match, invalid move - do not update state
-        else {
-          console.log('Invalid skip card move:', { isColorMatch, isNumberMatch });
+        if (!isValidPlay(played_card, currentColor, currentNumber)) {
           alert("Invalid Move! Skip cards must match either the color or number of the current card.");
+          break;
         }
+
+        const activePlayers = getActivePlayers();
+        const nextPlayer = getNextPlayer(cardPlayedBy, activePlayers, playDirection);
+        const playerAfterSkipped = getNextPlayer(nextPlayer, activePlayers, playDirection);
+
+        cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard, toggleTurn: false });
+
+        setTimeout(() => {
+          const update = { turn: playerAfterSkipped };
+          isComputerMode ? dispatch(update) : emitSocketEvent("updateGameState", update);
+        }, 0);
         break;
       }
       case "_R":
       case "_G":
       case "_B":
       case "_Y": {
-        //extract color of played reverse card
         const colorOfPlayedCard = played_card.charAt(1);
         const numberOfPlayedCard = 100;
-        // Normalize the values for comparison
-        const normalizedCurrentNumber = String(currentNumber);
-        const normalizedPlayedNumber = String(numberOfPlayedCard);
-        
-        // Check for color match or number match
-        const isColorMatch = currentColor === colorOfPlayedCard;
-        const isNumberMatch = normalizedCurrentNumber === normalizedPlayedNumber;
-        
-        if (isColorMatch || isNumberMatch) {
-          console.log('Valid reverse card move:', { isColorMatch, isNumberMatch });
-          
-          const activePlayers = getActivePlayers();
-          
-          // In a 2-player game, Reverse acts exactly like Skip
-          // because reversing direction brings the turn back to the same player
-          if (activePlayers.length === 2) {
-            console.log('Reverse in 2-player game acts like Skip - turn stays with current player');
-            
-            // Play the card but keep the turn with the current player
-            cardPlayedByPlayer({
-              cardPlayedBy,
-              played_card,
-              colorOfPlayedCard,
-              numberOfPlayedCard,
-              toggleTurn: false, // Turn stays with current player
-            });
-            
-            // Trigger another computer move if it's the computer's turn
-            if (isComputerMode && cardPlayedBy === "Player 2") {
-              setComputerMoveCounter(prev => prev + 1);
-            }
-          } else {
-            // In 3+ player games, Reverse flips the direction
-            const newDirection = playDirection * -1; // Flip direction: 1 -> -1 or -1 -> 1
-            
-            console.log('Reverse card flips direction:', {
-              oldDirection: playDirection === 1 ? 'clockwise' : 'counter-clockwise',
-              newDirection: newDirection === 1 ? 'clockwise' : 'counter-clockwise'
-            });
-            
-            // Get the next player in the NEW direction
-            const nextPlayer = getNextPlayer(cardPlayedBy, activePlayers, newDirection);
-            
-            console.log('Reverse card played:', {
-              cardPlayedBy,
-              newDirection: newDirection === 1 ? 'clockwise' : 'counter-clockwise',
-              nextTurn: nextPlayer
-            });
-            
-            // Play the card and update direction
-            cardPlayedByPlayer({
-              cardPlayedBy,
-              played_card,
-              colorOfPlayedCard,
-              numberOfPlayedCard,
-              toggleTurn: false, // We'll manually set the turn
-            });
-            
-            // Update the direction and turn
-            setTimeout(() => {
-              if (isComputerMode) {
-                dispatch({ 
-                  playDirection: newDirection,
-                  turn: nextPlayer 
-                });
-              } else {
-                emitSocketEvent("updateGameState", { 
-                  playDirection: newDirection,
-                  turn: nextPlayer 
-                });
-              }
-            }, 0);
-          }
-        }
-        //if no color or number match, invalid move - do not update state
-        else {
-          console.log('Invalid reverse card move:', { isColorMatch, isNumberMatch });
+
+        if (!isValidPlay(played_card, currentColor, currentNumber)) {
           alert("Invalid Move! Reverse cards must match either the color or number of the current card.");
+          break;
+        }
+
+        const activePlayers = getActivePlayers();
+
+        if (activePlayers.length === 2) {
+          // 2-player: Reverse acts like Skip
+          cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard, toggleTurn: false });
+          if (isComputerMode && cardPlayedBy === "Player 2") setComputerMoveCounter(prev => prev + 1);
+        } else {
+          // 3+ players: flip direction
+          const newDirection = playDirection * -1;
+          const nextPlayer = getNextPlayer(cardPlayedBy, activePlayers, newDirection);
+          cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard, toggleTurn: false });
+          setTimeout(() => {
+            const update = { playDirection: newDirection, turn: nextPlayer };
+            isComputerMode ? dispatch(update) : emitSocketEvent("updateGameState", update);
+          }, 0);
         }
         break;
       }
-      //if card played was a draw 2 card
       case "D2R":
       case "D2G":
       case "D2B":
       case "D2Y": {
-        //extract color of played skip card
         const colorOfPlayedCard = played_card.charAt(2);
         const numberOfPlayedCard = 200;
-        // Normalize the values for comparison
-        const normalizedCurrentNumber = String(currentNumber);
-        const normalizedPlayedNumber = String(numberOfPlayedCard);
-        
-        // Check for color match or number match
-        const isColorMatch = currentColor === colorOfPlayedCard;
-        const isNumberMatch = normalizedCurrentNumber === normalizedPlayedNumber;
-        
-        if (isColorMatch || isNumberMatch) {
-          console.log('Valid draw 2 card move:', { isColorMatch, isNumberMatch });
-          cardPlayedByPlayer({
-            cardPlayedBy,
-            played_card,
-            colorOfPlayedCard,
-            numberOfPlayedCard,
-            isDraw2: true,
-            toggleTurn: false,
-          });
-          
-          // Trigger another computer move after playing +2 (turn stays with computer)
-          if (isComputerMode && cardPlayedBy === "Player 2") {
-            setComputerMoveCounter(prev => prev + 1);
-          }
-        }
-        //if no color or number match, invalid move - do not update state
-        else {
-          console.log('Invalid draw 2 card move:', { isColorMatch, isNumberMatch });
+
+        if (!isValidPlay(played_card, currentColor, currentNumber)) {
           alert("Invalid Move! Draw 2 cards must match either the color or number of the current card.");
+          break;
+        }
+
+        cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard, isDraw2: true, toggleTurn: false });
+        if (isComputerMode && cardPlayedBy === "Player 2") setComputerMoveCounter(prev => prev + 1);
+        break;
+      }
+      case "W":
+      case "D4W": {
+        const isDraw4 = played_card === 'D4W';
+        const numberOfPlayedCard = isDraw4 ? 400 : 500;
+
+        const playWild = (color) => {
+          cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard: color, numberOfPlayedCard, isDraw4, toggleTurn: !isDraw4 });
+          if (isDraw4 && isComputerMode && cardPlayedBy === "Player 2") setComputerMoveCounter(prev => prev + 1);
+        };
+
+        if (isComputerMode && cardPlayedBy === "Player 2") {
+          const colors = ['R', 'G', 'B', 'Y'];
+          playWild(colors[Math.floor(Math.random() * colors.length)]);
+        } else {
+          setIsDialogOpen(true);
+          setDialogCallback(() => (color) => color && playWild(color));
         }
         break;
       }
-      //if card played was a wild card
-      case "W":
-      case "D4W":
-        {
-          // For computer player, randomly select a color
-          if (isComputerMode && cardPlayedBy === "Player 2") {
-            // Available colors: R, G, B, Y
-            const colors = ['R', 'G', 'B', 'Y'];
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            
-            const cardDetails = {
-              cardPlayedBy,
-              played_card,
-              colorOfPlayedCard: randomColor,
-              numberOfPlayedCard: played_card === 'W' ? 500 : 400,
-              isDraw4: played_card === 'D4W',
-              toggleTurn: played_card !== 'D4W',
-            };
-            cardPlayedByPlayer(cardDetails);
-            
-            // Trigger another computer move after playing +4 (turn stays with computer)
-            if (played_card === 'D4W') {
-              setComputerMoveCounter(prev => prev + 1);
-            }
-          } else {
-            //ask for new color via dialog for human players
-            setIsDialogOpen(true);
-            setDialogCallback(() => (colorOfPlayedCard) => {
-              if (!colorOfPlayedCard) return;
-              const cardDetails = {
-                cardPlayedBy,
-                played_card,
-                colorOfPlayedCard,
-                numberOfPlayedCard: played_card === 'W' ? 500 : 400,
-                isDraw4: played_card === 'D4W',
-                toggleTurn: played_card !== 'D4W',
-              };
-              cardPlayedByPlayer(cardDetails);
-            });
-          }
-          break;
-        }
-      //if card played was a draw four wild card
-      // case "D4W": {
-      //   //ask for new color
-      //   const colorOfPlayedCard = prompt("Enter first letter of new color (r/g/b/y)")?.toUpperCase();
-      //   if (!colorOfPlayedCard) return;
-      //   cardPlayedByPlayer({
-      //     cardPlayedBy,
-      //     played_card,
-      //     colorOfPlayedCard,
-      //     numberOfPlayedCard: 400,
-      //     isDraw4: true,
-      //     toggleTurn: false,
-      //   });
-      //   break;
-      // }
       default: {
-        //extract number and color of played card
-        const numberOfPlayedCard = played_card.charAt(0);
-        const colorOfPlayedCard = played_card.charAt(1);
-
-        // Debug log to check the values being compared
-        console.log('Card matching debug:', {
-          played_card,
-          numberOfPlayedCard,
-          colorOfPlayedCard,
-          currentNumber,
-          currentColor,
-          numberMatch: currentNumber === numberOfPlayedCard,
-          colorMatch: currentColor === colorOfPlayedCard,
-          numberType: typeof numberOfPlayedCard,
-          currentNumberType: typeof currentNumber
-        });
-
-        // Normalize the values for comparison (ensure they're both strings)
-        const normalizedCurrentNumber = String(currentNumber);
-        const normalizedPlayedNumber = String(numberOfPlayedCard);
-        
-        // Check for color match or number match
-        // A card can always be played if it has the same number and color as the current card
-        const isSameCard = normalizedCurrentNumber === normalizedPlayedNumber && currentColor === colorOfPlayedCard;
-        const isColorMatch = currentColor === colorOfPlayedCard;
-        const isNumberMatch = normalizedCurrentNumber === normalizedPlayedNumber;
-        
-        if (isColorMatch || isNumberMatch || isSameCard) {
-          console.log('Valid move:', { isColorMatch, isNumberMatch, isSameCard });
-          cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard });
-        }
-        // If no color or number match, invalid move - do not update state
-        else {
-          console.log('Invalid move:', { isColorMatch, isNumberMatch, isSameCard });
+        const { color, number } = parseCard(played_card);
+        if (isValidPlay(played_card, currentColor, currentNumber)) {
+          cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard: color, numberOfPlayedCard: number });
+        } else {
           alert("Invalid Move! You must play a card that matches either the color or number of the current card.");
         }
         break;
@@ -885,358 +504,135 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     setIsDialogOpen(false);
   };
 
-  // Function to reshuffle the discard pile when draw pile is empty
+  // Reshuffle discard pile when draw pile empty
   const reshuffleDiscardPile = () => {
-    // Make sure we have played cards to reshuffle (at least 2, since we keep the top card)
-    if (playedCardsPile.length < 2) {
-      return null; // Not enough cards to reshuffle
-    }
-    
-    // Keep the top card of the discard pile
+    if (playedCardsPile.length < 2) return null;
+
     const topCard = playedCardsPile[playedCardsPile.length - 1];
-    
-    // Take all other cards from the discard pile
-    const cardsToReshuffle = playedCardsPile.slice(0, playedCardsPile.length - 1);
-    
-    // Shuffle these cards
-    const newDrawPile = shuffleArray([...cardsToReshuffle]);
-    
-    // Play shuffling sound
+    const newDrawPile = shuffleArray([...playedCardsPile.slice(0, -1)]);
     playShufflingSound();
-    
-    // Show toast notification
-    toast({
-      title: "Reshuffling Cards",
-      description: "Draw pile has been replenished with shuffled cards.",
-      variant: "default",
-      duration: 3000,
-    });
-    
-    // Return an object with the new draw pile and the updated discard pile (just the top card)
-    return {
-      newDrawPile,
-      newPlayedCardsPile: [topCard]
-    };
+    toast({ title: "Reshuffling Cards", description: "Draw pile replenished.", variant: "default", duration: 3000 });
+
+    return { newDrawPile, newPlayedCardsPile: [topCard] };
   };
 
+  // Draw a card
   const onCardDrawnHandler = () => {
-    //extract player who drew the card
-    let drawButtonPressed = false; // Always set to false to disable draw button after drawing
-    //remove 1 new card from drawCardPile and send it to playerDrawn method
-    let copiedDrawCardPileArray = [...drawCardPile];
-    let updatedPlayedCardsPile = [...playedCardsPile];
-    
-    // Check if there are cards left in the draw pile
-    if (copiedDrawCardPileArray.length === 0) {
-      // Try to reshuffle the discard pile
-      const reshuffleResult = reshuffleDiscardPile();
-      
-      if (reshuffleResult) {
-        // Update the draw and discard piles
-        copiedDrawCardPileArray = reshuffleResult.newDrawPile;
-        updatedPlayedCardsPile = reshuffleResult.newPlayedCardsPile;
-        
-        console.log('Reshuffled discard pile into draw pile. New draw pile size:', copiedDrawCardPileArray.length);
+    let drawPile = [...drawCardPile];
+    let discardPile = [...playedCardsPile];
+
+    // Reshuffle if empty
+    if (drawPile.length === 0) {
+      const result = reshuffleDiscardPile();
+      if (result) {
+        drawPile = result.newDrawPile;
+        discardPile = result.newPlayedCardsPile;
       } else {
-        // Handle case where there aren't enough cards to reshuffle
-        console.warn('Draw card pile is empty and not enough cards to reshuffle!');
-        toast({
-          title: "No Cards Available",
-          description: "There are no more cards to draw.",
-          variant: "warning",
-          duration: 3000,
-        });
-        
-        // Skip turn without drawing
-        const activePlayers = getActivePlayers();
-        const turnCopy = getNextPlayer(turn, activePlayers);
-        
-        if (isComputerMode) {
-          dispatch({
-            turn: turnCopy,
-            drawButtonPressed: false,
-            isExtraTurn: false, // Reset when no cards available
-          });
-        } else {
-          emitSocketEvent("updateGameState", {
-            turn: turnCopy,
-            drawButtonPressed: false,
-            isExtraTurn: false, // Reset when no cards available
-          });
-        }
+        toast({ title: "No Cards Available", description: "There are no more cards to draw.", variant: "warning", duration: 3000 });
+        const update = { turn: getNextPlayer(turn, getActivePlayers()), drawButtonPressed: false, isExtraTurn: false };
+        isComputerMode ? dispatch(update) : emitSocketEvent("updateGameState", update);
         return;
       }
     }
-    
-    //pull out last element from it
-    const drawCard = copiedDrawCardPileArray.pop();
-    
-    // Safety check for undefined card
-    if (!drawCard) {
-      console.error('Undefined card drawn from pile');
-      return;
-    }
-    
-    //add the drawn card to player's deck
-    let numberOfDrawnCard = drawCard.charAt(0);
-    let colorOfDrawnCard = drawCard.charAt(1);
 
-    //check if the card drawn is a skip card
-    if (drawCard === "skipR" || drawCard === "skipG" || drawCard === "skipB" || drawCard === "skipY") {
-      colorOfDrawnCard = drawCard.charAt(4);
-      numberOfDrawnCard = 100;
-    }
-    //if it is draw 2 card
-    if (drawCard === "D2R" || drawCard === "D2G" || drawCard === "D2B" || drawCard === "D2Y") {
-      colorOfDrawnCard = drawCard.charAt(2);
-      numberOfDrawnCard = 200;
-    }
+    const drawCard = drawPile.pop();
+    if (!drawCard) return;
 
-    // NEW RULE: Check if the drawn card is playable
-    // A card is playable if it matches the current color, number, or is a wild card
-    const isWildCard = drawCard === "W" || drawCard === "D4W";
-    
-    // Normalize the values for comparison (ensure they're both strings)
-    const normalizedCurrentNumber = String(currentNumber);
-    const normalizedDrawnNumber = String(numberOfDrawnCard);
-    
-    // Check if the drawn card matches the current card's color or number
-    const isColorMatch = currentColor === colorOfDrawnCard;
-    const isNumberMatch = normalizedCurrentNumber === normalizedDrawnNumber;
-    const isPlayable = isWildCard || isColorMatch || isNumberMatch;
-    
-    console.log('Card drawn:', drawCard, 'Playable:', isPlayable, { isWildCard, isColorMatch, isNumberMatch });
-    // Only change turn if the drawn card is NOT playable
+    const { color, number } = parseCard(drawCard);
+    const isPlayable = isValidPlay(drawCard, currentColor, currentNumber);
     const activePlayers = getActivePlayers();
     const turnCopy = isPlayable ? turn : getNextPlayer(turn, activePlayers);
-    
-    // Show toast notification if the card is playable
-    // if (isPlayable) {
-    //   toast({
-    //     title: "Playable Card",
-    //     description: "You drew a playable card! You can play it now.",
-    //     variant: "default",
-    //     duration: 3000,
-    //   });
-    // }
 
-    // Build the update object with the drawn card added to the current player's deck
-    const currentPlayerDeck = getPlayerDeck(turn);
-    const updatedDeck = [...currentPlayerDeck, drawCard];
-    const deckKey = `${turn.toLowerCase().replace(' ', '')}Deck`;
-    
+    const deckKey = turn.toLowerCase().replace(' ', '') + 'Deck';
     const updateState = {
       turn: turnCopy,
-      [deckKey]: updatedDeck,
-      drawCardPile: copiedDrawCardPileArray,
-      playedCardsPile: updatedPlayedCardsPile, // Include updated played cards pile
-      drawButtonPressed,
-      isExtraTurn: false, // Reset extra turn when drawing a card
+      [deckKey]: [...getPlayerDeck(turn), drawCard],
+      drawCardPile: drawPile,
+      playedCardsPile: discardPile,
+      drawButtonPressed: false,
+      isExtraTurn: false,
     };
 
     if (isComputerMode) {
-      // Handle locally for computer mode
       dispatch(updateState);
-      
-      // For computer mode, if computer draws a playable card, trigger another move
-      // Use computerMoveCounter to ensure fresh state instead of setTimeout with stale closure
       if (isPlayable && turn === "Player 2") {
-        console.log('Computer drew playable card:', drawCard, 'Will play on next turn cycle');
-        setTimeout(() => {
-          setComputerMoveCounter(prev => prev + 1);
-        }, 1000);
+        setTimeout(() => setComputerMoveCounter(prev => prev + 1), 1000);
       }
     } else {
-      //send new state to server for multiplayer mode
       emitSocketEvent("updateGameState", updateState);
     }
   };
 
+  // Skip turn button
   const onSkipButtonHandler = () => {
-    //extract player who skipped
-    const cardPlayedBy = turn;
-    const activePlayers = getActivePlayers();
-    const newState = {
-      turn: getNextPlayer(cardPlayedBy, activePlayers),
-      drawButtonPressed: false,
-      isExtraTurn: false, // Reset extra turn when skipping
-    };
-
-    if (isComputerMode) {
-      // Handle locally for computer mode
-      dispatch(newState);
-    } else {
-      // Send new state to server for multiplayer mode
-      emitSocketEvent("updateGameState", newState);
-    }
+    const update = { turn: getNextPlayer(turn, getActivePlayers()), drawButtonPressed: false, isExtraTurn: false };
+    isComputerMode ? dispatch(update) : emitSocketEvent("updateGameState", update);
   };
 
+  // Handle winner reward and blockchain transaction
   const handleWinnerReward = async (winnerName) => {
+    if (rewardGiven) return;
+
+    if (!address || !isConnected) {
+      toast({ title: "Wallet Required", description: "A connected wallet is required to receive your reward.", variant: "destructive", duration: 5000 });
+      return;
+    }
+
+    const isCurrentUserWinner = winnerName === currentUser;
+    if (!isCurrentUserWinner) return;
+
+    setRewardGiven(true);
+
     try {
-      if (rewardGiven) return; // Prevent multiple rewards
-
-      // In the UNO game, the winner is the player who played the last card
-      // The lastCardPlayedBy state tracks this
-      const winnerPlayer = winnerName;
-
-      // Get the winner's wallet address using Wagmi
-      if (!address || !isConnected) {
-        console.log('Wallet not connected. Please connect your wallet.');
-        
-        toast({
-          title: "Wallet Required",
-          description: "A connected wallet is required to receive your reward.",
-          variant: "destructive",
-          duration: 5000,
-        });
-        
-        return;
-      }
-      
-      const currentUserAddress = address;
-      console.log('Connected wallet address:', currentUserAddress);
-
-
-      // Only create a claimable balance if the current user is the winner
-      const isCurrentUserWinner =
-        (winnerPlayer === "Player 1" && currentUser === "Player 1") ||
-        (winnerPlayer === "Player 2" && currentUser === "Player 2");
-
-      console.log(currentUser, winnerPlayer, isCurrentUserWinner)
-
-      if (!isCurrentUserWinner) {
-        console.log('Current user is not the winner');
+      const hasSufficientBalance = await checkBalance();
+      if (!hasSufficientBalance) {
+        setShowLowBalanceDrawer(true);
         return;
       }
 
-      // const response = await fetch(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}/api/create-claimable-balance`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     winnerAddress: currentUserAddress,
-      //     gameId: room
-      //   }),
-      // });
+      const gameResultData = {
+        winnerAddress: address,
+        winnerPlayer: winnerName,
+        loserPlayers: getActivePlayers().filter(p => p !== winnerName),
+        gameId: room,
+        timestamp: Date.now(),
+      };
 
-      // const data = await response.json();
-      // console.log('API response:', data);
+      const gameHash = ethers.keccak256(ethers.toUtf8Bytes(JSON.stringify(gameResultData)));
 
-      // Since we're not actually calling the API currently, just mark the reward as given
-      if (true) {
-        setRewardGiven(true);
+      const transaction = prepareContractCall({
+        contract: {
+          address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+          abi: unoGameABI,
+          chain: baseSepolia,
+          client,
+        },
+        method: "endGame",
+        params: [BigInt(room), gameHash],
+      });
 
-        // If we were calling the API, we would use the balanceId from the response
-        // const supabaseResponse = await claimableBalancesApi.addClaimableBalance(currentUserAddress, 'dummy-balance-id');
-        // console.log('Supabase response:', supabaseResponse);
+      sendTransaction(transaction, {
+        onSuccess: () => toast({ title: "Game Ended on Blockchain", description: "Game recorded successfully.", variant: "success", duration: 5000 }),
+        onError: (err) => {
+          console.error("Transaction failed:", err);
+          toast({ title: "Error", description: "Failed to end game on blockchain.", variant: "destructive", duration: 5000 });
+        },
+      });
 
-        try {
-          // Check balance before proceeding with transaction
-          const hasSufficientBalance = await checkBalance();
-          if (!hasSufficientBalance) {
-            setShowLowBalanceDrawer(true);
-            return;
-          }
-          
-          const gameResultData = {
-            winnerAddress: currentUserAddress,
-            winnerPlayer: winnerPlayer,
-            // loserAddresses: [opponentAddress], 
-            loserPlayers: ["Player 1", "Player 2"].filter(player => player !== winnerPlayer),
-            gameId: room,
-            timestamp: Date.now()
-          };
-          
-          const gameResultString = JSON.stringify(gameResultData);
-          const gameHash = ethers.keccak256(ethers.toUtf8Bytes(gameResultString));
-          
-          console.log('Calling endGame with gameId:', room, 'and gameHash:', gameHash);
-
-          const transaction = prepareContractCall({
-            contract: {
-              address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-              abi: unoGameABI,
-              chain: baseSepolia,
-              client,
-            },
-            method: "endGame",
-            params: [BigInt(room), gameHash],
-          });
-          
-          sendTransaction(transaction, {
-            onSuccess: (result) => {
-              console.log("Transaction successful:", result);
-              toast({
-                title: "Game Ended on Blockchain",
-                description: "The game has been successfully recorded on the blockchain.",
-                variant: "success",
-                duration: 5000,
-              });
-            },
-            onError: (error) => {
-              console.error("Transaction failed:", error);
-              toast({
-                title: "Error",
-                description: "Failed to end game on blockchain. Please try again.",
-                variant: "destructive",
-                duration: 5000,
-              });
-            }
-          });
-          
-
-        } catch (error) {
-          console.error('Failed to end game on blockchain:', error);
-          
-          toast({
-            title: "Blockchain Update Failed",
-            description: "There was an issue recording the game on the blockchain. The reward was still created.",
-            variant: "warning",
-            duration: 5000,
-          });
-        }
-
-        toast({
-          title: "Congratulations!",
-          description: "You've won the game!",
-          variant: "success",
-          duration: 5000,
-        });
-      } else {
-        console.error('Failed to create claimable balance');
-
-        toast({
-          title: "Reward Failed",
-          description: "There was an issue creating your reward. Please try again later.",
-          variant: "destructive",
-          duration: 5000,
-        });
-      }
+      toast({ title: "Congratulations!", description: "You've won the game!", variant: "success", duration: 5000 });
     } catch (error) {
-      console.error('Error creating claimable balance:', error);
-
-      // toast({
-      //   title: "Error",
-      //   description: "Something went wrong while creating your reward.",
-      //   variant: "destructive",
-      //   duration: 5000,
-      // });
+      console.error("Failed to end game on blockchain:", error);
+      toast({ title: "Blockchain Update Failed", description: "Issue recording game on blockchain.", variant: "warning", duration: 5000 });
     }
   };
 
   useEffect(() => {
-    if (gameOver && winner && !rewardGiven) {
-      handleWinnerReward(winner);
-    }
+    if (gameOver && winner && !rewardGiven) handleWinnerReward(winner);
   }, [gameOver, winner, rewardGiven]);
-
-  const cleanedTurn = turn == currentUser ? "current" : "opponent"
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', marginTop: "-27px" }}>
       <GameBackground turn={turn} currentColor={currentColor} currentUser={currentUser} totalPlayers={totalPlayers} />
-      {/* <MemoizedHeader roomCode={room} /> */}
       {!gameOver ? (
         <>
           <GameScreen
@@ -1257,10 +653,9 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
             isComputerMode={isComputerMode}
             isExtraTurn={isExtraTurn}
             onUnoClicked={() => {
-              // Only allow setting Uno to true if it's not already pressed
               if (!isUnoButtonPressed) {
                 playUnoSound();
-                dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: true });
+                dispatch({ isUnoButtonPressed: true });
               }
             }}
           />
