@@ -1,23 +1,32 @@
-const express = require("express");
+import express, { Request, Response } from "express";
+import http from "http";
+import cors from "cors";
+import { Server as SocketIOServer, Socket } from "socket.io";
+import { WebSocketServer } from "ws";
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { addUser, removeUser, getUser, getUsersInRoom } from "./users";
+import { createClaimableBalance } from "./diamnetService";
+import logger from './logger';
+import gameLogger from './gameLogger';
+import PACK_OF_CARDS from './packOfCards';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const app = express();
-const cors = require("cors");
-const server = require("http").createServer(app);
-const ws = require("ws");
-const path = require('path');
-const {addUser, removeUser, getUser, getUsersInRoom} = require("./users");
-const { createClaimableBalance } = require("./diamnetService");
-const logger = require('./logger');
-const gameLogger = require('./gameLogger');
+const server = http.createServer(app);
 
 // Set server timeout to prevent hanging connections
 server.timeout = 30000; // 30 seconds
 
-const io = require("socket.io")(server, {
+const io = new SocketIOServer(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"],
     },
-    wsEngine: ws.Server,
+    wsEngine: WebSocketServer,
     pingTimeout: 20000, // 20 seconds before a client is considered disconnected
     pingInterval: 10000, // Send ping every 10 seconds
     connectTimeout: 15000, // Connection timeout
@@ -25,13 +34,13 @@ const io = require("socket.io")(server, {
     transports: ['websocket', 'polling'], // Prefer WebSocket, fallback to polling
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT: number = parseInt(process.env.PORT || '4000', 10);
 
 app.use(cors());
 app.use(express.json());
 
 // API endpoint for creating claimable balances
-app.post("/api/create-claimable-balance", async (req, res) => {
+app.post("/api/create-claimable-balance", async (req: Request, res: Response) => {
   try {
     const { winnerAddress, gameId } = req.body;
     
@@ -45,7 +54,7 @@ app.post("/api/create-claimable-balance", async (req, res) => {
     
     // Return success response
     res.status(200).json(result);
-  } catch (error) {
+  } catch (error: any) {
     logger.error("Error creating claimable balance:", error);
     res.status(500).json({ 
       success: false, 
@@ -56,13 +65,13 @@ app.post("/api/create-claimable-balance", async (req, res) => {
 
 if (process.env.NODE_ENV === "production") {
     app.use(express.static("frontend/build"));
-    app.get("*", (req, res) => {
+    app.get("*", (req: Request, res: Response) => {
         res.sendFile(path.resolve(__dirname, "build", "index.html"));
     });
 }
 
 // Set up graceful shutdown
-function gracefulShutdown() {
+function gracefulShutdown(): void {
     logger.info('Shutting down gracefully...');
     server.close(() => {
         logger.info('Server closed');
@@ -87,7 +96,7 @@ server.listen(PORT, () => {
 let activeConnections = 0;
 
 // Health check endpoint for Cloud Run
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({
         status: 'ok',
         connections: activeConnections,
@@ -95,7 +104,7 @@ app.get('/health', (req, res) => {
     });
 });
 
-io.on("connection", (socket) => {
+io.on("connection", (socket: Socket) => {
     activeConnections++;
     logger.info(`User ${socket.id} connected. Active connections: ${activeConnections}`);
     io.to(socket.id).emit("server_id", socket.id);
@@ -104,7 +113,7 @@ io.on("connection", (socket) => {
     // (pingTimeout, pingInterval, and connectTimeout)
 
     // Add room functionality
-    socket.on("joinRoom", (roomId) => {
+    socket.on("joinRoom", (roomId: string) => {
         socket.join(roomId);
         logger.info(`User ${socket.id} joined room ${roomId}`);
         io.to(roomId).emit("userJoined", socket.id);
@@ -116,7 +125,7 @@ io.on("connection", (socket) => {
         io.emit("gameRoomCreated");
     });
 
-    socket.on('gameStarted', (data) => {
+    socket.on('gameStarted', (data: any) => {
         const { newState, cardHashMap, roomId } = data;
         logger.info(`Game started in room ${roomId}`);
         
@@ -145,7 +154,7 @@ io.on("connection", (socket) => {
     });
 
     // Add playCard event handler
-    socket.on('playCard', (data) => {
+    socket.on('playCard', (data: any) => {
         const { roomId, action, newState } = data;
         logger.info(`Card played in room ${roomId}`);
         
@@ -182,13 +191,13 @@ io.on("connection", (socket) => {
     });
 
     // Add leave room functionality
-    socket.on("leaveRoom", (roomId) => {
+    socket.on("leaveRoom", (roomId: string) => {
         socket.leave(roomId);
         logger.info(`User ${socket.id} left room ${roomId}`);
         io.to(roomId).emit("userLeft", socket.id);
     });
 
-    socket.on("join", (payload, callback) => {
+    socket.on("join", (payload: { room: string }, callback: (error?: string) => void) => {
         let numberOfUsersInRoom = getUsersInRoom(payload.room).length;
 
         // Assign player name based on current number of users (Player 1-6)
@@ -211,7 +220,7 @@ io.on("connection", (socket) => {
     });
 
     // Handle game initialization request
-    socket.on("requestGameInit", (payload) => {
+    socket.on("requestGameInit", (payload: any) => {
         const user = getUser(socket.id);
         if (user) {
             const roomUsers = getUsersInRoom(user.room);
@@ -219,9 +228,8 @@ io.on("connection", (socket) => {
             
             logger.info(`Initializing game in room ${user.room} with ${numPlayers} players`);
             
-            // Import required utilities (these would need to be added to backend)
-            const PACK_OF_CARDS = require('./packOfCards'); // You'll need to create this
-            const shuffleArray = (array) => {
+            // Shuffle array utility
+            const shuffleArray = <T>(array: T[]): T[] => {
                 const shuffled = [...array];
                 for (let i = shuffled.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -230,8 +238,8 @@ io.on("connection", (socket) => {
                 return shuffled;
             };
             
-            const shuffledCards = shuffleArray(PACK_OF_CARDS);
-            const gameState = {
+            const shuffledCards = shuffleArray([...PACK_OF_CARDS]);
+            const gameState: any = {
                 gameOver: false,
                 turn: "Player 1",
                 currentColor: "",
@@ -268,7 +276,7 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("initGameState", (gameState) => {
+    socket.on("initGameState", (gameState: any) => {
         const user = getUser(socket.id);
         if (user) {
             // Broadcast the game state to all players in the room
@@ -277,7 +285,7 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("updateGameState", (gameState) => {
+    socket.on("updateGameState", (gameState: any) => {
         try {
             const user = getUser(socket.id);
             if (user) {
@@ -288,15 +296,17 @@ io.on("connection", (socket) => {
                 };
                 io.to(user.room).emit("updateGameState", enhancedGameState);
             }
-        } catch (error) {
+        } catch (error: any) {
             logger.error(`Error updating game state for socket ${socket.id}:`, error);
             socket.emit("error", { message: "Failed to update game state" });
         }
     });
 
-    socket.on("sendMessage", (payload, callback) => {
+    socket.on("sendMessage", (payload: { message: string }, callback: () => void) => {
         const user = getUser(socket.id);
-        io.to(user.room).emit("message", { user: user.name, text: payload.message });
+        if (user) {
+            io.to(user.room).emit("message", { user: user.name, text: payload.message });
+        }
         callback();
     });
 
@@ -322,18 +332,18 @@ io.on("connection", (socket) => {
     });
     
     // Handle socket errors
-    socket.on("error", (error) => {
+    socket.on("error", (error: Error) => {
         logger.error(`Socket ${socket.id} error:`, error);
     });
 });
 
 // Global error handlers
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', (error: Error) => {
     logger.error('Uncaught Exception:', error);
     // Keep the process running despite the error
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
     logger.error('Unhandled Rejection at:', { promise, reason });
     // Keep the process running despite the rejection
 });

@@ -1,16 +1,22 @@
-const { Asset, Aurora, Keypair, Operation, BASE_FEE, TransactionBuilder, Claimant, xdr } = require("diamnet-sdk");
-require('dotenv').config();
-const logger = require('./logger');
+import { Asset, Aurora, Keypair, Operation, BASE_FEE, TransactionBuilder, Claimant, xdr } from "diamnet-sdk";
+import 'dotenv/config';
+import logger from './logger';
 
 const DIAMNET_SECRET_KEY = process.env.DIAMNET_SECRET_KEY;
 
+interface ClaimableBalanceResult {
+  success: boolean;
+  balanceId: string;
+  transactionHash: string;
+}
+
 /**
  * Creates a claimable balance for the specified destination address
- * @param {string} destinationPublicKey - The public key of the destination account
- * @param {string} amount - The amount to lock in the claimable balance (default: "5")
- * @returns {Promise<Object>} - The transaction result
+ * @param destinationPublicKey - The public key of the destination account
+ * @param amount - The amount to lock in the claimable balance (default: "5")
+ * @returns The transaction result
  */
-async function createClaimableBalance(destinationPublicKey, amount = "5") {
+export async function createClaimableBalance(destinationPublicKey: string, amount: string = "5"): Promise<ClaimableBalanceResult> {
   if (!DIAMNET_SECRET_KEY) {
     throw new Error("DIAMNET_SECRET_KEY environment variable is not set");
   }
@@ -59,12 +65,8 @@ async function createClaimableBalance(destinationPublicKey, amount = "5") {
       balanceId: balanceId,
       transactionHash: result.hash
     };
-  } catch (error) {
+  } catch (error: any) {
     logger.error("Transaction submission error:", error);
     throw error;
   }
 }
-
-module.exports = {
-  createClaimableBalance
-};

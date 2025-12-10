@@ -1,6 +1,11 @@
-const winston = require('winston');
-const path = require('path');
-const fs = require('fs');
+import winston from 'winston';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, 'logs');
@@ -26,7 +31,7 @@ const consoleFormat = winston.format.combine(
 );
 
 // Create the logger
-const logger = winston.createLogger({
+const logger: winston.Logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: logFormat,
   defaultMeta: { service: 'gameofuno-backend' },
@@ -55,10 +60,10 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Create a stream object for Morgan integration (if needed later)
-logger.stream = {
-  write: (message) => {
+(logger as any).stream = {
+  write: (message: string) => {
     logger.info(message.trim());
   },
 };
 
-module.exports = logger;
+export default logger;
