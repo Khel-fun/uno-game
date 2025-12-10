@@ -40,4 +40,7 @@ next-env.d.ts
 # game logs
 /game-logs
 node_modules
-*.md/backend/dist
+*.md
+
+# backend build output
+/backend/dist
