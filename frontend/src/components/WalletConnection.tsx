@@ -33,7 +33,7 @@ export function WalletConnection({ onConnect }: WalletConnectionProps) {
   }, [address, onConnect]);
 
   const wallets = [
-    inAppWallet({ auth: { options: ["farcaster", "google", "email", "apple"] } }),
+    inAppWallet({ auth: { options: ["google", "email", "apple"] } }),
     createWallet("io.metamask"),
     createWallet("com.coinbase.wallet"),
     createWallet("me.rainbow"),
