@@ -12,7 +12,7 @@ const GameBackground = ({ turn, currentColor, currentUser, totalPlayers }) => {
     const currentPlayerNum = parseInt(currentUser.split(' ')[1]);
     // Calculate relative opponent index (starts from 0)
     let relativeIndex = turnPlayerNum - currentPlayerNum;
-    if (relativeIndex < 0) relativeIndex += MAX_PLAYERS; // Wrap around for max players
+    if (relativeIndex < 0) relativeIndex += totalPlayers; // Wrap around based on actual player count
     playerIndex = relativeIndex - 1; // Adjust to start from 0
   }
   
