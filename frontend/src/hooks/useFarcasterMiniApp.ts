@@ -13,8 +13,16 @@ export const useFarcasterMiniApp = () => {
     const initSDK = async () => {
       try {
         // Check if we're in a Farcaster context
-        const context = sdk.context;
-        setIsFarcasterContext(!!context);
+        const context = await sdk.context;
+        const isInFarcaster = !!context;
+        setIsFarcasterContext(isInFarcaster);
+        
+        // Signal to Farcaster that the app is ready to be displayed
+        if (isInFarcaster) {
+          await sdk.actions.ready();
+          console.log('Farcaster SDK ready');
+        }
+        
         setIsSDKLoaded(true);
       } catch (err) {
         console.error('Failed to initialize Farcaster SDK:', err);
