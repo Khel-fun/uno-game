@@ -1,12 +1,12 @@
-import { Server, Socket } from 'socket.io';
-import logger from '../logger';
-import { clearRemoval } from './timers';
-import type { UserManager } from '../users';
-import type { GameStateManager } from '../gameStateManager';
+import { Server, Socket } from "socket.io";
+import { clearRemoval } from "./timers";
+import log from "../log";
+import type { UserStorage } from "../services/storage/userStorage";
+import type { GameStorage } from "../services/storage/gameStorage";
 
 interface ReconnectionDependencies {
-  userManager: UserManager;
-  gameStateManager: GameStateManager;
+  userStorage: UserStorage;
+  gameStorage: GameStorage;
 }
 
 interface RejoinPayload {
@@ -25,34 +25,40 @@ interface RejoinResponse {
 export default function reconnectionHandler(
   io: Server,
   socket: Socket,
-  { userManager }: ReconnectionDependencies
+  { userStorage }: ReconnectionDependencies
 ): void {
-  socket.on('rejoinRoom', ({ room, gameId, walletAddress }: RejoinPayload, callback?: (response: RejoinResponse) => void) => {
-    const match = userManager.reconnectUser({
-      room,
-      walletAddress,
-      newId: socket.id,
-    });
+  socket.on(
+    "rejoinRoom",
+    async (
+      { room, gameId, walletAddress }: RejoinPayload,
+      callback?: (response: RejoinResponse) => void
+    ) => {
+      const match = await userStorage.reconnectUser({
+        room,
+        walletAddress,
+        newId: socket.id,
+      });
 
-    if (!match) {
-      callback?.({ success: false, error: 'Room not found' });
-      return;
+      if (!match) {
+        callback?.({ success: false, error: "Room not found" });
+        return;
+      }
+
+      clearRemoval(match.id);
+      socket.join(room);
+      log.info("User reconnected to room %s as %s", room, match.name);
+
+      socket.emit("reconnected", { room, gameId });
+      io.to(room).emit("playerReconnected", {
+        userId: match.id,
+        room,
+        timestamp: Date.now(),
+      });
+
+      const users = await userStorage.getUsersInRoom(room);
+      io.to(room).emit("roomData", { room, users });
+
+      callback?.({ success: true, room, gameId });
     }
-
-    clearRemoval(match.id);
-    socket.join(room);
-    logger.info('User reconnected to room %s as %s', room, match.name);
-
-    socket.emit('reconnected', { room, gameId });
-    io.to(room).emit('playerReconnected', {
-      userId: match.id,
-      room,
-      timestamp: Date.now(),
-    });
-
-    const users = userManager.getUsersInRoom(room);
-    io.to(room).emit('roomData', { room, users });
-
-    callback?.({ success: true, room, gameId });
-  });
+  );
 }

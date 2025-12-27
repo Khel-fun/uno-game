@@ -1,18 +1,20 @@
 import {
   USER_CLEANUP_INTERVAL_MS,
   GAME_CLEANUP_INTERVAL_MS,
-} from '../constants';
-import type { GameStateManager } from '../gameStateManager';
-import type { UserManager } from '../users';
+} from "../constants";
+import type { GameStorage } from "../services/storage/gameStorage";
+import type { UserStorage } from "../services/storage/userStorage";
 
 interface CleanupDependencies {
-  gameStateManager: GameStateManager;
-  userManager: UserManager;
+  gameStorage: GameStorage;
+  userStorage: UserStorage;
 }
 
-function setupCleanup({ gameStateManager, userManager }: CleanupDependencies): void {
-  setInterval(() => userManager.cleanupDisconnected(), USER_CLEANUP_INTERVAL_MS);
-  setInterval(() => gameStateManager.cleanupOldStates(), GAME_CLEANUP_INTERVAL_MS);
+function setupCleanup({ gameStorage, userStorage }: CleanupDependencies): void {
+  setInterval(() => {
+    void userStorage.cleanupDisconnected();
+  }, USER_CLEANUP_INTERVAL_MS);
+  setInterval(() => gameStorage.cleanupOldStates(), GAME_CLEANUP_INTERVAL_MS);
 }
 
 export { setupCleanup };

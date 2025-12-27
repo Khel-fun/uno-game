@@ -1,22 +1,25 @@
-import { Server, Socket } from 'socket.io';
-import connectionHandler from './connection';
-import lobbyHandler from './lobby';
-import gameHandler from './game';
-import reconnectionHandler from './reconnection';
-import type { GameStateManager } from '../gameStateManager';
-import type { UserManager } from '../users';
+import { Server, Socket } from "socket.io";
+import connectionHandler from "./connection";
+import lobbyHandler from "./lobby";
+import gameHandler from "./game";
+import reconnectionHandler from "./reconnection";
+import type { GameStorage } from "../services/storage/gameStorage";
+import type { UserStorage } from "../services/storage/userStorage";
 
 interface SocketDependencies {
-  gameStateManager: GameStateManager;
-  userManager: UserManager;
+  gameStorage: GameStorage;
+  userStorage: UserStorage;
 }
 
-function registerSocketHandlers(io: Server, { gameStateManager, userManager }: SocketDependencies): void {
-  io.on('connection', (socket: Socket) => {
-    connectionHandler(io, socket, { userManager });
-    lobbyHandler(io, socket, { userManager });
-    gameHandler(io, socket, { gameStateManager, userManager });
-    reconnectionHandler(io, socket, { gameStateManager, userManager });
+function registerSocketHandlers(
+  io: Server,
+  { gameStorage, userStorage }: SocketDependencies
+): void {
+  io.on("connection", (socket: Socket) => {
+    connectionHandler(io, socket, { userStorage });
+    lobbyHandler(io, socket, { userStorage });
+    gameHandler(io, socket, { gameStorage, userStorage });
+    reconnectionHandler(io, socket, { gameStorage, userStorage });
   });
 }
 

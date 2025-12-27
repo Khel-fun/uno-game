@@ -80,6 +80,24 @@ export default function PlayGame() {
     };
   }, [refetchGames]);
 
+  // Register or login user when wallet connects
+  useEffect(() => {
+    if (isConnected && address && socketManager.isConnected()) {
+      console.log("Registering/logging in user with wallet:", address);
+      
+      socketManager.emit("registerOrLoginUser", {
+        walletAddress: address,
+        username: address.slice(0, 8) // Optional: use short address as username
+      }, (error: string | null, data?: any) => {
+        if (error) {
+          console.error("Failed to register/login user:", error);
+        } else {
+          console.log("User registered/logged in successfully:", data);
+        }
+      });
+    }
+  }, [isConnected, address]);
+
   const openHandler = () => {
     setOpen(false);
   };

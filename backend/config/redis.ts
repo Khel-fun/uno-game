@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import logger from '../logger';
+import log from '../log';
 
 function createRedisClient(role: string = 'data'): Redis {
   const {
@@ -24,10 +24,10 @@ function createRedisClient(role: string = 'data'): Redis {
 
   const client = REDIS_URL ? new Redis(REDIS_URL, options) : new Redis(options);
 
-  client.on('connect', () => logger.info(`[redis-${role}] connected`));
-  client.on('error', (err) => logger.error(`[redis-${role}] error: ${err.message}`));
-  client.on('close', () => logger.warn(`[redis-${role}] connection closed`));
-  client.on('reconnecting', () => logger.warn(`[redis-${role}] reconnecting...`));
+  client.on('connect', () => log.info(`[redis-${role}] connected`));
+  client.on('error', (err) => log.error(`[redis-${role}] error: ${err.message}`));
+  client.on('close', () => log.warn(`[redis-${role}] connection closed`));
+  client.on('reconnecting', () => log.warn(`[redis-${role}] reconnecting...`));
 
   return client;
 }

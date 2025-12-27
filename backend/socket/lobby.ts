@@ -1,10 +1,10 @@
-import { Server, Socket } from 'socket.io';
-import { clearRemoval } from './timers';
-import logger from '../logger';
-import type { UserManager } from '../users';
+import { Server, Socket } from "socket.io";
+import { clearRemoval } from "./timers";
+import log from "../log";
+import type { UserStorage } from "../services/storage/userStorage";
 
 interface LobbyDependencies {
-  userManager: UserManager;
+  userStorage: UserStorage;
 }
 
 interface JoinPayload {
@@ -16,49 +16,116 @@ interface SendMessagePayload {
   message: string;
 }
 
+interface RegisterOrLoginUserPayload {
+  walletAddress: string;
+  username?: string;
+}
+
 export default function lobbyHandler(
   io: Server,
   socket: Socket,
-  { userManager }: LobbyDependencies
+  { userStorage }: LobbyDependencies
 ): void {
-  socket.on('join', ({ room, walletAddress }: JoinPayload, callback?: (error: string | null, data?: any) => void) => {
-    const result = userManager.addOrReuseUser({ id: socket.id, room, walletAddress });
+  log.info(`[LOBBY] Lobby handler initialized for socket: ${socket.id}`);
 
-    if (result.error) {
-      callback?.(result.error);
-      return;
+  // Register or login user when they connect wallet (creates account if new, or logs in existing user)
+  socket.on(
+    "registerOrLoginUser",
+    async (
+      { walletAddress, username }: RegisterOrLoginUserPayload,
+      callback?: (error: string | null, data?: any) => void
+    ) => {
+      try {
+        if (!walletAddress) {
+          callback?.("Wallet address is required");
+          return;
+        }
+
+        log.info(
+          `User registration/login - socketId: ${
+            socket.id
+          }, wallet: ${walletAddress}, username: ${username || "none"}`
+        );
+
+        // Register or login user with UUID (creates new account or returns existing user)
+        const user = await userStorage.registerOrLoginUser(walletAddress);
+
+        // Update name if provided
+        if (username) {
+          user.name = username;
+          await userStorage.updateUser(user);
+        }
+
+        log.info(
+          `✓ User registered/logged in - userId: ${user.id}, wallet: ${user.walletAddress}, stored in Redis`
+        );
+
+        callback?.(null, {
+          userId: user.id,
+          name: user.name,
+          walletAddress: user.walletAddress,
+        });
+      } catch (err: any) {
+        log.error(`Error registering user: ${err.message}`);
+        callback?.("Failed to register user");
+      }
     }
+  );
 
-    const { user, reused } = result;
-    if (!user) return;
-    
-    clearRemoval(user.id);
-    socket.join(room);
-    logger.info('User %s joined room %s', user.name, room);
+  socket.on(
+    "join",
+    async (
+      { room, walletAddress }: JoinPayload,
+      callback?: (error: string | null, data?: any) => void
+    ) => {
+      try {
+        const result = await userStorage.addOrReuseUser({
+          id: socket.id,
+          room,
+          walletAddress,
+        });
 
-    // Emit data to joining user
-    socket.emit('currentUserData', { name: user.name });
+        if (result.error) {
+          callback?.(result.error);
+          return;
+        }
 
-    // Emit room data to all
-    const users = userManager.getUsersInRoom(room);
-    io.to(room).emit('roomData', { room, users });
+        const { user, reused } = result;
+        if (!user) return;
 
-    callback?.(null, { reused });
-  });
+        clearRemoval(user.id);
+        socket.join(room);
+        log.info(`User ${user.name} joined room ${room}`);
 
-  socket.on('quitRoom', () => {
-    const user = userManager.removeUser(socket.id);
-    if (user) {
+        socket.emit("currentUserData", { name: user.name });
+
+        const users = await userStorage.getUsersInRoom(room);
+        io.to(room).emit("roomData", { room, users });
+
+        callback?.(null, { reused });
+      } catch (err: any) {
+        log.error(`Error handling join: ${err.message}`);
+        callback?.("Internal error");
+      }
+    }
+  );
+
+  socket.on("quitRoom", async () => {
+    const user = await userStorage.removeUser(socket.id);
+    if (user && user.room) {
       socket.leave(user.room);
-      const users = userManager.getUsersInRoom(user.room);
-      io.to(user.room).emit('roomData', { room: user.room, users });
+      const users = await userStorage.getUsersInRoom(user.room);
+      io.to(user.room).emit("roomData", { room: user.room, users });
     }
   });
 
-  socket.on('sendMessage', ({ message }: SendMessagePayload, callback?: () => void) => {
-    const user = userManager.getUser(socket.id);
-    if (!user) return;
-    io.to(user.room).emit('message', { user: user.name, text: message });
-    callback?.();
-  });
+  socket.on(
+    "sendMessage",
+    async ({ message }: SendMessagePayload, callback?: () => void) => {
+      const user = await userStorage.getUser(socket.id);
+      if (!user || !user.room) return;
+      io.to(user.room).emit("message", { user: user.name, text: message });
+      callback?.();
+    }
+  );
 }

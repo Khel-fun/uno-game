@@ -1,42 +1,47 @@
-import { Server, Socket } from 'socket.io';
-import logger from '../logger';
-import { scheduleRemoval } from './timers';
-import type { UserManager } from '../users';
+import { Server, Socket } from "socket.io";
+import { scheduleRemoval } from "./timers";
+import log from "../log";
+import type { UserStorage } from "../services/storage/userStorage";
 
 interface ConnectionDependencies {
-  userManager: UserManager;
+  userStorage: UserStorage;
 }
 
 export default function connectionHandler(
   io: Server,
   socket: Socket,
-  { userManager }: ConnectionDependencies
+  { userStorage }: ConnectionDependencies
 ): void {
-  // Send server socket id
-  socket.emit('server_id', socket.id);
+  log.info(`[CONNECTION] New socket connection: ${socket.id}`);
 
-  socket.on('disconnect', (reason: string) => {
-    const user = userManager.markDisconnected(socket.id);
-    if (user) {
-      logger.info('User disconnected %s (%s)', user.name, reason);
+  // Send server socket id
+  socket.emit("server_id", socket.id);
+
+  socket.on("disconnect", async (reason: string) => {
+    const user = await userStorage.markDisconnected(socket.id);
+    if (user && user.room) {
+      log.info(`User disconnected ${user.name} (${reason})`);
       // notify room
-      io.to(user.room).emit('playerDisconnected', {
+      io.to(user.room).emit("playerDisconnected", {
         userId: user.id,
         userName: user.name,
         temporary: true,
         reason,
       });
 
-      scheduleRemoval(user.id, () => {
-        const removed = userManager.removeUser(user.id);
-        if (removed) {
-          io.to(user.room).emit('playerLeft', {
+      scheduleRemoval(user.id, async () => {
+        const removed = await userStorage.removeUser(user.id);
+        if (removed && removed.room) {
+          io.to(removed.room).emit("playerLeft", {
             userId: removed.id,
             userName: removed.name,
             permanent: true,
           });
-          const updated = userManager.getUsersInRoom(user.room);
-          io.to(user.room).emit('roomData', { room: user.room, users: updated });
+          const updated = await userStorage.getUsersInRoom(removed.room);
+          io.to(removed.room).emit("roomData", {
+            room: removed.room,
+            users: updated,
+          });
         }
       });
     }
