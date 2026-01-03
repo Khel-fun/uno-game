@@ -2,20 +2,33 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Game from "./Game";
-import { useParams, useSearchParams, useRouter } from 'next/navigation'
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import socket, { socketManager } from "@/services/socket";
 import CenterInfo from "./CenterInfo";
 import { ConnectionStatusIndicator } from "@/components/ConnectionStatusIndicator";
 import { useSocketConnection } from "@/context/SocketConnectionContext";
-import { UnoGameContract, OffChainGameState, Card, Action } from '../../lib/types'
-import { useUserAccount } from '@/userstate/useUserAccount';
-import { getContractNew } from '../../lib/web3'
-import { applyActionToOffChainState, hashAction, startGame, storePlayerHand, getPlayerHand, createDeck, hashCard } from '../../lib/gameLogic'
-import { updateGlobalCardHashMap } from '../../lib/globalState';
+import {
+  UnoGameContract,
+  OffChainGameState,
+  Card,
+  Action,
+} from "../../lib/types";
+import { useUserAccount } from "@/userstate/useUserAccount";
+import { getContractNew } from "../../lib/web3";
+import {
+  applyActionToOffChainState,
+  hashAction,
+  startGame,
+  storePlayerHand,
+  getPlayerHand,
+  createDeck,
+  hashCard,
+} from "../../lib/gameLogic";
+import { updateGlobalCardHashMap } from "../../lib/globalState";
 import { unoGameABI } from "@/constants/unogameabi";
 import { useSendTransaction } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
-import { baseSepolia } from "@/lib/chains";
+import { celoSepolia } from "@/lib/chains";
 import { client } from "@/utils/thirdWebClient";
 import { getSelectedNetwork } from "@/utils/networkUtils";
 import { useToast } from "@/components/ui/use-toast";
@@ -24,8 +37,15 @@ import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
 import { MAX_PLAYERS } from "@/constants/gameConstants";
 import { useWalletStorage } from "@/hooks/useWalletStorage";
+import {
+  isMiniPay,
+  sendMiniPayTransaction,
+  getFeeCurrency,
+} from "@/utils/miniPayUtils";
+import { encodeFunctionData } from "viem";
+import { useChainId } from "wagmi";
 
-type User = { 
+type User = {
   id: string;
   name: string;
   room: string;
@@ -34,12 +54,12 @@ type User = {
 };
 
 const Room = () => {
-  const { id } = useParams()
-  const searchParams = useSearchParams()
-  const isComputerMode = searchParams.get('mode') === 'computer'
+  const { id } = useParams();
+  const searchParams = useSearchParams();
+  const isComputerMode = searchParams.get("mode") === "computer";
   const { isConnected } = useSocketConnection();
   const router = useRouter();
-  
+
   //initialize socket state
   const [room] = useState(id);
   const [roomFull, setRoomFull] = useState(false);
@@ -50,23 +70,34 @@ const Room = () => {
   const hasJoinedRoom = useRef(false);
   const { account, bytesAddress } = useUserAccount();
   const { address } = useWalletStorage(); // Use wallet storage hook for persistent address
-  const [contract, setContract] = useState<UnoGameContract | null>(null)
-  const [gameId, setGameId] = useState<bigint | null>(null)
-  
+  const [contract, setContract] = useState<UnoGameContract | null>(null);
+  const [gameId, setGameId] = useState<bigint | null>(null);
+
   const { toast } = useToast();
 
-  const [offChainGameState, setOffChainGameState] = useState<OffChainGameState | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [offChainGameState, setOffChainGameState] =
+    useState<OffChainGameState | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [playerHand, setPlayerHand] = useState<string[]>([]);
   const [showLowBalanceDrawer, setShowLowBalanceDrawer] = useState(false);
+  const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
   const { checkBalance } = useBalanceCheck();
+  const chainId = useChainId();
 
   const { mutate: sendTransaction } = useSendTransaction();
+
+  // Detect MiniPay wallet on mount
+  useEffect(() => {
+    if (typeof window !== "undefined" && isMiniPay()) {
+      console.log("[MiniPay] Detected in Room component");
+      setIsMiniPayWallet(true);
+    }
+  }, []);
 
   // Initialize computer game (off-chain only)
   const initializeComputerGame = async () => {
     if (!contract || !account || !offChainGameState || !gameId) {
-      setError('Missing data to start computer game');
+      setError("Missing data to start computer game");
       return;
     }
 
@@ -79,14 +110,14 @@ const Room = () => {
       });
 
       const newState = startGame(offChainGameState, socket);
-      const action: Action = { type: 'startGame', player: bytesAddress! };
+      const action: Action = { type: "startGame", player: bytesAddress! };
       hashAction(action); // not committed on-chain in computer mode
 
       setGameStarted(true);
       setOffChainGameState(newState);
     } catch (error) {
-      console.error('Error initializing computer game:', error);
-      setError('Failed to initialize computer game. Please try again.');
+      console.error("Error initializing computer game:", error);
+      setError("Failed to initialize computer game. Please try again.");
     }
   };
 
@@ -95,29 +126,33 @@ const Room = () => {
       // For computer mode, simulate having 2 players immediately
       setUsers([
         { id: "player1", name: "Player 1", room: room as string },
-        { id: "computer", name: "Computer", room: room as string }
+        { id: "computer", name: "Computer", room: room as string },
       ]);
       setCurrentUser("Player 1");
-      
+
       // We'll initialize the computer game after contract setup
       // console.log('Computer mode detected, will initialize after contract setup');
     } else {
       // Set room info for reconnection (game-* room id)
       socketManager.setRoomInfo(`game-${room}`, id as string);
-      
+
       // Only join if we haven't already and socket is connected
       if (isConnected && !hasJoinedRoom.current) {
         // Get wallet address from thirdweb hook or localStorage
         const walletAddress = address || null;
         // console.log('Joining room with wallet address:', walletAddress);
-        
-        socket.emit("join", { room: room, walletAddress: walletAddress }, (error: any) => {
-          if (error) {
-            setRoomFull(true);
-          } else {
-            hasJoinedRoom.current = true;
-          }
-        });
+
+        socket.emit(
+          "join",
+          { room: room, walletAddress: walletAddress },
+          (error: any) => {
+            if (error) {
+              setRoomFull(true);
+            } else {
+              hasJoinedRoom.current = true;
+            }
+          },
+        );
       }
     }
   }, [room, isComputerMode, isConnected, address]);
@@ -129,23 +164,27 @@ const Room = () => {
           // console.log('Setting up contract with account:', account);
           const contractResult = await getContractNew();
           // console.log('Contract result:', contractResult);
-          
+
           if (!contractResult.contract) {
-            console.error('Failed to initialize contract');
-            setError('Failed to initialize contract. Please try again.');
+            console.error("Failed to initialize contract");
+            setError("Failed to initialize contract. Please try again.");
             return;
           }
-          
+
           // console.log('Contract initialized:', contractResult.contract);
           setContract(contractResult.contract);
-          
+
           if (contractResult.contract && id) {
             const bigIntId = BigInt(id as string);
             // console.log('Setting game ID:', bigIntId.toString());
             setGameId(bigIntId);
-            
+
             // console.log('Fetching game state...');
-            const gameState = await fetchGameState(contractResult.contract, bigIntId, account);
+            const gameState = await fetchGameState(
+              contractResult.contract,
+              bigIntId,
+              account,
+            );
             // Set the offChainGameState from the game state
             if (gameState) {
               // console.log('Game state fetched successfully');
@@ -154,85 +193,106 @@ const Room = () => {
               // after all state is properly set, without blockchain transactions
               // For non-computer mode, we'll wait for the gameStarted event from the server
             } else {
-              console.error('Failed to fetch game state');
-              setError('Failed to fetch game state. Please try again.');
+              console.error("Failed to fetch game state");
+              setError("Failed to fetch game state. Please try again.");
             }
           }
         } catch (error) {
-          console.error('Error in setup:', error);
-          setError('Failed to set up the game. Please try again.');
+          console.error("Error in setup:", error);
+          setError("Failed to set up the game. Please try again.");
         }
       }
     };
     setup();
-  }, [id, account])
-  
+  }, [id, account]);
+
   useEffect(() => {
-    if (isComputerMode && contract && offChainGameState && gameId && !gameStarted) {
+    if (
+      isComputerMode &&
+      contract &&
+      offChainGameState &&
+      gameId &&
+      !gameStarted
+    ) {
       setTimeout(() => {
         initializeComputerGame();
       }, 2000);
     }
-  }, [isComputerMode, contract, offChainGameState, gameId, gameStarted, initializeComputerGame])
+  }, [
+    isComputerMode,
+    contract,
+    offChainGameState,
+    gameId,
+    gameStarted,
+    initializeComputerGame,
+  ]);
 
   useEffect(() => {
     if (!socket || !id) return;
 
     const roomId = `game-${id}`;
-    
+
     // console.log(`Joining room: ${roomId}`);
-    
+
     // Only join room if connected
     if (isConnected) {
       socket.emit("joinRoom", roomId);
-      
+
       // Request game state restoration on page load/refresh
       // console.log('Requesting game state restoration for game:', id);
-      socket.emit('requestGameStateSync', { roomId, gameId: id });
+      socket.emit("requestGameStateSync", { roomId, gameId: id });
     }
-    
+
     // Handle reconnection - rejoin room when connection is restored
     const handleReconnect = () => {
       // console.log('Reconnected, rejoining room:', roomId);
       socket.emit("joinRoom", roomId);
-      
+
       // Re-join the lobby room to get player list (if game hasn't started)
       if (!gameStarted && !isComputerMode) {
         // console.log('Re-joining lobby room:', room);
         // Get wallet address for reconnection
         const walletAddress = address || null;
-        socket.emit("join", { room: room, walletAddress: walletAddress }, (error: any) => {
-          if (error) {
-            console.error('Error rejoining lobby:', error);
-          } else {
-            // console.log('Successfully rejoined lobby, should receive roomData');
-          }
-        });
+        socket.emit(
+          "join",
+          { room: room, walletAddress: walletAddress },
+          (error: any) => {
+            if (error) {
+              console.error("Error rejoining lobby:", error);
+            } else {
+              // console.log('Successfully rejoined lobby, should receive roomData');
+            }
+          },
+        );
       }
-      
+
       // Request game state sync if game was started
       if (gameStarted) {
-        socket.emit('requestGameStateSync', { roomId, gameId: id });
+        socket.emit("requestGameStateSync", { roomId, gameId: id });
       }
     };
-    
-    socket.on('connect', handleReconnect);
-    socket.on('roomRejoined', handleReconnect);
-    socket.on('reconnected', handleReconnect); // Handle socketManager's reconnected event
-    
+
+    socket.on("connect", handleReconnect);
+    socket.on("roomRejoined", handleReconnect);
+    socket.on("reconnected", handleReconnect); // Handle socketManager's reconnected event
+
     // Set up game started event listener
-    socket.on(`gameStarted-${roomId}`, (data: { newState: OffChainGameState; cardHashMap: any; }) => {
+    socket.on(
+      `gameStarted-${roomId}`,
+      (data: { newState: OffChainGameState; cardHashMap: any }) => {
         // console.log(`Game started event received for room ${roomId}:`, data);
-        
+
         try {
           const { newState, cardHashMap } = data;
-          
+
           // console.log('Received newState:', newState);
           // console.log('Received cardHashMap:', cardHashMap);
           // console.log('Current account:', account);
-          
+
           if (!newState) {
-            console.error('Error: Received empty game state in gameStarted event');
+            console.error(
+              "Error: Received empty game state in gameStarted event",
+            );
             return;
           }
 
@@ -240,7 +300,9 @@ const Room = () => {
             // console.log('Updating global card hash map');
             updateGlobalCardHashMap(cardHashMap);
           } else {
-            console.warn('Warning: No cardHashMap received in gameStarted event');
+            console.warn(
+              "Warning: No cardHashMap received in gameStarted event",
+            );
           }
 
           // console.log('Setting game as started');
@@ -252,31 +314,38 @@ const Room = () => {
           if (account) {
             // console.log('Updating player hand for account:', account);
             // console.log('Player hands in newState:', newState.playerHands);
-            
+
             const playerHandHashes = newState.playerHands[account];
             // console.log('Player hand hashes:', playerHandHashes);
-            
+
             if (playerHandHashes) {
               setPlayerHand(playerHandHashes);
               storePlayerHand(BigInt(id as string), account, playerHandHashes);
               // console.log('Player hand updated and stored');
             } else {
-              console.error(`Error: No hand found for player ${account} in the game state`);
+              console.error(
+                `Error: No hand found for player ${account} in the game state`,
+              );
             }
           } else {
-            console.error('Error: No account available to update player hand');
+            console.error("Error: No account available to update player hand");
           }
 
           if (!newState.players || newState.currentPlayerIndex === undefined) {
-            console.error('Error: Cannot determine starting player from game state');
+            console.error(
+              "Error: Cannot determine starting player from game state",
+            );
           }
         } catch (error) {
-          console.error('Error handling gameStarted event:', error);
+          console.error("Error handling gameStarted event:", error);
         }
-      });
+      },
+    );
 
-      // Listen for cardPlayed event
-      socket.on(`cardPlayed-${roomId}`, (data: { action: any; newState: OffChainGameState; }) => {
+    // Listen for cardPlayed event
+    socket.on(
+      `cardPlayed-${roomId}`,
+      (data: { action: any; newState: OffChainGameState }) => {
         const { action, newState } = data;
 
         setOffChainGameState(newState);
@@ -284,33 +353,41 @@ const Room = () => {
         if (account && newState.playerHands[account]) {
           setPlayerHand(newState.playerHands[account]);
         }
-      });
-      
-      // Listen for game state sync response (after reconnection or page refresh)
-      socket.on(`gameStateSync-${roomId}`, (data: { newState: OffChainGameState; cardHashMap: any; restored?: boolean; error?: string; }) => {
+      },
+    );
+
+    // Listen for game state sync response (after reconnection or page refresh)
+    socket.on(
+      `gameStateSync-${roomId}`,
+      (data: {
+        newState: OffChainGameState;
+        cardHashMap: any;
+        restored?: boolean;
+        error?: string;
+      }) => {
         // console.log('Received game state sync:', data);
-        
+
         if (data.error) {
           // console.log('No saved game state found, starting fresh');
           return;
         }
-        
+
         const { newState, cardHashMap, restored } = data;
-        
+
         if (newState) {
           // console.log('Restoring game state:', newState);
           setOffChainGameState(newState);
-          
+
           if (cardHashMap) {
             // console.log('Restoring card hash map');
             updateGlobalCardHashMap(cardHashMap);
           }
-          
+
           // Check if game was already started
           if (newState.isStarted) {
             // console.log('Game was already started, restoring game state');
             setGameStarted(true);
-            
+
             // Restore player hand if available
             if (account) {
               const playerHandHashes = newState.playerHands?.[account];
@@ -319,10 +396,10 @@ const Room = () => {
                 setPlayerHand(playerHandHashes);
               }
             }
-            
+
             // current player info already included in newState
           }
-          
+
           if (restored) {
             toast({
               title: "Game restored",
@@ -339,13 +416,14 @@ const Room = () => {
             });
           }
         }
-      });
-    
+      },
+    );
+
     // Cleanup
     return () => {
-      socket.off('connect', handleReconnect);
-      socket.off('roomRejoined', handleReconnect);
-      socket.off('reconnected', handleReconnect);
+      socket.off("connect", handleReconnect);
+      socket.off("roomRejoined", handleReconnect);
+      socket.off("reconnected", handleReconnect);
       socket.off(`gameStarted-${roomId}`);
       socket.off(`cardPlayed-${roomId}`);
       socket.off(`gameStateSync-${roomId}`);
@@ -356,7 +434,7 @@ const Room = () => {
     const handleRoomData = ({ users }: { users: User[] }) => {
       // console.log('Received roomData event with users:', users);
       // Filter only connected users
-      const connectedUsers = users.filter(u => u.connected !== false);
+      const connectedUsers = users.filter((u) => u.connected !== false);
       // console.log('Connected users:', connectedUsers);
       setUsers(connectedUsers);
     };
@@ -376,25 +454,30 @@ const Room = () => {
     };
   }, []);
 
-  const fetchGameState = async (contract: UnoGameContract, gameId: bigint, account: string) => {
+  const fetchGameState = async (
+    contract: UnoGameContract,
+    gameId: bigint,
+    account: string,
+  ) => {
     try {
       // console.log('Fetching game state for game ID:', gameId.toString());
       // console.log('Using contract:', contract);
-      
+
       if (!contract || !contract.getGame) {
-        throw new Error('Invalid contract or missing getGame method');
+        throw new Error("Invalid contract or missing getGame method");
       }
-      
+
       // Call the getGame method on the ethers.js contract
       const gameData = await contract.getGame(gameId);
       // console.log('Raw game data:', gameData);
-      
+
       if (!gameData) {
-        throw new Error('No game data returned from contract');
+        throw new Error("No game data returned from contract");
       }
-      
+
       // Extract the data from the result
-      const [id, players, status, startTime, endTime, gameHash, moves] = gameData;
+      const [id, players, status, startTime, endTime, gameHash, moves] =
+        gameData;
       // console.log('On chain game state: ', { id, players, status, startTime, endTime, gameHash, moves })
 
       const formattedGameData = {
@@ -404,7 +487,7 @@ const Room = () => {
         startTime,
         endTime,
         gameHash,
-        moves
+        moves,
       };
 
       // console.log('Formatted game data:', formattedGameData);
@@ -419,22 +502,22 @@ const Room = () => {
         directionClockwise: true, // Default direction
         playerHandsHash: {},
         playerHands: {},
-        deckHash: '',
-        discardPileHash: '',
+        deckHash: "",
+        discardPileHash: "",
         currentColor: null,
         currentValue: null,
         lastPlayedCardHash: null,
-        stateHash: gameHash || '',
-        isStarted: status === 1 // 0=NotStarted, 1=Started, 2=Ended
-      }
+        stateHash: gameHash || "",
+        isStarted: status === 1, // 0=NotStarted, 1=Started, 2=Ended
+      };
 
       if (offChainGameState.isStarted) {
-        const allCards = createDeck()
-        const tempCardHashMap: { [hash: string]: Card } = {}
-        
+        const allCards = createDeck();
+        const tempCardHashMap: { [hash: string]: Card } = {};
+
         allCards.forEach((card: Card) => {
-            const hash = hashCard(card);
-            tempCardHashMap[hash] = card;
+          const hash = hashCard(card);
+          tempCardHashMap[hash] = card;
         });
         updateGlobalCardHashMap(tempCardHashMap);
 
@@ -444,46 +527,102 @@ const Room = () => {
       }
 
       // Update the state with the new game state
-      setOffChainGameState(offChainGameState)
+      setOffChainGameState(offChainGameState);
       // console.log('Off chain game state: ', offChainGameState)
 
       // Return the game state for further processing
       return offChainGameState;
     } catch (error) {
-      console.error('Error fetching game state:', error)
-      setError('Failed to fetch game state. Please try again.')
+      console.error("Error fetching game state:", error);
+      setError("Failed to fetch game state. Please try again.");
       return null;
     }
-  }
+  };
 
   const handleStartGame = async () => {
     // console.log('Starting game with:', { address, account, offChainGameState, gameId })
     if (!address || !account || !offChainGameState || !gameId) {
-      console.error('Missing required data to start game')
-      setError('Missing required data to start game')
-      return
+      console.error("Missing required data to start game");
+      setError("Missing required data to start game");
+      return;
     }
 
-    // Check balance before proceeding
-    const hasSufficientBalance = await checkBalance();
-    if (!hasSufficientBalance) {
-      setShowLowBalanceDrawer(true);
-      return;
+    // Skip balance check for MiniPay (uses cUSD fee abstraction)
+    if (!isMiniPayWallet) {
+      const hasSufficientBalance = await checkBalance();
+      if (!hasSufficientBalance) {
+        setShowLowBalanceDrawer(true);
+        return;
+      }
     }
 
     try {
       setStartGameLoading(true);
-      // console.log('Starting game on contract...')
-      
-      // Use writeContract to require user signature
-      // writeContract({
-      //   address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-      //   abi: UnoGameABI.abi,
-      //   functionName: 'startGame',
-      //   args: [gameId],
-      // });
 
-      const transaction = prepareContractCall({
+      // Use MiniPay native transaction method for fee abstraction
+      if (isMiniPayWallet && address) {
+        console.log("[MiniPay] Starting game with MiniPay transaction...");
+        console.log("[MiniPay] Chain ID:", chainId);
+        console.log(
+          "[MiniPay] Fee Currency:",
+          getFeeCurrency(chainId || 11142220),
+        );
+
+        // Validate we're on Celo Sepolia
+        if (chainId !== 11142220) {
+          throw new Error(
+            `Wrong network! Please switch to Celo Sepolia (chain ID: 11142220). Current chain: ${chainId}`,
+          );
+        }
+
+        const contractAddress = process.env
+          .NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
+
+        if (!contractAddress) {
+          throw new Error("Contract address not configured");
+        }
+
+        const data = encodeFunctionData({
+          abi: unoGameABI,
+          functionName: "startGame",
+          args: [gameId],
+        });
+
+        console.log("[MiniPay] Contract Address:", contractAddress);
+        console.log("[MiniPay] Transaction Data:", data);
+
+        // Use direct eth_sendTransaction for MiniPay
+        const hash = await sendMiniPayTransaction(
+          contractAddress,
+          data,
+          address as string,
+          chainId,
+        );
+
+        console.log("[MiniPay] Transaction sent! Hash:", hash);
+
+        toast({
+          title: "Transaction Sent!",
+          description: "Waiting for confirmation...",
+          duration: 5000,
+          variant: "default",
+        });
+
+        // Wait a moment for transaction to be mined
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        toast({
+          title: "Game started successfully!",
+          description: "Game started successfully!",
+          duration: 5000,
+          variant: "success",
+        });
+
+        initializeGameAfterStart();
+        setStartGameLoading(false);
+      } else {
+        // Non-MiniPay transaction (browser with MetaMask, etc.)
+        const transaction = prepareContractCall({
           contract: {
             address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
             abi: unoGameABI,
@@ -493,7 +632,7 @@ const Room = () => {
           method: "startGame",
           params: [gameId],
         });
-        
+
         sendTransaction(transaction, {
           onSuccess: async (result) => {
             // console.log("Transaction successful:", result);
@@ -503,43 +642,50 @@ const Room = () => {
               duration: 5000,
               variant: "success",
             });
-      
+
             initializeGameAfterStart();
             setStartGameLoading(false);
           },
           onError: (error) => {
             console.error("Transaction failed:", error);
-            setError('Failed to start game')
+            setError("Failed to start game");
             setStartGameLoading(false);
-          }
+          },
         });
-
+      }
     } catch (error) {
-      console.error('Failed to start game:', error)
-      setError('Failed to start game')
+      console.error("Failed to start game:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      setError(`Failed to start game: ${errorMessage}`);
+      toast({
+        title: "Failed to Start Game",
+        description: errorMessage,
+        variant: "destructive",
+        duration: 5000,
+      });
       setStartGameLoading(false);
     }
-  }
+  };
 
   const initializeGameAfterStart = () => {
-    if (!offChainGameState || !bytesAddress) return
+    if (!offChainGameState || !bytesAddress) return;
 
     try {
-      const newState = startGame(offChainGameState, socket)
+      const newState = startGame(offChainGameState, socket);
 
-      const action: Action = { type: 'startGame', player: bytesAddress! }
-      hashAction(action)
+      const action: Action = { type: "startGame", player: bytesAddress! };
+      hashAction(action);
 
-      setGameStarted(true)
+      setGameStarted(true);
 
-      const optimisticUpdate = applyActionToOffChainState(newState, action)
-      setOffChainGameState(optimisticUpdate)
-
+      const optimisticUpdate = applyActionToOffChainState(newState, action);
+      setOffChainGameState(optimisticUpdate);
     } catch (error) {
-      console.error('Error starting game:', error)
-      setError('Failed to start game. Please try again.')
+      console.error("Error starting game:", error);
+      setError("Failed to start game. Please try again.");
     }
-  }
+  };
 
   return !roomFull ? (
     <div
@@ -567,64 +713,95 @@ const Room = () => {
           gap: "4px",
           padding: "0 12px",
           borderRadius: "18px",
-          boxShadow: "0 8px 16px rgba(0, 105, 227, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)",
+          boxShadow:
+            "0 8px 16px rgba(0, 105, 227, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)",
           transition: "all 0.2s ease",
           top: "15px",
-          left: "15px"
+          left: "15px",
         }}
         onClick={() => router.push("/play")}
       >
-        <svg width="24" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="24"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M24 12H5M12 19l-7-7 7-7" />
         </svg>
       </button>
-    <ConnectionStatusIndicator />
-    <Toaster />
+      <ConnectionStatusIndicator />
+      <Toaster />
       {isComputerMode ? (
         // Computer mode - skip waiting and go directly to game
         (() => {
           // console.log('Rendering computer mode, gameStarted:', gameStarted, 'currentUser:', currentUser);
           return gameStarted ? (
-            <Game room={room} currentUser={currentUser} isComputerMode={isComputerMode} playerCount={users.length} />
+            <Game
+              room={room}
+              currentUser={currentUser}
+              isComputerMode={isComputerMode}
+              playerCount={users.length}
+            />
           ) : (
-            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
-              <h1 className='topInfoText text-white font-2xl font-bold'>Starting game against Computer 🤖</h1>
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                textAlign: "center",
+              }}
+            >
+              <h1 className="topInfoText text-white font-2xl font-bold">
+                Starting game against Computer 🤖
+              </h1>
               <br />
               <div className="text-white">Preparing your opponent...</div>
             </div>
           );
         })()
-      ) : (
-        users.length < 2 ? (
-          <div style={{ 
-            position: "absolute", 
-            top: "50%", 
-            left: "50%", 
-            transform: "translate(-50%, -50%)", 
+      ) : users.length < 2 ? (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
             width: "90%",
             maxWidth: "440px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            height: "85vh"
-          }}>
-            {/* Card Container */}
-            <div style={{
+            height: "85vh",
+          }}
+        >
+          {/* Card Container */}
+          <div
+            style={{
               position: "relative",
               width: "100%",
-              background: "linear-gradient(180deg, rgba(133, 115, 62, 0.95) 0%, rgba(115, 92, 45, 0.95) 50%, rgba(139, 99, 48, 0.95) 100%)",
+              background:
+                "linear-gradient(180deg, rgba(133, 115, 62, 0.95) 0%, rgba(115, 92, 45, 0.95) 50%, rgba(139, 99, 48, 0.95) 100%)",
               borderRadius: "2rem",
               border: "3px solid #9CA34C",
               padding: "2rem 1.5rem",
-              boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+              boxShadow:
+                "0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
               minHeight: "600px",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              height: "100%"
-            }}>
-              {/* Room Number Badge */}
-              <div style={{
+              height: "100%",
+            }}
+          >
+            {/* Room Number Badge */}
+            <div
+              style={{
                 position: "absolute",
                 top: "-25px",
                 left: "50%",
@@ -641,15 +818,24 @@ const Room = () => {
                 fontWeight: "bold",
                 color: "white",
                 fontFamily: "monospace",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)"
-              }}>
-                #{String(room)}
-              </div>
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              }}
+            >
+              #{String(room)}
+            </div>
 
-              {/* Content */}
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", marginTop: "2rem" }}>
-                {/* Title */}
-                <h2 style={{
+            {/* Content */}
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                marginTop: "2rem",
+              }}
+            >
+              {/* Title */}
+              <h2
+                style={{
                   color: "white",
                   fontSize: "2rem",
                   fontWeight: "bold",
@@ -657,239 +843,291 @@ const Room = () => {
                   marginBottom: "2rem",
                   fontStyle: "italic",
                   textTransform: "uppercase",
-                  letterSpacing: "0.05em"
-                }}>
-                  PLAYERS
-                </h2>
+                  letterSpacing: "0.05em",
+                }}
+              >
+                PLAYERS
+              </h2>
 
-                {/* Players List */}
-                <div style={{
+              {/* Players List */}
+              <div
+                style={{
                   display: "flex",
                   flexDirection: "column",
                   gap: "1rem",
-                  marginBottom: "2rem"
-                }}>
-                  {users.map((user, index) => (
-                    <div key={user.id} style={{
+                  marginBottom: "2rem",
+                }}
+              >
+                {users.map((user, index) => (
+                  <div
+                    key={user.id}
+                    style={{
                       display: "flex",
                       alignItems: "center",
                       gap: "0.75rem",
                       color: "white",
                       fontSize: "1rem",
-                      fontFamily: "monospace"
-                    }}>
-                      <span style={{ fontSize: "1.25rem" }}>{'>'}</span>
-                      <span style={{ fontWeight: "bold" }}>{String(index + 1).padStart(2, '0')}.</span>
-                      <span style={{ 
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    <span style={{ fontSize: "1.25rem" }}>{">"}</span>
+                    <span style={{ fontWeight: "bold" }}>
+                      {String(index + 1).padStart(2, "0")}.
+                    </span>
+                    <span
+                      style={{
                         flex: 1,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
-                        whiteSpace: "nowrap"
-                      }}>
-                        {user.name === currentUser ? `${address?.slice(0, 20)}...` : `${user.name}`}
-                      </span>
-                      {user.name === currentUser && (
-                        <span style={{ 
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {user.name === currentUser
+                        ? `${address?.slice(0, 20)}...`
+                        : `${user.name}`}
+                    </span>
+                    {user.name === currentUser && (
+                      <span
+                        style={{
                           fontSize: "0.875rem",
                           opacity: 0.8,
-                          fontStyle: "italic"
-                        }}>
-                          (you)
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                          fontStyle: "italic",
+                        }}
+                      >
+                        (you)
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
 
-                {/* Waiting Message */}
-                <div style={{
+              {/* Waiting Message */}
+              <div
+                style={{
                   textAlign: "center",
                   color: "rgba(255, 255, 255, 0.6)",
                   fontSize: "0.875rem",
                   marginTop: "auto",
                   marginBottom: "2rem",
-                  fontStyle: "italic"
-                }}>
-                  {users.length === 1 && currentUser !== "Player 1"
-                    ? "Player 1 has left the game." 
-                    : `waiting for other players to join (${users.length}/${MAX_PLAYERS})`}
-                </div>
+                  fontStyle: "italic",
+                }}
+              >
+                {users.length === 1 && currentUser !== "Player 1"
+                  ? "Player 1 has left the game."
+                  : `waiting for other players to join (${users.length}/${MAX_PLAYERS})`}
               </div>
             </div>
           </div>
-        ) : (
-          !gameStarted
-            ? (
-              <div style={{ 
-                position: "absolute", 
-                top: "50%", 
-                left: "50%", 
-                transform: "translate(-50%, -50%)", 
-                width: "90%",
-                maxWidth: "440px",
+        </div>
+      ) : !gameStarted ? (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "90%",
+            maxWidth: "440px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            height: "85vh",
+          }}
+        >
+          {/* Card Container */}
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              background:
+                "linear-gradient(180deg, rgba(133, 115, 62, 0.95) 0%, rgba(115, 92, 45, 0.95) 50%, rgba(139, 99, 48, 0.95) 100%)",
+              borderRadius: "2rem",
+              border: "3px solid #9CA34C",
+              padding: "2rem 1.5rem",
+              boxShadow:
+                "0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+              minHeight: "600px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              height: "100%",
+            }}
+          >
+            {/* Room Number Badge */}
+            <div
+              style={{
+                position: "absolute",
+                top: "-25px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                backgroundColor: "#9CA34C",
+                border: "3px solid #9CA34C",
+                borderRadius: "50%",
+                width: "60px",
+                height: "60px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "1.25rem",
+                fontWeight: "bold",
+                color: "white",
+                fontFamily: "monospace",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              }}
+            >
+              #{String(room)}
+            </div>
+
+            {/* Content */}
+            <div
+              style={{
+                flex: 1,
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
-                height: "85vh"
-              }}>
-                {/* Card Container */}
-                <div style={{
-                  position: "relative",
-                  width: "100%",
-                  background: "linear-gradient(180deg, rgba(133, 115, 62, 0.95) 0%, rgba(115, 92, 45, 0.95) 50%, rgba(139, 99, 48, 0.95) 100%)",
-                  borderRadius: "2rem",
-                  border: "3px solid #9CA34C",
-                  padding: "2rem 1.5rem",
-                  boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
-                  minHeight: "600px",
+                marginTop: "2rem",
+              }}
+            >
+              {/* Title */}
+              <h2
+                style={{
+                  color: "white",
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  marginBottom: "2rem",
+                  fontStyle: "italic",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                PLAYERS
+              </h2>
+
+              {/* Players List */}
+              <div
+                style={{
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "space-between",
-                  height: "100%"
-                }}>
-                  {/* Room Number Badge */}
-                  <div style={{
-                    position: "absolute",
-                    top: "-25px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    backgroundColor: "#9CA34C",
-                    border: "3px solid #9CA34C",
-                    borderRadius: "50%",
-                    width: "60px",
-                    height: "60px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "1.25rem",
-                    fontWeight: "bold",
-                    color: "white",
-                    fontFamily: "monospace",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)"
-                  }}>
-                    #{String(room)}
-                  </div>
-
-                  {/* Content */}
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", marginTop: "2rem" }}>
-                    {/* Title */}
-                    <h2 style={{
-                      color: "white",
-                      fontSize: "2rem",
-                      fontWeight: "bold",
-                      textAlign: "center",
-                      marginBottom: "2rem",
-                      fontStyle: "italic",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em"
-                    }}>
-                      PLAYERS
-                    </h2>
-
-                    {/* Players List */}
-                    <div style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "1rem",
-                      marginBottom: "2rem"
-                    }}>
-                      {users.map((user, index) => (
-                        <div key={user.id} style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.75rem",
-                          color: "white",
-                          fontSize: "1rem",
-                          fontFamily: "monospace"
-                        }}>
-                          <span style={{ fontSize: "1.25rem" }}>{'>'}</span>
-                          <span style={{ fontWeight: "bold" }}>{String(index + 1).padStart(2, '0')}.</span>
-                          <span style={{ 
-                            flex: 1,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap"
-                          }}>
-                            {user.name === currentUser ? `${address?.slice(0, 20)}...` : `${user.name}`}
-                          </span>
-                          {user.name === currentUser && (
-                            <span style={{ 
-                              fontSize: "0.875rem",
-                              opacity: 0.8,
-                              fontStyle: "italic"
-                            }}>
-                              (you)
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Waiting Message */}
-                    <div style={{
-                      textAlign: "center",
-                      color: "rgba(255, 255, 255, 0.6)",
-                      fontSize: "0.875rem",
-                      marginTop: "auto",
-                      marginBottom: "2rem",
-                      fontStyle: "italic"
-                    }}>
-                      waiting for other players to join ({users.length}/{MAX_PLAYERS})<br />minimum 2 players required to start
-                    </div>
-                  </div>
-
-                  {/* Start Game Button */}
-                  <button 
-                    onClick={() => handleStartGame()}
-                    disabled={startGameLoading}
+                  gap: "1rem",
+                  marginBottom: "2rem",
+                }}
+              >
+                {users.map((user, index) => (
+                  <div
+                    key={user.id}
                     style={{
-                      backgroundColor: "#C89A4A",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.75rem",
                       color: "white",
-                      fontSize: "1.125rem",
-                      fontWeight: "bold",
-                      padding: "1rem 3rem",
-                      borderRadius: "2rem",
-                      border: "none",
-                      cursor: startGameLoading ? "not-allowed" : "pointer",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                      transition: "all 0.2s ease",
-                      textTransform: "lowercase",
-                      opacity: startGameLoading ? 0.7 : 1,
-                      alignSelf: "center"
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!startGameLoading) {
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                        e.currentTarget.style.boxShadow = "0 6px 16px rgba(0, 0, 0, 0.4)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.3)";
+                      fontSize: "1rem",
+                      fontFamily: "monospace",
                     }}
                   >
-                    {startGameLoading ? "starting..." : "start game"}
-                  </button>
-                </div>
+                    <span style={{ fontSize: "1.25rem" }}>{">"}</span>
+                    <span style={{ fontWeight: "bold" }}>
+                      {String(index + 1).padStart(2, "0")}.
+                    </span>
+                    <span
+                      style={{
+                        flex: 1,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {user.name === currentUser
+                        ? `${address?.slice(0, 20)}...`
+                        : `${user.name}`}
+                    </span>
+                    {user.name === currentUser && (
+                      <span
+                        style={{
+                          fontSize: "0.875rem",
+                          opacity: 0.8,
+                          fontStyle: "italic",
+                        }}
+                      >
+                        (you)
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
-            )
-            : (
-              <Game room={room} currentUser={currentUser} isComputerMode={false} playerCount={users.length} />
-            )
-        )
+
+              {/* Waiting Message */}
+              <div
+                style={{
+                  textAlign: "center",
+                  color: "rgba(255, 255, 255, 0.6)",
+                  fontSize: "0.875rem",
+                  marginTop: "auto",
+                  marginBottom: "2rem",
+                  fontStyle: "italic",
+                }}
+              >
+                waiting for other players to join ({users.length}/{MAX_PLAYERS})
+                <br />
+                minimum 2 players required to start
+              </div>
+            </div>
+
+            {/* Start Game Button */}
+            <button
+              onClick={() => handleStartGame()}
+              disabled={startGameLoading}
+              style={{
+                backgroundColor: "#C89A4A",
+                color: "white",
+                fontSize: "1.125rem",
+                fontWeight: "bold",
+                padding: "1rem 3rem",
+                borderRadius: "2rem",
+                border: "none",
+                cursor: startGameLoading ? "not-allowed" : "pointer",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                transition: "all 0.2s ease",
+                textTransform: "lowercase",
+                opacity: startGameLoading ? 0.7 : 1,
+                alignSelf: "center",
+              }}
+              onMouseEnter={(e) => {
+                if (!startGameLoading) {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 6px 16px rgba(0, 0, 0, 0.4)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 12px rgba(0, 0, 0, 0.3)";
+              }}
+            >
+              {startGameLoading ? "starting..." : "start game"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <Game
+          room={room}
+          currentUser={currentUser}
+          isComputerMode={false}
+          playerCount={users.length}
+        />
       )}
-      <LowBalanceDrawer 
-        open={showLowBalanceDrawer} 
-        onClose={() => setShowLowBalanceDrawer(false)} 
+      <LowBalanceDrawer
+        open={showLowBalanceDrawer}
+        onClose={() => setShowLowBalanceDrawer(false)}
       />
     </div>
   ) : (
     <>
-      <CenterInfo msg='Room is full' />
+      <CenterInfo msg="Room is full" />
       <Toaster />
-      <LowBalanceDrawer 
-        open={showLowBalanceDrawer} 
-        onClose={() => setShowLowBalanceDrawer(false)} 
+      <LowBalanceDrawer
+        open={showLowBalanceDrawer}
+        onClose={() => setShowLowBalanceDrawer(false)}
       />
     </>
   );

@@ -1,27 +1,27 @@
-import { Chain } from 'wagmi/chains';
+import { Chain } from "wagmi/chains";
 
 export const celo = {
   id: 42220,
-  name: 'Celo',
-  nativeCurrency: { name: 'CELO', symbol: 'CELO', decimals: 18 },
+  name: "Celo",
+  nativeCurrency: { name: "CELO", symbol: "CELO", decimals: 18 },
   rpcUrls: {
-    default: { http: ['https://forno.celo.org'] },
+    default: { http: ["https://forno.celo.org"] },
   },
   blockExplorers: {
-    default: { name: 'Celoscan', url: 'https://celoscan.io' },
+    default: { name: "Celoscan", url: "https://celoscan.io" },
   },
   testnet: false,
 } as const satisfies Chain;
 
 export const celoSepolia = {
   id: 11142220,
-  name: 'Celo Sepolia',
-  nativeCurrency: { name: 'CELO', symbol: 'CELO', decimals: 18 },
+  name: "Celo Sepolia",
+  nativeCurrency: { name: "CELO", symbol: "CELO", decimals: 18 },
   rpcUrls: {
-    default: { http: ['https://forno.celo-sepolia.celo-testnet.org'] },
+    default: { http: ["https://forno.celo-sepolia.celo-testnet.org"] },
   },
   blockExplorers: {
-    default: { name: 'Celoscan', url: 'https://celo-sepolia.blockscout.com/' },
+    default: { name: "Celoscan", url: "https://celo-sepolia.blockscout.com/" },
   },
   testnet: true,
 } as const satisfies Chain;
@@ -36,28 +36,10 @@ export interface NetworkConfig {
 
 export const SUPPORTED_NETWORKS: NetworkConfig[] = [
   {
-    id: 84532,
-    name: 'baseSepolia',
-    displayName: 'Base Sepolia',
-    icon: '/base-logo.svg',
-    chain: {
-      id: 84532,
-      name: 'Base Sepolia',
-      nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
-      rpcUrls: {
-        default: { http: ['https://sepolia.base.org'] },
-      },
-      blockExplorers: {
-        default: { name: 'Basescan', url: 'https://sepolia.basescan.org' },
-      },
-      testnet: true,
-    } as const satisfies Chain,
-  },
-  {
     id: 11142220,
-    name: 'celoSepolia',
-    displayName: 'Celo Sepolia',
-    icon: '/celo-logo.svg',
+    name: "celoSepolia",
+    displayName: "Celo Sepolia",
+    icon: "/celo-logo.svg",
     chain: celoSepolia,
   },
 ];
