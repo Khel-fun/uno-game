@@ -99,7 +99,6 @@ const Game = ({
   // Detect MiniPay wallet on mount
   useEffect(() => {
     if (typeof window !== "undefined" && isMiniPay()) {
-      console.log("[MiniPay] Detected in Game component");
       setIsMiniPayWallet(true);
     }
   }, []);
@@ -744,13 +743,6 @@ const Game = ({
 
       // Use MiniPay native transaction method for fee abstraction
       if (isMiniPayWallet && address) {
-        console.log("[MiniPay] Ending game with MiniPay transaction...");
-        console.log("[MiniPay] Chain ID:", chainId);
-        console.log(
-          "[MiniPay] Fee Currency:",
-          getFeeCurrency(chainId || 11142220),
-        );
-
         // Validate we're on Celo Sepolia
         if (chainId !== 11142220) {
           throw new Error(
@@ -770,9 +762,6 @@ const Game = ({
           args: [BigInt(room), gameHash],
         });
 
-        console.log("[MiniPay] Contract Address:", contractAddress);
-        console.log("[MiniPay] Transaction Data:", data);
-
         // Use direct eth_sendTransaction for MiniPay
         const hash = await sendMiniPayTransaction(
           contractAddress,
@@ -780,8 +769,6 @@ const Game = ({
           address,
           chainId,
         );
-
-        console.log("[MiniPay] Transaction sent! Hash:", hash);
 
         toast({
           title: "Game Ended on Blockchain",

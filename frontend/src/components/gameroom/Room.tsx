@@ -89,7 +89,6 @@ const Room = () => {
   // Detect MiniPay wallet on mount
   useEffect(() => {
     if (typeof window !== "undefined" && isMiniPay()) {
-      console.log("[MiniPay] Detected in Room component");
       setIsMiniPayWallet(true);
     }
   }, []);
@@ -561,13 +560,6 @@ const Room = () => {
 
       // Use MiniPay native transaction method for fee abstraction
       if (isMiniPayWallet && address) {
-        console.log("[MiniPay] Starting game with MiniPay transaction...");
-        console.log("[MiniPay] Chain ID:", chainId);
-        console.log(
-          "[MiniPay] Fee Currency:",
-          getFeeCurrency(chainId || 11142220),
-        );
-
         // Validate we're on Celo Sepolia
         if (chainId !== 11142220) {
           throw new Error(
@@ -588,9 +580,6 @@ const Room = () => {
           args: [gameId],
         });
 
-        console.log("[MiniPay] Contract Address:", contractAddress);
-        console.log("[MiniPay] Transaction Data:", data);
-
         // Use direct eth_sendTransaction for MiniPay
         const hash = await sendMiniPayTransaction(
           contractAddress,
@@ -598,8 +587,6 @@ const Room = () => {
           address as string,
           chainId,
         );
-
-        console.log("[MiniPay] Transaction sent! Hash:", hash);
 
         toast({
           title: "Transaction Sent!",

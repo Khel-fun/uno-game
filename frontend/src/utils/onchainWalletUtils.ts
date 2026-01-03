@@ -20,12 +20,10 @@ export function useWalletAddress() {
   useEffect(() => {
     const initMiniPay = async () => {
       if (typeof window !== "undefined" && isMiniPay()) {
-        console.log("[MiniPay] Detected in wallet utils");
         setIsMiniPayWallet(true);
 
         // Fetch address directly from MiniPay
         const mpAddress = await getMiniPayAddress();
-        console.log("[MiniPay] Address fetched in wallet utils:", mpAddress);
         setMiniPayAddress(mpAddress);
       }
     };

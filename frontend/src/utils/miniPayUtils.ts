@@ -188,14 +188,6 @@ export const sendMiniPayTransaction = async (
 
   const feeCurrency = getFeeCurrency(chainId);
 
-  console.log("[MiniPay] Preparing transaction:", {
-    to,
-    from,
-    data: data.substring(0, 20) + "...",
-    chainId,
-    feeCurrency,
-  });
-
   try {
     // Build transaction params - MiniPay handles gas estimation internally
     const txParams: any = {
@@ -209,13 +201,6 @@ export const sendMiniPayTransaction = async (
       txParams.feeCurrency = feeCurrency;
     }
 
-    console.log("[MiniPay] Sending transaction with params:", {
-      from: txParams.from,
-      to: txParams.to,
-      data: txParams.data.substring(0, 20) + "...",
-      feeCurrency: txParams.feeCurrency,
-    });
-
     // MiniPay will estimate gas automatically - don't include gas/gasPrice
     // Including them can cause "divide by zero" errors
     const hash = await window.ethereum!.request({
@@ -223,7 +208,6 @@ export const sendMiniPayTransaction = async (
       params: [txParams],
     });
 
-    console.log("[MiniPay] Transaction sent successfully:", hash);
     return hash as string;
   } catch (error: any) {
     console.error("[MiniPay] Transaction failed:", error);

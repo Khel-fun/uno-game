@@ -50,7 +50,6 @@ export default function PlayGame() {
   const [gameId, setGameId] = useState<BigInt | null>(null);
   const [showLowBalanceDrawer, setShowLowBalanceDrawer] = useState(false);
   const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
-  const [debugError, setDebugError] = useState<any>(null);
   const [transactionStatus, setTransactionStatus] = useState<string>("");
   const [cusdBalance, setCusdBalance] = useState<string>("");
   const [miniPayAddress, setMiniPayAddress] = useState<string | null>(null);
@@ -83,12 +82,10 @@ export default function PlayGame() {
   useEffect(() => {
     const initMiniPay = async () => {
       if (typeof window !== "undefined" && isMiniPay()) {
-        console.log("[MiniPay] Detected on play page");
         setIsMiniPayWallet(true);
 
         // Fetch address directly from MiniPay
         const mpAddress = await getMiniPayAddress();
-        console.log("[MiniPay] Address fetched:", mpAddress);
         setMiniPayAddress(mpAddress);
       }
     };
@@ -149,7 +146,6 @@ export default function PlayGame() {
 
   const createGame = async () => {
     // Clear previous errors and status
-    setDebugError(null);
     setTransactionStatus("");
 
     if (!address) {
@@ -173,15 +169,10 @@ export default function PlayGame() {
 
     try {
       setCreateLoading(true);
-      setDebugError(null); // Clear previous errors
 
       // Use MiniPay native transaction method for fee abstraction
       if (isMiniPayWallet && address) {
         setTransactionStatus("✓ Preparing transaction...");
-        console.log("[MiniPay] Creating game transaction...");
-        console.log("[MiniPay] Chain ID:", chainId);
-        console.log("[MiniPay] Fee Currency:", getFeeCurrency(chainId));
-        console.log("[MiniPay] Address:", address);
 
         // Validate we're on Celo Sepolia
         if (chainId !== 11142220) {
@@ -203,9 +194,6 @@ export default function PlayGame() {
           args: [address as `0x${string}`, false],
         });
 
-        console.log("[MiniPay] Contract Address:", contractAddress);
-        console.log("[MiniPay] Transaction Data:", data);
-
         setTransactionStatus(
           "⏳ Requesting transaction from MiniPay wallet...",
         );
@@ -219,7 +207,6 @@ export default function PlayGame() {
           chainId,
         );
 
-        console.log("[MiniPay] Transaction sent! Hash:", hash);
         setTransactionStatus(
           `✓ Transaction sent: ${hash.substring(0, 10)}...${hash.substring(hash.length - 8)}`,
         );
@@ -234,11 +221,9 @@ export default function PlayGame() {
         // Wait for transaction receipt using public client
         if (publicClient) {
           setTransactionStatus("⏳ Waiting for blockchain confirmation...");
-          console.log("[MiniPay] Waiting for receipt...");
           const receipt = await publicClient.waitForTransactionReceipt({
             hash: hash as `0x${string}`,
           });
-          console.log("[MiniPay] Receipt received:", receipt);
           setTransactionStatus("✓ Transaction confirmed!");
 
           toast({
@@ -318,29 +303,9 @@ export default function PlayGame() {
       console.error("[MiniPay] Failed to create game:", error);
       setTransactionStatus(`❌ Error: ${error?.message || error?.toString()}`);
 
-      // Store error details for display - THIS WILL SHOW ON THE PAGE
-      const errorDetails = {
-        action: "Create Game",
-        timestamp: new Date().toISOString(),
-        chainId,
-        feeCurrency: getFeeCurrency(chainId),
-        contractAddress: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-        walletClient: walletClient ? "Connected" : "Missing",
-        publicClient: publicClient ? "Connected" : "Missing",
-        address: address,
-        isMiniPayWallet,
-        errorMessage: error?.message || error?.toString() || "Unknown error",
-        errorCode: error?.code,
-        errorData: JSON.stringify(error?.data),
-        errorStack: error?.stack?.substring(0, 500),
-      };
-
-      console.log("[MiniPay] Full error details:", errorDetails);
-      setDebugError(errorDetails);
-
       toast({
         title: "❌ Failed to Create Game",
-        description: "Check error details on the page below",
+        description: error?.message || "Please try again",
         variant: "destructive",
         duration: 5000,
       });
@@ -372,7 +337,6 @@ export default function PlayGame() {
             args: [address as `0x${string}`, true],
           });
 
-          console.log("[MiniPay] Creating computer game...");
           const hash = await sendMiniPayTransaction(
             contractAddress,
             data,
@@ -552,7 +516,6 @@ export default function PlayGame() {
           args: [BigInt(gameId.toString()), address as `0x${string}`],
         });
 
-        console.log("[MiniPay] Joining game:", gameId);
         const hash = await sendMiniPayTransaction(
           contractAddress,
           data,
@@ -761,163 +724,6 @@ export default function PlayGame() {
                     <span className="text-xs text-blue-300 ml-auto">
                       ⚡ Gas fees in cUSD
                     </span>
-                  )}
-                </div>
-
-                {/* MiniPay Diagnostics */}
-                <div className="mt-3 pt-3 border-t border-green-500/20 text-xs text-gray-300 space-y-1">
-                  <div className="font-semibold text-green-300 mb-2">
-                    Debug Info:
-                  </div>
-                  <div>
-                    <strong>Chain ID:</strong> {chainId}{" "}
-                    {chainId === 11142220 ? (
-                      <span className="text-green-400">✓ Celo Sepolia</span>
-                    ) : (
-                      <span className="text-red-400">
-                        ✗ Wrong network! Switch to Celo Sepolia
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <strong>cUSD Balance:</strong>{" "}
-                    {cusdBalance ? (
-                      <span
-                        className={
-                          parseFloat(cusdBalance) >= 0.01
-                            ? "text-green-400"
-                            : "text-red-400"
-                        }
-                      >
-                        {parseFloat(cusdBalance) >= 0.01 ? "✓" : "✗"}{" "}
-                        {cusdBalance} cUSD
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">Loading...</span>
-                    )}
-                    {cusdBalance && parseFloat(cusdBalance) < 0.01 && (
-                      <div className="text-xs text-red-300 mt-1">
-                        ⚠ Need at least 0.01 cUSD for transactions
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <strong>Fee Currency:</strong>{" "}
-                    {getFeeCurrency(chainId) ? (
-                      <span className="text-green-400">
-                        ✓ {getFeeCurrency(chainId)?.substring(0, 10)}...
-                      </span>
-                    ) : (
-                      <span className="text-red-400">✗ Not Available</span>
-                    )}
-                  </div>
-                  <div>
-                    <strong>Contract:</strong>{" "}
-                    {process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ? (
-                      <span className="text-green-400">
-                        ✓{" "}
-                        {process.env.NEXT_PUBLIC_CONTRACT_ADDRESS?.substring(
-                          0,
-                          10,
-                        )}
-                        ...
-                      </span>
-                    ) : (
-                      <span className="text-red-400">✗ Not configured</span>
-                    )}
-                  </div>
-                  <div>
-                    <strong>Wallet Client:</strong>{" "}
-                    {walletClient ? (
-                      <span className="text-green-400">✓ Connected</span>
-                    ) : (
-                      <span className="text-yellow-400">⚠ Missing</span>
-                    )}
-                  </div>
-                  <div>
-                    <strong>Public Client:</strong>{" "}
-                    {publicClient ? (
-                      <span className="text-green-400">✓ Connected</span>
-                    ) : (
-                      <span className="text-yellow-400">⚠ Missing</span>
-                    )}
-                  </div>
-                  {transactionStatus && (
-                    <div className="mt-2 pt-2 border-t border-green-500/20">
-                      <strong>Status:</strong>{" "}
-                      <span className="text-yellow-300">
-                        {transactionStatus}
-                      </span>
-                    </div>
-                  )}
-                  {chainId !== 11142220 && (
-                    <div className="mt-2 p-2 bg-red-900/30 border border-red-500/50 rounded">
-                      <strong className="text-red-400">⚠ Warning:</strong>
-                      <div className="text-xs mt-1">
-                        MiniPay only works on Celo Sepolia. Please switch
-                        networks in Settings.
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* MiniPay Debug Error Display */}
-          {isMiniPayWallet && debugError && (
-            <div className="px-6 pb-4">
-              <div className="bg-red-900/30 border border-red-500/50 rounded-lg p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-red-400 font-bold text-lg">
-                    ⚠️ Error Details - {debugError.action}
-                  </h3>
-                  <button
-                    onClick={() => setDebugError(null)}
-                    className="text-red-300 hover:text-red-100"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="text-sm text-gray-300 space-y-1">
-                  <div>
-                    <strong>Time:</strong>{" "}
-                    {new Date(debugError.timestamp).toLocaleTimeString()}
-                  </div>
-                  <div>
-                    <strong>Chain ID:</strong> {debugError.chainId}
-                  </div>
-                  <div>
-                    <strong>Fee Currency:</strong>{" "}
-                    {debugError.feeCurrency || "Not set"}
-                  </div>
-                  <div>
-                    <strong>Contract:</strong> {debugError.contractAddress}
-                  </div>
-                  <div>
-                    <strong>Wallet Client:</strong> {debugError.walletClient}
-                  </div>
-                  <div>
-                    <strong>Public Client:</strong> {debugError.publicClient}
-                  </div>
-                  <div className="pt-2 border-t border-red-500/30 mt-2">
-                    <strong>Error Message:</strong>
-                    <div className="bg-black/30 p-2 rounded mt-1 text-red-200 break-words max-h-40 overflow-y-auto">
-                      {debugError.errorMessage}
-                    </div>
-                  </div>
-                  {debugError.errorCode && (
-                    <div>
-                      <strong>Error Code:</strong> {debugError.errorCode}
-                    </div>
-                  )}
-                  {debugError.errorData && (
-                    <div className="pt-2">
-                      <strong>Error Data:</strong>
-                      <div className="bg-black/30 p-2 rounded mt-1 text-xs text-gray-400 break-words max-h-32 overflow-y-auto">
-                        {JSON.stringify(debugError.errorData, null, 2)}
-                      </div>
-                    </div>
                   )}
                 </div>
               </div>

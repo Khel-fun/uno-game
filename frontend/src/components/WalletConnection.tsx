@@ -32,16 +32,14 @@ export function WalletConnection({ onConnect }: WalletConnectionProps) {
   useEffect(() => {
     const initMiniPay = async () => {
       if (typeof window !== "undefined" && isMiniPay()) {
-        console.log("[MiniPay] MiniPay wallet detected!");
         setHideMiniPayConnectBtn(true);
 
         // Request accounts first (required by MiniPay)
         try {
-          const accounts = await window.ethereum!.request({
+          await window.ethereum!.request({
             method: "eth_requestAccounts",
             params: [],
           });
-          console.log("[MiniPay] Accounts requested:", accounts);
         } catch (error) {
           console.error("[MiniPay] Failed to request accounts:", error);
           return;
@@ -59,15 +57,11 @@ export function WalletConnection({ onConnect }: WalletConnectionProps) {
 
         // Auto-connect if not already connected
         if (!isConnected) {
-          console.log("[MiniPay] Initiating connection...");
           try {
             await connect({ connector: injectedConnector });
-            console.log("[MiniPay] Connection initiated successfully");
           } catch (error) {
             console.error("[MiniPay] Connection failed:", error);
           }
-        } else {
-          console.log("[MiniPay] Already connected");
         }
       }
     };
@@ -80,7 +74,6 @@ export function WalletConnection({ onConnect }: WalletConnectionProps) {
   // Switch to Celo Sepolia when connected via MiniPay and update localStorage
   useEffect(() => {
     if (isMiniPay() && isConnected && switchChain) {
-      console.log("[MiniPay] Connected! Switching to Celo Sepolia...");
       switchChain({ chainId: celoSepoliaWagmi.id });
       // Update localStorage so ThirdWeb uses the correct network
       if (typeof window !== "undefined") {
@@ -91,17 +84,6 @@ export function WalletConnection({ onConnect }: WalletConnectionProps) {
       }
     }
   }, [isConnected, switchChain]);
-
-  // Log connection status for debugging
-  useEffect(() => {
-    if (hideMiniPayConnectBtn) {
-      console.log("[MiniPay] Status:", {
-        isConnected,
-        address,
-        chainId: isConnected ? "connected" : "not connected",
-      });
-    }
-  }, [isConnected, address, hideMiniPayConnectBtn]);
 
   // When address changes or subaccount is selected, notify parent component
   useEffect(() => {
