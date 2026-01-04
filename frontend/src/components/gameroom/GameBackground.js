@@ -12,7 +12,7 @@ const GameBackground = ({ turn, currentColor, currentUser, totalPlayers }) => {
     const currentPlayerNum = parseInt(currentUser.split(' ')[1]);
     // Calculate relative opponent index (starts from 0)
     let relativeIndex = turnPlayerNum - currentPlayerNum;
-    if (relativeIndex < 0) relativeIndex += MAX_PLAYERS; // Wrap around for max players
+    if (relativeIndex < 0) relativeIndex += totalPlayers; // Wrap around based on actual player count
     playerIndex = relativeIndex - 1; // Adjust to start from 0
   }
   
@@ -127,12 +127,18 @@ const GameBackground = ({ turn, currentColor, currentUser, totalPlayers }) => {
           opacity: 0.9,
           transform: playerIndex === "current" 
             ? 'rotate(0deg)' 
-            : totalPlayers === 2 && (playerIndex === 0 || playerIndex === 1)
+            : totalPlayers === 2
               ? 'rotate(0deg)'
-              : playerIndex === 0 
-                ? 'rotate(300deg)' 
-                : playerIndex === 1 
-                  ? 'rotate(60deg)' 
+              : totalPlayers === 3
+                ? playerIndex === 0 
+                  ? 'rotate(300deg)'  // Left opponent
+                  : 'rotate(60deg)'   // Right opponent
+                : totalPlayers === 4
+                  ? playerIndex === 0 
+                    ? 'rotate(300deg)'  // Left opponent
+                    : playerIndex === 1 
+                      ? 'rotate(0deg)'  // Top opponent
+                      : 'rotate(60deg)' // Right opponent
                   : 'rotate(0deg)'
         }} 
       />

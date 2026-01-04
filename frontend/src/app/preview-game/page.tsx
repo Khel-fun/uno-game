@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PACK_OF_CARDS } from "@/utils/packOfCards";
 import { MAX_PLAYERS } from "@/constants/gameConstants";
+import GameBackground from "@/components/gameroom/GameBackground";
 
 const PreviewGame = () => {
   const [playerCount, setPlayerCount] = useState(3);
@@ -54,25 +55,6 @@ const PreviewGame = () => {
 
   // Determine current color from played card
   const currentColor = playedCard.slice(-1); // Get last character (R, G, B, Y)
-  const colorMap: {[key: string]: string} = {
-    'R': 'red',
-    'G': 'green',
-    'B': 'blue',
-    'Y': 'yellow'
-  };
-  const colorName = colorMap[currentColor] || 'blue';
-  const turnType = currentTurn === "Player 1" ? "current" : "opponent";
-  
-  // Calculate player index: "current" if it's current user's turn, otherwise opponent index (0, 1, 2...)
-  let playerIndex: string | number = "current";
-  if (currentTurn !== "Player 1") {
-    const turnPlayerNum = parseInt(currentTurn.split(' ')[1]);
-    const currentPlayerNum = 1; // Player 1 is always the current user
-    // Calculate relative opponent index (starts from 0)
-    let relativeIndex = turnPlayerNum - currentPlayerNum;
-    if (relativeIndex < 0) relativeIndex += MAX_PLAYERS; // Wrap around for max players
-    playerIndex = relativeIndex - 1; // Adjust to start from 0
-  }
 
   return (
     <div
@@ -84,111 +66,13 @@ const PreviewGame = () => {
         position: "relative",
       }}
     >
-      {/* Multi-layered Background - matching GameBackground component */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100svh',
-        overflow: 'hidden',
-        zIndex: 0
-      }}>
-        {/* Layer 1 - Base background */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundImage: "url('/bg_primary.webp')",
-            backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            zIndex: 1
-          }} 
-        />
-
-        {/* Layer 2 - Color highlight */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundImage: `url('/highlight_${colorName}.svg')`,
-            backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            zIndex: 2,
-            opacity: 0.5
-          }} 
-        />
-        
-        {/* Layer 3 - Table image */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundImage: "url('/bg_secondary.webp')",
-            backgroundSize: '130%',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            zIndex: 3,
-            opacity: 0.8
-          }} 
-        />
-        
-        {/* Layer 4 - Color-based layer */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: "-17vw",
-            left: "0",
-            width: '100%',
-            height: '100%',
-            backgroundImage: `url('/assets/play_bg/${colorName}_layer.svg')`,
-            backgroundSize: '116%',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            zIndex: 4,
-            transition: 'opacity 0.5s ease-in-out',
-            opacity: 0.6
-          }} 
-        />
-        
-        {/* Layer 5 - Turn-based layer */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: "-3vw",
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundImage: playerIndex === "current" 
-              ? `url('/assets/play_bg/current.svg')` 
-              : `url('/assets/play_bg/opponent.svg')`,
-            backgroundSize: '142%',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            zIndex: 5,
-            transition: 'opacity 0.5s ease-in-out, transform 0.5s ease-in-out',
-            opacity: 0.9,
-            transform: playerIndex === "current" 
-              ? 'rotate(0deg)' 
-              : playerIndex === 0 
-                ? 'rotate(300deg)' 
-                : playerIndex === 1 
-                  ? 'rotate(60deg)' 
-                  : 'rotate(0deg)'
-          }} 
-        />
-      </div>
+      {/* Multi-layered Background */}
+      <GameBackground 
+        turn={currentTurn}
+        currentColor={currentColor}
+        currentUser="Player 1"
+        totalPlayers={playerCount}
+      />
       {/* Controls Bar */}
       <div style={{
         position: "fixed",

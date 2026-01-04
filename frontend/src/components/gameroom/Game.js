@@ -15,6 +15,8 @@ import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
 import { ethers } from "ethers";
 import { useSendTransaction } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
+import { getSelectedNetwork } from "@/utils/networkUtils";
+import { client } from "@/utils/thirdWebClient";
 import { useSocketConnection } from "@/context/SocketConnectionContext";
 import { MAX_PLAYERS } from "@/constants/gameConstants";
 import { unoGameABI } from "@/constants/unogameabi";
@@ -604,7 +606,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         contract: {
           address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
           abi: unoGameABI,
-          chain: baseSepolia,
+          chain: getSelectedNetwork(),
           client,
         },
         method: "endGame",

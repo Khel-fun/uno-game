@@ -17,6 +17,7 @@ import { useSendTransaction } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
 import { baseSepolia } from "@/lib/chains";
 import { client } from "@/utils/thirdWebClient";
+import { getSelectedNetwork } from "@/utils/networkUtils";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
@@ -486,7 +487,7 @@ const Room = () => {
           contract: {
             address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
             abi: unoGameABI,
-            chain: baseSepolia,
+            chain: getSelectedNetwork(),
             client,
           },
           method: "startGame",
