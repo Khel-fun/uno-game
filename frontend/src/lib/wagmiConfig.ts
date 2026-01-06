@@ -1,20 +1,21 @@
-import { createConfig, http } from 'wagmi';
-import { baseSepolia } from 'wagmi/chains';
-import { coinbaseWallet, injected } from 'wagmi/connectors';
-import { celoSepolia } from '@/config/networks';
+import { createConfig, http } from "wagmi";
+import { coinbaseWallet, injected } from "wagmi/connectors";
+import { celoSepolia } from "@/config/networks";
 
-// Create Wagmi config with testnet chains only (Base Sepolia and Celo Sepolia)
+// Create Wagmi config with Celo Sepolia testnet only
+// MiniPay uses injected connector and supports Celo Sepolia with fee abstraction (cUSD)
 export const wagmiConfig = createConfig({
-  chains: [baseSepolia, celoSepolia],
+  chains: [celoSepolia],
   connectors: [
     coinbaseWallet({
-      appName: 'Zunno',
+      appName: "Zunno",
     }),
-    injected(), // Support for MetaMask and other injected wallets
+    // MiniPay uses injected wallet provider
+    // When window.ethereum.isMiniPay is true, this connector will be used
+    injected(), // Support for MiniPay and other injected wallets
   ],
   ssr: true,
   transports: {
-    [baseSepolia.id]: http(),
     [celoSepolia.id]: http(),
   },
 });
