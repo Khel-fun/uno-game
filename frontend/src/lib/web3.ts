@@ -6,12 +6,6 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-declare global {
-  interface Window {
-    ethereum?: any;
-  }
-}
-
 async function verifyContract(provider: ethers.Provider, address: string) {
   const code = await provider.getCode(address);
   if (code === "0x") {
