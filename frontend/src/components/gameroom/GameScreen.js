@@ -254,6 +254,7 @@ const GameScreen = ({
         {opponentDecks.map((opponent, index) => {
           // Position opponents around the table based on index
           let positionStyle = {};
+          let skewStyle = "";
           const totalPlayers = opponentDecks.length + 1; // +1 for current player
           
           if (isComputerMode || totalPlayers === 2) {
@@ -264,9 +265,11 @@ const GameScreen = ({
             if (index === 0) {
               // Left side, middle
               positionStyle = { position: "absolute", top: "26%", left: "5%" };
+              skewStyle = "skew(-12deg, -16deg)"
             } else if (index === 1) {
               // Right side, middle
               positionStyle = { position: "absolute", top: "26%", right: "5%" };
+              skewStyle = "skew(12deg, 16deg)"
             } else {
               // Additional players just use absolute positioning
               positionStyle = { position: "absolute", top: "1px" };
@@ -275,12 +278,14 @@ const GameScreen = ({
             if (index === 0) {
               // Left side, middle
               positionStyle = { position: "absolute", top: "26%", left: "5%" };
+              skewStyle = "skew(-12deg, -16deg)"
             } else if (index === 1) {
               // Right side, middle
               positionStyle = { position: "absolute", top: "1px" };
             } else {
               // Additional players just use absolute positioning
               positionStyle = { position: "absolute", top: "26%", right: "5%" };
+              skewStyle = "skew(12deg, 16deg)"
             }
           }
 
@@ -363,6 +368,7 @@ const GameScreen = ({
                 </div>
               </div>
               <PlayerViewofOpponent
+                skewStyle={skewStyle}
                 turn={turn}
                 opponent={opponent.name}
                 opponentDeck={opponent.deck}

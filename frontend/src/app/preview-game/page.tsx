@@ -204,6 +204,7 @@ const PreviewGame = () => {
         {opponents.map((opponent, index) => {
           // Position opponents around the table based on index
           let positionStyle = {};
+          let skewStyle = "";
           if (playerCount === 2) {
             // In computer mode or 2-player game, use simple absolute positioning for all opponents
             positionStyle = { position: "absolute", top: "1px" };
@@ -212,9 +213,11 @@ const PreviewGame = () => {
             if (index === 0) {
               // Left side, middle
               positionStyle = { position: "absolute", top: "26%", left: "5%" };
+              skewStyle = "skew(-12deg, -16deg)"
             } else if (index === 1) {
               // Right side, middle
               positionStyle = { position: "absolute", top: "26%", right: "5%" };
+              skewStyle = "skew(12deg, 16deg)"
             } else {
               // Additional players just use absolute positioning
               positionStyle = { position: "absolute", top: "1px" };
@@ -223,14 +226,17 @@ const PreviewGame = () => {
             if (index === 0) {
               // Left side, middle
               positionStyle = { position: "absolute", top: "26%", left: "5%" };
+              skewStyle = "skew(-12deg, -16deg)"
             } else if (index === 1) {
               // Right side, middle
               positionStyle = { position: "absolute", top: "1px" };
             } else {
               // Additional players just use absolute positioning
               positionStyle = { position: "absolute", top: "26%", right: "5%" };
+              skewStyle = "skew(12deg, 16deg)"
             }
           }
+          console.log(skewStyle)
 
           return (
             <div
@@ -330,7 +336,7 @@ const PreviewGame = () => {
                     transform:
                       (playerCount === 4 && index === 1)
                         ? `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`
-                        : `rotate(${i % 2 === 0 ? '-2' : '2'}deg) translateY(${-54 * i}px)`,
+                        : `translateY(${-54 * i * 1.1}px) ${skewStyle}`,
                     zIndex: i
                   }}
                 >

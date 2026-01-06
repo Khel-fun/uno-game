@@ -1,7 +1,7 @@
 import React from "react";
 import MemoizedSpinner from "./Spinner";
 
-const PlayerViewofOpponent = ({ opponentDeck, turn, opponent, index = 0, playerCount }) => {
+const PlayerViewofOpponent = ({ skewStyle, opponentDeck, turn, opponent, index = 0, playerCount }) => {
   return (
     <div style={{
       display: "flex",
@@ -24,7 +24,7 @@ const PlayerViewofOpponent = ({ opponentDeck, turn, opponent, index = 0, playerC
             transform:
               (playerCount === 4 && index === 1)
                 ? `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`
-                : `rotate(${i % 2 === 0 ? '-2' : '2'}deg) translateY(${-54 * i}px)`,
+                : `translateY(${-54 * i * 1.05}px) ${skewStyle}`,
             zIndex: i
           }}
         >
