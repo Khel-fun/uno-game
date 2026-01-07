@@ -169,9 +169,9 @@ const Room = () => {
     const setup = async () => {
       if (account) {
         try {
-          // console.log('Setting up contract with account:', account);
+          console.log('Setting up contract with chainId:', chainId);
           const contractResult = await getContractNew(chainId);
-          // console.log('Contract result:', contractResult);
+          console.log('Contract result:', contractResult);
 
           if (!contractResult.contract) {
             console.error("Failed to initialize contract");
@@ -179,7 +179,7 @@ const Room = () => {
             return;
           }
 
-          // console.log('Contract initialized:', contractResult.contract);
+          console.log('Contract initialized for chain:', chainId, 'at address:', contractResult.contract.target);
           setContract(contractResult.contract);
 
           if (contractResult.contract && id) {
@@ -212,7 +212,7 @@ const Room = () => {
       }
     };
     setup();
-  }, [id, account]);
+  }, [id, account, chainId]);
 
   useEffect(() => {
     if (
@@ -288,7 +288,7 @@ const Room = () => {
     socket.on(
       `gameStarted-${roomId}`,
       (data: { newState: OffChainGameState; cardHashMap: any }) => {
-        // console.log(`Game started event received for room ${roomId}:`, data);
+        console.log(`Game started event received for room ${roomId}:`, data);
 
         try {
           const { newState, cardHashMap } = data;
@@ -468,7 +468,7 @@ const Room = () => {
     account: string,
   ) => {
     try {
-      // console.log('Fetching game state for game ID:', gameId.toString());
+      console.log('Fetching game state for game ID:', gameId.toString());
       // console.log('Using contract:', contract);
 
       if (!contract || !contract.getGame) {
@@ -477,7 +477,7 @@ const Room = () => {
 
       // Call the getGame method on the ethers.js contract
       const gameData = await contract.getGame(gameId);
-      // console.log('Raw game data:', gameData);
+      console.log('Raw game data:', gameData);
 
       if (!gameData) {
         throw new Error("No game data returned from contract");
@@ -664,10 +664,13 @@ const Room = () => {
   };
 
   const initializeGameAfterStart = () => {
+    console.log('Initializing game after start');
     if (!offChainGameState || !bytesAddress) return;
 
     try {
+      console.log('Off chain game state:', offChainGameState);
       const newState = startGame(offChainGameState, socket);
+      console.log('New state:', newState);
 
       const action: Action = { type: "startGame", player: bytesAddress! };
       hashAction(action);

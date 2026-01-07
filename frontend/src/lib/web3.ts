@@ -33,7 +33,9 @@ function getRpcUrl(chainId: number): string {
 
 export async function getContractNew(chainId: number) {
   try {
+    console.log('getContractNew called with chainId:', chainId);
     const rpcUrl = getRpcUrl(chainId);
+    console.log('Using RPC URL:', rpcUrl);
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const KEY = process.env.NEXT_PUBLIC_PRIVATE_KEY;
 
@@ -43,6 +45,7 @@ export async function getContractNew(chainId: number) {
 
     const wallet = new ethers.Wallet(KEY, provider);
     const contractAddress = getContractAddress(chainId);
+    console.log('Contract address for chain', chainId, ':', contractAddress);
     if (!contractAddress) {
       throw new Error(`Contract address not found for chain ID: ${chainId}`);
     }
@@ -55,7 +58,7 @@ export async function getContractNew(chainId: number) {
       contractABI,
       wallet,
     ) as ethers.Contract & UnoGameContract;
-    // console.log('Contract connected with wallet:', wallet.address);
+    console.log('Contract created successfully at:', contractAddress, 'on chain:', chainId);
 
     return { contract: gameContract, wallet: wallet.address };
   } catch (error) {

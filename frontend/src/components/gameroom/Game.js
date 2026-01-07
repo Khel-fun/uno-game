@@ -230,7 +230,7 @@ const Game = ({
     const validMoves = getValidMoves(player2Deck);
     if (validMoves.length === 0) return "draw";
     const special = validMoves.find(
-      (c) => isSkipCard(c) || isDraw2Card(c) || isWildCard(c),
+      (c) => isSkipCard(c) || isDraw2Card(c) || isWildCard(c)
     );
     return special || validMoves[0];
   };
@@ -470,7 +470,7 @@ const Game = ({
 
         if (!isValidPlay(played_card, currentColor, currentNumber)) {
           alert(
-            "Invalid Move! Skip cards must match either the color or number of the current card.",
+            "Invalid Move! Skip cards must match either the color or number of the current card."
           );
           break;
         }
@@ -479,12 +479,12 @@ const Game = ({
         const nextPlayer = getNextPlayer(
           cardPlayedBy,
           activePlayers,
-          playDirection,
+          playDirection
         );
         const playerAfterSkipped = getNextPlayer(
           nextPlayer,
           activePlayers,
-          playDirection,
+          playDirection
         );
 
         cardPlayedByPlayer({
@@ -512,7 +512,7 @@ const Game = ({
 
         if (!isValidPlay(played_card, currentColor, currentNumber)) {
           alert(
-            "Invalid Move! Reverse cards must match either the color or number of the current card.",
+            "Invalid Move! Reverse cards must match either the color or number of the current card."
           );
           break;
         }
@@ -536,7 +536,7 @@ const Game = ({
           const nextPlayer = getNextPlayer(
             cardPlayedBy,
             activePlayers,
-            newDirection,
+            newDirection
           );
           cardPlayedByPlayer({
             cardPlayedBy,
@@ -563,7 +563,7 @@ const Game = ({
 
         if (!isValidPlay(played_card, currentColor, currentNumber)) {
           alert(
-            "Invalid Move! Draw 2 cards must match either the color or number of the current card.",
+            "Invalid Move! Draw 2 cards must match either the color or number of the current card."
           );
           break;
         }
@@ -618,7 +618,7 @@ const Game = ({
           });
         } else {
           alert(
-            "Invalid Move! You must play a card that matches either the color or number of the current card.",
+            "Invalid Move! You must play a card that matches either the color or number of the current card."
           );
         }
         break;
@@ -758,7 +758,7 @@ const Game = ({
       };
 
       const gameHash = ethers.keccak256(
-        ethers.toUtf8Bytes(JSON.stringify(gameResultData)),
+        ethers.toUtf8Bytes(JSON.stringify(gameResultData))
       );
 
       // Use MiniPay native transaction method for fee abstraction
@@ -787,7 +787,7 @@ const Game = ({
           contractAddress,
           data,
           address,
-          chainId,
+          chainId
         );
 
         toast({
@@ -800,7 +800,9 @@ const Game = ({
         // Browser wallet: Use wagmi transaction
         if (!isSupportedChain(chainId)) {
           throw new Error(
-            `Unsupported network! Please switch to a supported network. Current chain: ${chainId}, Supported: ${getSupportedChainIds().join(", ")}`,
+            `Unsupported network! Please switch to a supported network. Current chain: ${chainId}, Supported: ${getSupportedChainIds().join(
+              ", "
+            )}`
           );
         }
 
