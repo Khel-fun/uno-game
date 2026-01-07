@@ -13,7 +13,7 @@ const PlayerViewofOpponent = ({ skewStyle, opponentDeck, turn, opponent, index =
       flexDirection:
         playerCount === 4
           ? (index === 1 ? "row" : "column")
-          : "column"
+          : (playerCount === 2 && index === 0 ? "row" : "column")
     }}>
       {opponentDeck.map((item, i) => (
         <div 
@@ -22,7 +22,7 @@ const PlayerViewofOpponent = ({ skewStyle, opponentDeck, turn, opponent, index =
             position: "relative",
             margin: "0 -10px",
             transform:
-              (playerCount === 4 && index === 1)
+              (playerCount === 4 && index === 1 || playerCount == 2 && index === 0)
                 ? `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`
                 : `translateY(${-54 * i * 1.05}px) ${skewStyle}`,
             zIndex: i

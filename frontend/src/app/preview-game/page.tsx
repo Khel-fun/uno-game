@@ -236,7 +236,6 @@ const PreviewGame = () => {
               skewStyle = "skew(12deg, 16deg)"
             }
           }
-          console.log(skewStyle)
 
           return (
             <div
@@ -325,7 +324,7 @@ const PreviewGame = () => {
               flexDirection:
                 playerCount === 4
                   ? (index === 1 ? "row" : "column")
-                  : "column"
+                  : (playerCount === 2 && index === 0 ? "row" : "column")
             }}>
               {opponent.deck.map((item, i) => (
                 <div 
@@ -334,7 +333,7 @@ const PreviewGame = () => {
                     position: "relative",
                     margin: "0 -10px",
                     transform:
-                      (playerCount === 4 && index === 1)
+                      (playerCount === 4 && index === 1 || playerCount == 2 && index === 0)
                         ? `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`
                         : `translateY(${-54 * i * 1.1}px) ${skewStyle}`,
                     zIndex: i
