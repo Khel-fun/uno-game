@@ -169,6 +169,10 @@ const Room = () => {
     const setup = async () => {
       if (account) {
         try {
+          // Reset contract state when chainId changes to prevent stale data
+          setContract(null);
+          setOffChainGameState(null);
+          
           console.log('Setting up contract with chainId:', chainId);
           const contractResult = await getContractNew(chainId);
           console.log('Contract result:', contractResult);
