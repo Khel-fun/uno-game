@@ -1,18 +1,21 @@
 /**
  * Hook to check if user has sufficient ETH balance for gas fees
  */
-import { useState, useEffect } from 'react';
-import { useBalance } from 'wagmi';
-import { useWalletAddress } from '@/utils/onchainWalletUtils';
+import { useState, useEffect } from "react";
+import { useBalance, useAccount, useChainId } from "wagmi";
+import { isMiniPay } from "@/utils/miniPayUtils";
 
 const MIN_BALANCE_ETH = 0.00001; // Minimum balance required for transactions
 
 export function useBalanceCheck() {
-  const { address, isConnected } = useWalletAddress();
+  const { address, isConnected } = useAccount();
+  const chainId = useChainId();
   const [hasLowBalance, setHasLowBalance] = useState(false);
-  
+
+  // Check balance on the currently connected chain
   const { data: balanceData, refetch } = useBalance({
     address: address as `0x${string}`,
+    chainId: chainId,
   });
 
   useEffect(() => {
@@ -34,7 +37,7 @@ export function useBalanceCheck() {
       setHasLowBalance(isLow);
       return !isLow; // Return true if balance is sufficient
     }
-    
+
     return false;
   };
 

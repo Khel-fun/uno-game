@@ -1,31 +1,31 @@
-'use client';
+"use client";
 
 /**
  * MiniKit utility functions to help with integration
  */
 
-// Base Sepolia chain ID
-export const BASE_SEPOLIA_CHAIN_ID = 84532;
+// Celo Sepolia chain ID
+export const CELO_SEPOLIA_CHAIN_ID = 11142220;
 
-// Get MiniKit chain configuration
+// Get MiniKit chain configuration for Celo Sepolia
 export const getMiniKitChain = () => {
   // This is a simplified chain object that works with MiniKit
   // We're avoiding the type issues by using a simple object with just the required properties
   return {
-    id: BASE_SEPOLIA_CHAIN_ID,
-    name: 'Base Sepolia',
-    network: 'base-sepolia',
+    id: CELO_SEPOLIA_CHAIN_ID,
+    name: "Celo Sepolia",
+    network: "celo-sepolia",
     nativeCurrency: {
-      name: 'Ether',
-      symbol: 'ETH',
+      name: "CELO",
+      symbol: "CELO",
       decimals: 18,
     },
     rpcUrls: {
       default: {
-        http: ['https://sepolia.base.org'],
+        http: ["https://forno.celo-sepolia.celo-testnet.org"],
       },
       public: {
-        http: ['https://sepolia.base.org'],
+        http: ["https://forno.celo-sepolia.celo-testnet.org"],
       },
     },
   };
@@ -33,27 +33,27 @@ export const getMiniKitChain = () => {
 
 // Get MiniKit API key from environment variables
 export const getMiniKitApiKey = () => {
-  return process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY || '';
+  return process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY || "";
 };
 
 export const getMiniKitProjectId = () => {
-  return process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_ID || '';
+  return process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_ID || "";
 };
 
 // Check if MiniKit is properly configured
 export const isMiniKitConfigured = () => {
   const apiKey = getMiniKitApiKey();
-  return apiKey !== undefined && apiKey !== '';
+  return apiKey !== undefined && apiKey !== "";
 };
 
 // Define the Mode type to match OnchainKit's expected type
-type Mode = 'dark' | 'light';
+type Mode = "dark" | "light";
 
 // Get MiniKit appearance configuration
 export const getMiniKitAppearance = () => {
   return {
-    name: 'Zunno',
-    mode: 'dark' as Mode,
-    theme: 'default',
+    name: "Zunno",
+    mode: "dark" as Mode,
+    theme: "default",
   };
 };

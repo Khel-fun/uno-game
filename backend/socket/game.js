@@ -22,6 +22,7 @@ module.exports = function gameHandler(io, socket, { gameStateManager, userManage
       if (cardHashMap) {
         await gameStateManager.saveCardHashMap(roomId, cardHashMap);
       }
+      logger.info('Game started: %s', roomId);
       io.to(roomId).emit(`gameStarted-${roomId}`, { newState, cardHashMap });
     } catch (err) {
       logger.error('Error handling gameStarted: %s', err.message);

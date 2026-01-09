@@ -1,12 +1,13 @@
 "use client";
 
-import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { useEffect } from "react";
+import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
+import { useEffect, useState } from "react";
 import { useActiveAccount, ConnectButton } from "thirdweb/react";
 import { createWallet, inAppWallet } from "thirdweb/wallets";
 import { client } from "@/utils/thirdWebClient";
-import { baseSepolia } from "@/lib/chains";
-import { useWalletAddress } from "@/utils/onchainWalletUtils";
+import { celoSepolia } from "@/lib/chains";
+import { isMiniPay } from "@/utils/miniPayUtils";
+import { celoSepolia as celoSepoliaWagmi } from "@/config/networks";
 
 const wallet = inAppWallet();
 
@@ -15,14 +16,74 @@ interface WalletConnectionProps {
 }
 
 export function WalletConnection({ onConnect }: WalletConnectionProps) {
+  // State to hide connect button when MiniPay is detected
+  const [hideMiniPayConnectBtn, setHideMiniPayConnectBtn] = useState(false);
 
-  // Use Wagmi hooks for Base Account integration
-  const { address } = useWalletAddress();
+  // Use wagmi's useAccount directly for proper connection state
+  const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
+  const { switchChain } = useSwitchChain();
+  const { connect, connectors } = useConnect();
 
-  const { connect } = useConnect();
   // Once connected, you can access the active account
   const activeAccount = useActiveAccount();
+
+  // MiniPay auto-connect on mount - only run once
+  useEffect(() => {
+    const initMiniPay = async () => {
+      if (typeof window !== "undefined" && isMiniPay()) {
+        setHideMiniPayConnectBtn(true);
+
+        // Request accounts first (required by MiniPay)
+        try {
+          await window.ethereum!.request({
+            method: "eth_requestAccounts",
+            params: [],
+          });
+        } catch (error) {
+          console.error("[MiniPay] Failed to request accounts:", error);
+          return;
+        }
+
+        // Find the injected connector
+        const injectedConnector = connectors.find(
+          (connector) => connector.id === "injected",
+        );
+
+        if (!injectedConnector) {
+          console.error("[MiniPay] Injected connector not found");
+          return;
+        }
+
+        // Auto-connect if not already connected
+        if (!isConnected) {
+          try {
+            await connect({ connector: injectedConnector });
+          } catch (error) {
+            console.error("[MiniPay] Connection failed:", error);
+          }
+        }
+      }
+    };
+
+    initMiniPay();
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Switch to Celo Sepolia when connected via MiniPay and update localStorage
+  useEffect(() => {
+    if (isMiniPay() && isConnected && switchChain) {
+      switchChain({ chainId: celoSepoliaWagmi.id });
+      // Update localStorage so ThirdWeb uses the correct network
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "zunno_selected_network",
+          celoSepoliaWagmi.id.toString(),
+        );
+      }
+    }
+  }, [isConnected, switchChain]);
 
   // When address changes or subaccount is selected, notify parent component
   useEffect(() => {
@@ -41,17 +102,40 @@ export function WalletConnection({ onConnect }: WalletConnectionProps) {
 
   return (
     <div className="flex flex-col gap-4 items-center">
-      <div className="max-w-xs">
-        <ConnectButton 
-        client={client} 
-        chain={baseSepolia} 
-        wallets={wallets}
-        />
-      </div>
+      {/* Show MiniPay status when detected and connected */}
+      {hideMiniPayConnectBtn && isConnected && address && (
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-sm text-green-500 font-medium">
+            ✓ Connected via MiniPay
+          </div>
+          <div className="text-xs text-gray-400">
+            {address.substring(0, 6)}...{address.substring(address.length - 4)}
+          </div>
+        </div>
+      )}
+
+      {/* Show connecting message for MiniPay before connection */}
+      {hideMiniPayConnectBtn && !isConnected && (
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-sm text-yellow-500 animate-pulse">
+            🔄 Connecting to MiniPay...
+          </div>
+          <div className="text-xs text-gray-400">
+            Please approve in MiniPay wallet
+          </div>
+        </div>
+      )}
+
+      {/* Conditionally render Connect Button - hide when MiniPay is detected */}
+      {!hideMiniPayConnectBtn && (
+        <div className="max-w-xs">
+          <ConnectButton
+            client={client}
+            chain={celoSepolia}
+            wallets={wallets}
+          />
+        </div>
+      )}
     </div>
   );
 }
-
-// https://keys.coinbase.com/connect?sdkName=%40coinbase%2Fwallet-sdk&sdkVersion=4.3.0&origin=http%3A%2F%2Flocalhost%3A3000&coop=null
-
-// https://keys.coinbase.com/sign/eth-request-accounts?sdkName=%40coinbase%2Fwallet-sdk&sdkVersion=4.3.6&origin=https%3A%2F%2Fwww.zunno.xyz&coop=null

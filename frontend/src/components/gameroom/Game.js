@@ -13,13 +13,22 @@ import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
 import { ethers } from "ethers";
-import { useSendTransaction } from "thirdweb/react";
-import { prepareContractCall } from "thirdweb";
-import { getSelectedNetwork } from "@/utils/networkUtils";
-import { client } from "@/utils/thirdWebClient";
+import {
+  isMiniPay,
+  sendMiniPayTransaction,
+  getFeeCurrency,
+} from "@/utils/miniPayUtils";
+import { encodeFunctionData } from "viem";
 import { useSocketConnection } from "@/context/SocketConnectionContext";
 import { MAX_PLAYERS } from "@/constants/gameConstants";
 import { unoGameABI } from "@/constants/unogameabi";
+import {
+  getContractAddress,
+  isSupportedChain,
+  getSupportedChainIds,
+} from "@/config/networks";
+import { useNetworkSelection } from "@/hooks/useNetworkSelection";
+import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 
 // Card codes: SKIP=100, DRAW2=200, DRAW4=400, WILD=500
 const checkGameOver = (deck) => deck.length === 1;
@@ -51,25 +60,30 @@ const gameReducer = (state, action) => ({ ...state, ...action });
 
 // Card parsing helpers
 const parseCard = (card) => {
-  if (card.startsWith('skip')) return { color: card.charAt(4), number: 100 };
-  if (card.startsWith('D2')) return { color: card.charAt(2), number: 200 };
-  if (card.startsWith('_')) return { color: card.charAt(1), number: 100 };
-  if (card === 'W') return { color: null, number: 500 };
-  if (card === 'D4W') return { color: null, number: 400 };
+  if (card.startsWith("skip")) return { color: card.charAt(4), number: 100 };
+  if (card.startsWith("D2")) return { color: card.charAt(2), number: 200 };
+  if (card.startsWith("_")) return { color: card.charAt(1), number: 100 };
+  if (card === "W") return { color: null, number: 500 };
+  if (card === "D4W") return { color: null, number: 400 };
   return { color: card.charAt(1), number: card.charAt(0) };
 };
 
-const isWildCard = (card) => card === 'W' || card === 'D4W';
-const isSkipCard = (card) => card.startsWith('skip');
-const isReverseCard = (card) => card.startsWith('_');
-const isDraw2Card = (card) => card.startsWith('D2');
+const isWildCard = (card) => card === "W" || card === "D4W";
+const isSkipCard = (card) => card.startsWith("skip");
+const isReverseCard = (card) => card.startsWith("_");
+const isDraw2Card = (card) => card.startsWith("D2");
 const isValidPlay = (card, currentColor, currentNumber) => {
   if (isWildCard(card)) return true;
   const { color, number } = parseCard(card);
   return color === currentColor || String(number) === String(currentNumber);
 };
 
-const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) => {
+const Game = ({
+  room,
+  currentUser,
+  isComputerMode = false,
+  playerCount = 2,
+}) => {
   const [gameState, dispatch] = useReducer(gameReducer, initialGameState);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -77,15 +91,37 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
   const [rewardGiven, setRewardGiven] = useState(false);
   const [computerMoveCounter, setComputerMoveCounter] = useState(0);
   const [showLowBalanceDrawer, setShowLowBalanceDrawer] = useState(false);
+  const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
   const { checkBalance } = useBalanceCheck();
-  
+
+  // Get the network selected from dropdown
+  const { selectedNetwork } = useNetworkSelection();
+  const chainId = selectedNetwork.id;
+
+  // Wagmi hooks for browser wallet transactions
+  const {
+    sendTransaction,
+    data: txHash,
+    isPending: isTxPending,
+  } = useSendTransaction();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash: txHash,
+    });
+
   // Connection status tracking
-  const { isConnected: socketConnected, isReconnecting } = useSocketConnection();
+  const { isConnected: socketConnected, isReconnecting } =
+    useSocketConnection();
   const pendingActionsRef = useRef([]);
 
   const { address, isConnected } = useWalletAddress();
 
-  const { mutate: sendTransaction } = useSendTransaction();
+  // Detect MiniPay wallet on mount
+  useEffect(() => {
+    if (typeof window !== "undefined" && isMiniPay()) {
+      setIsMiniPayWallet(true);
+    }
+  }, []);
 
   const {
     gameOver,
@@ -117,10 +153,11 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
   // Helper function to emit socket events with buffering support
   const emitSocketEvent = (eventName, data) => {
     // Automatically add roomId for game state events
-    const payload = (eventName === "updateGameState" || eventName === "initGameState") 
-      ? { ...data, roomId: socketRoomId } 
-      : data;
-    
+    const payload =
+      eventName === "updateGameState" || eventName === "initGameState"
+        ? { ...data, roomId: socketRoomId }
+        : data;
+
     if (socketConnected) {
       socket.emit(eventName, payload);
     } else {
@@ -138,13 +175,13 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
   useEffect(() => {
     if (socketConnected && pendingActionsRef.current.length > 0) {
       // console.log(`Processing ${pendingActionsRef.current.length} pending actions`);
-      
+
       pendingActionsRef.current.forEach(({ eventName, data }) => {
         socket.emit(eventName, data);
       });
-      
+
       pendingActionsRef.current = [];
-      
+
       toast({
         title: "Connection restored",
         description: "All pending actions have been sent",
@@ -186,19 +223,22 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
   };
 
   // Computer AI: find valid moves and pick best one
-  const getValidMoves = (deck) => deck.filter(card => isValidPlay(card, currentColor, currentNumber));
+  const getValidMoves = (deck) =>
+    deck.filter((card) => isValidPlay(card, currentColor, currentNumber));
 
   const computerMakeMove = () => {
     const validMoves = getValidMoves(player2Deck);
     if (validMoves.length === 0) return "draw";
-    const special = validMoves.find(c => isSkipCard(c) || isDraw2Card(c) || isWildCard(c));
+    const special = validMoves.find(
+      (c) => isSkipCard(c) || isDraw2Card(c) || isWildCard(c)
+    );
     return special || validMoves[0];
   };
 
   // Computer turn with delay
   useEffect(() => {
     if (!isComputerMode || turn !== "Player 2" || gameOver) return;
-    
+
     const timer = setTimeout(() => {
       if (player2Deck.length === 2) playUnoSound();
       const move = computerMakeMove();
@@ -238,7 +278,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         totalPlayers: 2,
         playDirection: 1,
       });
-    } else{
+    } else {
       // Multiplayer: Player 1 initializes
       const shuffled = shuffleArray(PACK_OF_CARDS);
       const state = {
@@ -281,7 +321,11 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       } else if (state.currentNumber) {
         playCardPlayedSound();
       }
-      dispatch({ ...state, isUnoButtonPressed: false, drawButtonPressed: state.drawButtonPressed || false });
+      dispatch({
+        ...state,
+        isUnoButtonPressed: false,
+        drawButtonPressed: state.drawButtonPressed || false,
+      });
     });
 
     return () => {
@@ -291,8 +335,16 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
   }, []);
 
   // Player deck lookup
-  const decks = { player1Deck, player2Deck, player3Deck, player4Deck, player5Deck, player6Deck };
-  const getPlayerDeck = (name) => decks[name.toLowerCase().replace(' ', '') + 'Deck'] || [];
+  const decks = {
+    player1Deck,
+    player2Deck,
+    player3Deck,
+    player4Deck,
+    player5Deck,
+    player6Deck,
+  };
+  const getPlayerDeck = (name) =>
+    decks[name.toLowerCase().replace(" ", "") + "Deck"] || [];
 
   // Turn rotation helpers
   const getNextPlayer = (current, players, dir = playDirection) => {
@@ -322,7 +374,10 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
 
     // Remove played card from player's deck
     const removeIndex = playerDeck.indexOf(played_card);
-    let updatedPlayerDeck = [...playerDeck.slice(0, removeIndex), ...playerDeck.slice(removeIndex + 1)];
+    let updatedPlayerDeck = [
+      ...playerDeck.slice(0, removeIndex),
+      ...playerDeck.slice(removeIndex + 1),
+    ];
 
     let copiedDrawCardPileArray = [...drawCardPile];
     let updatedPlayedCardsPile = [...playedCardsPile, played_card];
@@ -330,14 +385,20 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
 
     // Draw with auto-reshuffle when pile empty
     const drawCardWithReshuffle = () => {
-      if (copiedDrawCardPileArray.length === 0 && updatedPlayedCardsPile.length > 1) {
-        const topCard = updatedPlayedCardsPile[updatedPlayedCardsPile.length - 1];
+      if (
+        copiedDrawCardPileArray.length === 0 &&
+        updatedPlayedCardsPile.length > 1
+      ) {
+        const topCard =
+          updatedPlayedCardsPile[updatedPlayedCardsPile.length - 1];
         const cardsToReshuffle = updatedPlayedCardsPile.slice(0, -1);
         copiedDrawCardPileArray = shuffleArray([...cardsToReshuffle]);
         updatedPlayedCardsPile = [topCard];
         playShufflingSound();
       }
-      return copiedDrawCardPileArray.length > 0 ? copiedDrawCardPileArray.pop() : null;
+      return copiedDrawCardPileArray.length > 0
+        ? copiedDrawCardPileArray.pop()
+        : null;
     };
 
     // Handle Draw 2/4 penalty to next player
@@ -374,19 +435,21 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     };
 
     // Update decks
-    const toDeckKey = (name) => name.toLowerCase().replace(' ', '') + 'Deck';
+    const toDeckKey = (name) => name.toLowerCase().replace(" ", "") + "Deck";
     newGameState[toDeckKey(cardPlayedBy)] = updatedPlayerDeck;
     if (isDraw2 || isDraw4) {
       newGameState[toDeckKey(nextPlayerName)] = nextPlayerDeckCopy;
     }
-    activePlayers.forEach(player => {
+    activePlayers.forEach((player) => {
       const key = toDeckKey(player);
       if (!newGameState[key]) newGameState[key] = getPlayerDeck(player);
     });
 
     if (isComputerMode) {
       dispatch(newGameState);
-      numberOfPlayedCard in playSoundMap ? playSoundMap[numberOfPlayedCard]() : playCardPlayedSound();
+      numberOfPlayedCard in playSoundMap
+        ? playSoundMap[numberOfPlayedCard]()
+        : playCardPlayedSound();
       if (newGameState.gameOver) playGameOverSound();
     } else {
       emitSocketEvent("updateGameState", newGameState);
@@ -404,21 +467,39 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       case "skipY": {
         const colorOfPlayedCard = played_card.charAt(4);
         const numberOfPlayedCard = 100;
-        
+
         if (!isValidPlay(played_card, currentColor, currentNumber)) {
-          alert("Invalid Move! Skip cards must match either the color or number of the current card.");
+          alert(
+            "Invalid Move! Skip cards must match either the color or number of the current card."
+          );
           break;
         }
 
         const activePlayers = getActivePlayers();
-        const nextPlayer = getNextPlayer(cardPlayedBy, activePlayers, playDirection);
-        const playerAfterSkipped = getNextPlayer(nextPlayer, activePlayers, playDirection);
+        const nextPlayer = getNextPlayer(
+          cardPlayedBy,
+          activePlayers,
+          playDirection
+        );
+        const playerAfterSkipped = getNextPlayer(
+          nextPlayer,
+          activePlayers,
+          playDirection
+        );
 
-        cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard, toggleTurn: false });
+        cardPlayedByPlayer({
+          cardPlayedBy,
+          played_card,
+          colorOfPlayedCard,
+          numberOfPlayedCard,
+          toggleTurn: false,
+        });
 
         setTimeout(() => {
           const update = { turn: playerAfterSkipped };
-          isComputerMode ? dispatch(update) : emitSocketEvent("updateGameState", update);
+          isComputerMode
+            ? dispatch(update)
+            : emitSocketEvent("updateGameState", update);
         }, 0);
         break;
       }
@@ -430,7 +511,9 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         const numberOfPlayedCard = 100;
 
         if (!isValidPlay(played_card, currentColor, currentNumber)) {
-          alert("Invalid Move! Reverse cards must match either the color or number of the current card.");
+          alert(
+            "Invalid Move! Reverse cards must match either the color or number of the current card."
+          );
           break;
         }
 
@@ -438,16 +521,35 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
 
         if (activePlayers.length === 2) {
           // 2-player: Reverse acts like Skip
-          cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard, toggleTurn: false });
-          if (isComputerMode && cardPlayedBy === "Player 2") setComputerMoveCounter(prev => prev + 1);
+          cardPlayedByPlayer({
+            cardPlayedBy,
+            played_card,
+            colorOfPlayedCard,
+            numberOfPlayedCard,
+            toggleTurn: false,
+          });
+          if (isComputerMode && cardPlayedBy === "Player 2")
+            setComputerMoveCounter((prev) => prev + 1);
         } else {
           // 3+ players: flip direction
           const newDirection = playDirection * -1;
-          const nextPlayer = getNextPlayer(cardPlayedBy, activePlayers, newDirection);
-          cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard, toggleTurn: false });
+          const nextPlayer = getNextPlayer(
+            cardPlayedBy,
+            activePlayers,
+            newDirection
+          );
+          cardPlayedByPlayer({
+            cardPlayedBy,
+            played_card,
+            colorOfPlayedCard,
+            numberOfPlayedCard,
+            toggleTurn: false,
+          });
           setTimeout(() => {
             const update = { playDirection: newDirection, turn: nextPlayer };
-            isComputerMode ? dispatch(update) : emitSocketEvent("updateGameState", update);
+            isComputerMode
+              ? dispatch(update)
+              : emitSocketEvent("updateGameState", update);
           }, 0);
         }
         break;
@@ -460,26 +562,44 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         const numberOfPlayedCard = 200;
 
         if (!isValidPlay(played_card, currentColor, currentNumber)) {
-          alert("Invalid Move! Draw 2 cards must match either the color or number of the current card.");
+          alert(
+            "Invalid Move! Draw 2 cards must match either the color or number of the current card."
+          );
           break;
         }
 
-        cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard, isDraw2: true, toggleTurn: false });
-        if (isComputerMode && cardPlayedBy === "Player 2") setComputerMoveCounter(prev => prev + 1);
+        cardPlayedByPlayer({
+          cardPlayedBy,
+          played_card,
+          colorOfPlayedCard,
+          numberOfPlayedCard,
+          isDraw2: true,
+          toggleTurn: false,
+        });
+        if (isComputerMode && cardPlayedBy === "Player 2")
+          setComputerMoveCounter((prev) => prev + 1);
         break;
       }
       case "W":
       case "D4W": {
-        const isDraw4 = played_card === 'D4W';
+        const isDraw4 = played_card === "D4W";
         const numberOfPlayedCard = isDraw4 ? 400 : 500;
 
         const playWild = (color) => {
-          cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard: color, numberOfPlayedCard, isDraw4, toggleTurn: !isDraw4 });
-          if (isDraw4 && isComputerMode && cardPlayedBy === "Player 2") setComputerMoveCounter(prev => prev + 1);
+          cardPlayedByPlayer({
+            cardPlayedBy,
+            played_card,
+            colorOfPlayedCard: color,
+            numberOfPlayedCard,
+            isDraw4,
+            toggleTurn: !isDraw4,
+          });
+          if (isDraw4 && isComputerMode && cardPlayedBy === "Player 2")
+            setComputerMoveCounter((prev) => prev + 1);
         };
 
         if (isComputerMode && cardPlayedBy === "Player 2") {
-          const colors = ['R', 'G', 'B', 'Y'];
+          const colors = ["R", "G", "B", "Y"];
           playWild(colors[Math.floor(Math.random() * colors.length)]);
         } else {
           setIsDialogOpen(true);
@@ -490,9 +610,16 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
       default: {
         const { color, number } = parseCard(played_card);
         if (isValidPlay(played_card, currentColor, currentNumber)) {
-          cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard: color, numberOfPlayedCard: number });
+          cardPlayedByPlayer({
+            cardPlayedBy,
+            played_card,
+            colorOfPlayedCard: color,
+            numberOfPlayedCard: number,
+          });
         } else {
-          alert("Invalid Move! You must play a card that matches either the color or number of the current card.");
+          alert(
+            "Invalid Move! You must play a card that matches either the color or number of the current card."
+          );
         }
         break;
       }
@@ -513,7 +640,12 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     const topCard = playedCardsPile[playedCardsPile.length - 1];
     const newDrawPile = shuffleArray([...playedCardsPile.slice(0, -1)]);
     playShufflingSound();
-    toast({ title: "Reshuffling Cards", description: "Draw pile replenished.", variant: "default", duration: 3000 });
+    toast({
+      title: "Reshuffling Cards",
+      description: "Draw pile replenished.",
+      variant: "default",
+      duration: 3000,
+    });
 
     return { newDrawPile, newPlayedCardsPile: [topCard] };
   };
@@ -530,9 +662,20 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         drawPile = result.newDrawPile;
         discardPile = result.newPlayedCardsPile;
       } else {
-        toast({ title: "No Cards Available", description: "There are no more cards to draw.", variant: "warning", duration: 3000 });
-        const update = { turn: getNextPlayer(turn, getActivePlayers()), drawButtonPressed: false, isExtraTurn: false };
-        isComputerMode ? dispatch(update) : emitSocketEvent("updateGameState", update);
+        toast({
+          title: "No Cards Available",
+          description: "There are no more cards to draw.",
+          variant: "warning",
+          duration: 3000,
+        });
+        const update = {
+          turn: getNextPlayer(turn, getActivePlayers()),
+          drawButtonPressed: false,
+          isExtraTurn: false,
+        };
+        isComputerMode
+          ? dispatch(update)
+          : emitSocketEvent("updateGameState", update);
         return;
       }
     }
@@ -545,7 +688,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     const activePlayers = getActivePlayers();
     const turnCopy = isPlayable ? turn : getNextPlayer(turn, activePlayers);
 
-    const deckKey = turn.toLowerCase().replace(' ', '') + 'Deck';
+    const deckKey = turn.toLowerCase().replace(" ", "") + "Deck";
     const updateState = {
       turn: turnCopy,
       [deckKey]: [...getPlayerDeck(turn), drawCard],
@@ -558,7 +701,7 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     if (isComputerMode) {
       dispatch(updateState);
       if (isPlayable && turn === "Player 2") {
-        setTimeout(() => setComputerMoveCounter(prev => prev + 1), 1000);
+        setTimeout(() => setComputerMoveCounter((prev) => prev + 1), 1000);
       }
     } else {
       emitSocketEvent("updateGameState", updateState);
@@ -567,8 +710,14 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
 
   // Skip turn button
   const onSkipButtonHandler = () => {
-    const update = { turn: getNextPlayer(turn, getActivePlayers()), drawButtonPressed: false, isExtraTurn: false };
-    isComputerMode ? dispatch(update) : emitSocketEvent("updateGameState", update);
+    const update = {
+      turn: getNextPlayer(turn, getActivePlayers()),
+      drawButtonPressed: false,
+      isExtraTurn: false,
+    };
+    isComputerMode
+      ? dispatch(update)
+      : emitSocketEvent("updateGameState", update);
   };
 
   // Handle winner reward and blockchain transaction
@@ -576,7 +725,12 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     if (rewardGiven) return;
 
     if (!address || !isConnected) {
-      toast({ title: "Wallet Required", description: "A connected wallet is required to receive your reward.", variant: "destructive", duration: 5000 });
+      toast({
+        title: "Wallet Required",
+        description: "A connected wallet is required to receive your reward.",
+        variant: "destructive",
+        duration: 5000,
+      });
       return;
     }
 
@@ -586,55 +740,170 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
     setRewardGiven(true);
 
     try {
-      const hasSufficientBalance = await checkBalance();
-      if (!hasSufficientBalance) {
-        setShowLowBalanceDrawer(true);
-        return;
+      // Skip balance check for MiniPay (uses cUSD fee abstraction)
+      if (!isMiniPayWallet) {
+        const hasSufficientBalance = await checkBalance();
+        if (!hasSufficientBalance) {
+          setShowLowBalanceDrawer(true);
+          return;
+        }
       }
 
       const gameResultData = {
         winnerAddress: address,
         winnerPlayer: winnerName,
-        loserPlayers: getActivePlayers().filter(p => p !== winnerName),
+        loserPlayers: getActivePlayers().filter((p) => p !== winnerName),
         gameId: room,
         timestamp: Date.now(),
       };
 
-      const gameHash = ethers.keccak256(ethers.toUtf8Bytes(JSON.stringify(gameResultData)));
+      const gameHash = ethers.keccak256(
+        ethers.toUtf8Bytes(JSON.stringify(gameResultData))
+      );
 
-      const transaction = prepareContractCall({
-        contract: {
-          address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+      // Use MiniPay native transaction method for fee abstraction
+      if (isMiniPayWallet && address) {
+        // Validate we're on a supported network
+        if (!isSupportedChain(chainId)) {
+          throw new Error(
+            `Unsupported network! Please switch to a supported network. Current chain: ${chainId}, Supported: ${getSupportedChainIds().join(", ")}`,
+          );
+        }
+
+        const contractAddress = getContractAddress(chainId);
+
+        if (!contractAddress) {
+          throw new Error("Contract address not configured");
+        }
+
+        const data = encodeFunctionData({
           abi: unoGameABI,
-          chain: getSelectedNetwork(),
-          client,
-        },
-        method: "endGame",
-        params: [BigInt(room), gameHash],
-      });
+          functionName: "endGame",
+          args: [BigInt(room), gameHash],
+        });
 
-      sendTransaction(transaction, {
-        onSuccess: () => toast({ title: "Game Ended on Blockchain", description: "Game recorded successfully.", variant: "success", duration: 5000 }),
-        onError: (err) => {
-          console.error("Transaction failed:", err);
-          toast({ title: "Error", description: "Failed to end game on blockchain.", variant: "destructive", duration: 5000 });
-        },
-      });
+        // Use direct eth_sendTransaction for MiniPay
+        const hash = await sendMiniPayTransaction(
+          contractAddress,
+          data,
+          address,
+          chainId
+        );
 
-      toast({ title: "Congratulations!", description: "You've won the game!", variant: "success", duration: 5000 });
+        toast({
+          title: "Game Ended on Blockchain",
+          description: `Game recorded successfully on ${selectedNetwork.displayName}.`,
+          variant: "success",
+          duration: 5000,
+        });
+      } else {
+        // Browser wallet: Use wagmi transaction
+        if (!isSupportedChain(chainId)) {
+          throw new Error(
+            `Unsupported network! Please switch to a supported network. Current chain: ${chainId}, Supported: ${getSupportedChainIds().join(
+              ", "
+            )}`
+          );
+        }
+
+        const contractAddress = getContractAddress(chainId);
+
+        if (!contractAddress) {
+          throw new Error("Contract address not configured");
+        }
+
+        const data = encodeFunctionData({
+          abi: unoGameABI,
+          functionName: "endGame",
+          args: [BigInt(room), gameHash],
+        });
+
+        toast({
+          title: "Transaction Pending",
+          description: "Please confirm the transaction in your wallet...",
+          variant: "default",
+          duration: 5000,
+        });
+
+        // Send transaction using wagmi
+        sendTransaction({
+          to: contractAddress,
+          data: data,
+        });
+
+        // Note: Transaction confirmation is handled by the useEffect below
+      }
+
+      // Show congratulations for MiniPay (instant), browser wallet waits for confirmation
+      if (isMiniPayWallet) {
+        toast({
+          title: "Congratulations!",
+          description: "You've won the game!",
+          variant: "success",
+          duration: 5000,
+        });
+      }
     } catch (error) {
       console.error("Failed to end game on blockchain:", error);
-      toast({ title: "Blockchain Update Failed", description: "Issue recording game on blockchain.", variant: "warning", duration: 5000 });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      toast({
+        title: "Blockchain Update Failed",
+        description: `Issue recording game on blockchain: ${errorMessage}`,
+        variant: "warning",
+        duration: 5000,
+      });
     }
   };
+
+  // Handle browser wallet transaction confirmation
+  useEffect(() => {
+    if (isConfirming && !isMiniPayWallet) {
+      toast({
+        title: "Transaction Confirming",
+        description: "Waiting for blockchain confirmation...",
+        variant: "default",
+        duration: 5000,
+      });
+    }
+
+    if (isConfirmed && !isMiniPayWallet) {
+      toast({
+        title: "Game Ended on Blockchain",
+        description: `Game recorded successfully on ${selectedNetwork.displayName}.`,
+        variant: "success",
+        duration: 5000,
+      });
+
+      toast({
+        title: "Congratulations!",
+        description: "You've won the game!",
+        variant: "success",
+        duration: 5000,
+      });
+    }
+  }, [isConfirming, isConfirmed, isMiniPayWallet]);
 
   useEffect(() => {
     if (gameOver && winner && !rewardGiven) handleWinnerReward(winner);
   }, [gameOver, winner, rewardGiven]);
 
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', marginTop: "-27px" }}>
-      <GameBackground turn={turn} currentColor={currentColor} currentUser={currentUser} totalPlayers={totalPlayers} />
+    <div
+      style={{
+        position: "relative",
+        width: "100vw",
+        height: "100vh",
+        overflow: "hidden",
+        marginTop: "-27px",
+      }}
+    >
+      <GameBackground
+        turn={turn}
+        currentColor={currentColor}
+        currentUser={currentUser}
+        totalPlayers={totalPlayers}
+      />
       {!gameOver ? (
         <>
           <GameScreen
@@ -673,9 +942,9 @@ const Game = ({ room, currentUser, isComputerMode = false, playerCount = 2 }) =>
         <CenterInfo msg={`Game Over: ${winner} wins!!`} />
       )}
       <Toaster />
-      <LowBalanceDrawer 
-        open={showLowBalanceDrawer} 
-        onClose={() => setShowLowBalanceDrawer(false)} 
+      <LowBalanceDrawer
+        open={showLowBalanceDrawer}
+        onClose={() => setShowLowBalanceDrawer(false)}
       />
     </div>
   );
