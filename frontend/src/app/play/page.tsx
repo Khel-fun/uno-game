@@ -64,7 +64,7 @@ export default function PlayGame() {
   const chains = useChains();
 
   // Get the network selected from dropdown
-  const { selectedNetwork } = useNetworkSelection();
+  const { selectedNetwork, isInitialized } = useNetworkSelection();
   const chainId = selectedNetwork.id; // Use selected network's chain ID instead of wallet's current chain
 
   // Use wagmi's useAccount directly for MiniPay compatibility
@@ -713,6 +713,13 @@ export default function PlayGame() {
             </div>
           )}
           <WalletConnection />
+        </div>
+      ) : !isInitialized ? (
+        <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+          <div className="text-center mb-2">
+            <h1 className="text-2xl font-bold mb-2">Loading Network...</h1>
+            <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mt-4"></div>
+          </div>
         </div>
       ) : (
         <>

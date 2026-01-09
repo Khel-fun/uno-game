@@ -15,9 +15,10 @@ const NETWORK_STORAGE_KEY = "zunno_selected_network";
 export function useNetworkSelection() {
   const { chain } = useAccount();
   const { switchChain } = useSwitchChain();
-  const [selectedNetwork, setSelectedNetwork] =
-    useState<NetworkConfig>(DEFAULT_NETWORK);
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedNetwork, setSelectedNetwork] = useState<NetworkConfig | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState(true);
   const [isInMiniPay, setIsInMiniPay] = useState(false);
 
   // Detect MiniPay on mount
@@ -25,21 +26,36 @@ export function useNetworkSelection() {
     setIsInMiniPay(isMiniPay());
   }, []);
 
+  // Initialize network selection once on mount
   useEffect(() => {
-    const storedNetworkId = localStorage.getItem(NETWORK_STORAGE_KEY);
+    const initializeNetwork = () => {
+      const storedNetworkId = localStorage.getItem(NETWORK_STORAGE_KEY);
 
-    if (storedNetworkId) {
-      const network = getNetworkById(parseInt(storedNetworkId));
-      if (network) {
-        setSelectedNetwork(network);
+      if (storedNetworkId) {
+        const network = getNetworkById(parseInt(storedNetworkId));
+        if (network) {
+          setSelectedNetwork(network);
+          setIsLoading(false);
+          return;
+        }
       }
-    } else if (chain) {
-      const currentNetwork = getNetworkById(chain.id);
-      if (currentNetwork) {
-        setSelectedNetwork(currentNetwork);
-        localStorage.setItem(NETWORK_STORAGE_KEY, chain.id.toString());
+
+      if (chain) {
+        const currentNetwork = getNetworkById(chain.id);
+        if (currentNetwork) {
+          setSelectedNetwork(currentNetwork);
+          localStorage.setItem(NETWORK_STORAGE_KEY, chain.id.toString());
+          setIsLoading(false);
+          return;
+        }
       }
-    }
+
+      // Fallback to default network
+      setSelectedNetwork(DEFAULT_NETWORK);
+      setIsLoading(false);
+    };
+
+    initializeNetwork();
   }, [chain]);
 
   const switchNetwork = async (network: NetworkConfig) => {
@@ -74,7 +90,8 @@ export function useNetworkSelection() {
     : SUPPORTED_NETWORKS;
 
   return {
-    selectedNetwork,
+    selectedNetwork: selectedNetwork || DEFAULT_NETWORK,
+    isInitialized: selectedNetwork !== null,
     switchNetwork,
     isLoading,
     supportedNetworks: availableNetworks,
