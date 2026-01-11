@@ -28,21 +28,18 @@ const consoleFormat = winston.format.combine(
 // Create the logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: logFormat,
-  defaultMeta: { service: 'gameofuno-backend' },
+  format: format.combine(
+    format.timestamp(),
+    format.errors({ stack: true }),
+    format.splat(),
+    format.json()
+  ),
   transports: [
-    // Write all logs with level 'error' and below to error.log
-    new winston.transports.File({ 
-      filename: path.join(logsDir, 'error.log'), 
-      level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
-    // Write all logs with level 'info' and below to combined.log
-    new winston.transports.File({ 
-      filename: path.join(logsDir, 'combined.log'),
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
+    new transports.Console({
+      format: format.combine(
+        format.colorize(),
+        format.simple()
+      )
     }),
   ],
 });

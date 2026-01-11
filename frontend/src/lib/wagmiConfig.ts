@@ -1,10 +1,11 @@
 import { createConfig, http } from 'wagmi';
-import { base, baseSepolia } from 'wagmi/chains';
+import { baseSepolia } from 'wagmi/chains';
 import { coinbaseWallet, injected } from 'wagmi/connectors';
+import { celoSepolia } from '@/config/networks';
 
-// Create Wagmi config with Base and Base Sepolia chains
+// Create Wagmi config with testnet chains only (Base Sepolia and Celo Sepolia)
 export const wagmiConfig = createConfig({
-  chains: [base, baseSepolia],
+  chains: [baseSepolia, celoSepolia],
   connectors: [
     coinbaseWallet({
       appName: 'Zunno',
@@ -13,7 +14,7 @@ export const wagmiConfig = createConfig({
   ],
   ssr: true,
   transports: {
-    [base.id]: http(),
     [baseSepolia.id]: http(),
+    [celoSepolia.id]: http(),
   },
 });

@@ -13,12 +13,18 @@ import { useChains } from "wagmi";
 import { client } from "@/utils/thirdWebClient";
 import { baseSepolia } from "@/lib/chains";
 import { unoGameABI } from "@/constants/unogameabi";
-import { useReadContract, useSendTransaction } from "thirdweb/react";
+import {
+  useReadContract,
+  useActiveAccount,
+  useSendTransaction,
+} from "thirdweb/react";
 import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
 import ProfileDropdown from "@/components/profileDropdown";
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
 import socket, { socketManager } from "@/services/socket";
+import { AddToFarcaster } from "@/components/AddToFarcaster";
+import NetworkDropdown from "@/components/NetworkDropdown";
 
 // DIAM wallet integration removed
 
@@ -66,7 +72,14 @@ export default function PlayGame() {
   }, [refetchGames]);
 
   // Setup socket event listeners using global socket manager
+  // Setup socket event listeners using global socket manager
   useEffect(() => {
+    // Add listener for gameRoomCreated event
+    const handleGameRoomCreated = () => {
+      refetchGames();
+    };
+
+    socketManager.on("gameRoomCreated", handleGameRoomCreated);
     // Add listener for gameRoomCreated event
     const handleGameRoomCreated = () => {
       refetchGames();
@@ -131,7 +144,7 @@ export default function PlayGame() {
         contract: {
           address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
           abi: unoGameABI,
-          chain: baseSepolia,
+          chain: getSelectedNetwork(),
           client,
         },
         method: "createGame",
@@ -140,6 +153,7 @@ export default function PlayGame() {
 
       sendTransaction(transaction, {
         onSuccess: async (result) => {
+          console.log("Transaction successful:", result);
           toast({
             title: "Game created successfully!",
             description: "Game created successfully!",
@@ -202,11 +216,13 @@ export default function PlayGame() {
       }
 
       try {
+        console.log("Creating computer game...");
+
         const transaction = prepareContractCall({
           contract: {
             address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
             abi: unoGameABI,
-            chain: baseSepolia,
+            chain: getSelectedNetwork(),
             client,
           },
           method: "createGame",
@@ -224,7 +240,7 @@ export default function PlayGame() {
 
             const receipt = await waitForReceipt({
               client,
-              chain: baseSepolia,
+              chain: getSelectedNetwork(),
               transactionHash: result.transactionHash,
             });
 
@@ -236,11 +252,14 @@ export default function PlayGame() {
               const gameId = BigInt(gameCreatedId); // Convert hex to decimal
               setGameId(gameId);
 
-              // Emit socket event to create computer game room using global socket manager
-              socketManager.emit("createComputerGame", {
-                gameId: gameId.toString(),
-                playerAddress: address,
-              });
+              // Emit socket event to create computer game room
+              if (socket.current) {
+                socket.current.emit("createComputerGame", {
+                  gameId: gameId.toString(),
+                  playerAddress: address,
+                });
+                console.log("Socket event emitted for computer game creation");
+              }
 
               // Navigate to game room with computer mode flag
               router.push(`/game/${gameId}?mode=computer`);
@@ -312,7 +331,7 @@ export default function PlayGame() {
         contract: {
           address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
           abi: unoGameABI,
-          chain: baseSepolia,
+          chain: getSelectedNetwork(),
           client,
         },
         method: "joinGame",
@@ -354,11 +373,11 @@ export default function PlayGame() {
   // Handle transaction confirmation
   // useEffect(() => {
   //   if (isConfirmed && hash) {
-  //     // console.log("Transaction confirmed with hash:", hash);
+  //     console.log("Transaction confirmed with hash:", hash);
 
   //     // Check if this was a create game transaction
   //     if (createLoading) {
-  //       // console.log("Game created successfully");
+  //       console.log("Game created successfully");
 
   //       if (socket && socket.current) {
   //         socket.current.emit("createGameRoom");
@@ -376,7 +395,7 @@ export default function PlayGame() {
 
   //     // Check if this was a join game transaction
   //     if (joiningGameId !== null) {
-  //       // console.log(`Joined game ${joiningGameId.toString()} successfully`);
+  //       console.log(`Joined game ${joiningGameId.toString()} successfully`);
 
   //       const gameIdToJoin = joiningGameId;
   //       setJoiningGameId(null);
@@ -429,6 +448,7 @@ export default function PlayGame() {
         </div>
 
         <div className="flex items-center space-x-3">
+          <AddToFarcaster variant="compact" />
           {process.env.NEXT_PUBLIC_ENVIRONMENT === "development" && (
             <Link href="/preview-game">
               <button className="px-4 py-2 bg-purple-600/30 hover:bg-purple-600/50 text-white rounded-lg text-sm font-medium transition-all duration-200 border border-purple-500/30">

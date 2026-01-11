@@ -6,6 +6,7 @@ import styles from '../styles';
 import { navVariants } from '@/utils/motion';
 import StyledButton from "../styled-button";
 import { useRouter } from 'next/navigation';
+import NetworkDropdown from '../NetworkDropdown';
 
 const Navbar = () => {
 
@@ -26,7 +27,8 @@ const Navbar = () => {
         <h2 className="font-extrabold text-[24px] leading-[30.24px] text-white">
            Zunno
         </h2>
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
+          <NetworkDropdown />
           {/* <StyledButton onClick={() => router.push("/profile")} roundedStyle='rounded-full' className='bg-[#8a2be2] text-md lg:text-2xl'>Profile</StyledButton> */}
           <StyledButton onClick={() => router.push("/play")} roundedStyle='rounded-full' className='bg-[#ff9000] text-md lg:text-2xl hidden sm:block'>Start Game</StyledButton>
         </div>

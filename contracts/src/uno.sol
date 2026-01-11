@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -10,7 +10,7 @@ contract UnoGame is ReentrancyGuard {
     enum GameStatus { NotStarted, Started, Ended }
 
     struct Game {
-        uint256 id; 
+        uint256 id;
         address[] players; 
         GameStatus status; 
         uint256 startTime; 

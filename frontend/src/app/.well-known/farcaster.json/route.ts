@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   const manifest = {
     frame: {
       name: "Zunno",
-      homeUrl: "https://zunno.xyz",
+      homeUrl: "https://zunno.xyz/play",
       iconUrl: "https://zunno.xyz/images/logo.png",
       version: "1",
       subtitle: "Blockchain's 1st Uno game",
