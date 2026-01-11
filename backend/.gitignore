@@ -43,4 +43,4 @@ node_modules
 *.md
 
 # backend build output
-/backend/dist
+dist/

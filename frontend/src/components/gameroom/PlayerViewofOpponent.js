@@ -1,35 +1,43 @@
 import React from "react";
 import MemoizedSpinner from "./Spinner";
 
-const PlayerViewofOpponent = ({ skewStyle, opponentDeck, turn, opponent, index = 0, playerCount }) => {
+const PlayerViewofOpponent = ({
+  skewStyle,
+  opponentDeck,
+  turn,
+  opponent,
+  index = 0,
+  playerCount,
+}) => {
   return (
-    <div style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: "0.5rem",
-      width: "100%",
-      maxWidth: "400px",
-      flexDirection:
-        playerCount === 4
-          ? (index === 1 ? "row" : "column")
-          : (playerCount === 2 && index === 0 ? "row" : "column")
-    }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "0.5rem",
+        width: "100%",
+        maxWidth: "400px",
+        flexDirection: index !== 4 ? "column" : "row",
+      }}
+    >
       {opponentDeck.map((item, i) => (
-        <div 
+        <div
           key={item + i}
           style={{
             position: "relative",
             margin: "0 -10px",
             transform:
-              (playerCount === 4 && index === 1 || playerCount == 2 && index === 0)
-                ? `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`
-                : `translateY(${-54 * i * 1.05}px) ${skewStyle}`,
-            zIndex: i
+              index !== 4
+                ? `rotate(${i % 2 === 0 ? "-2" : "2"}deg) translateY(${
+                    -54 * i
+                  }px)`
+                : `rotate(${i % 2 === 0 ? "-5" : "5"}deg)`,
+            zIndex: i,
           }}
         >
           <img
-            style={{ 
+            style={{
               pointerEvents: "none",
               width: "2.5rem",
               height: "4rem",

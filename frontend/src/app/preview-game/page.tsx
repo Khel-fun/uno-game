@@ -19,12 +19,14 @@ const PreviewGame = () => {
     return shuffled.slice(0, count);
   };
 
-  const [playerDecks, setPlayerDecks] = useState<{[key: string]: string[]}>({});
+  const [playerDecks, setPlayerDecks] = useState<{ [key: string]: string[] }>(
+    {}
+  );
   const [playedCard, setPlayedCard] = useState("5R");
 
   // Initialize player decks
   useEffect(() => {
-    const decks: {[key: string]: string[]} = {};
+    const decks: { [key: string]: string[] } = {};
     for (let i = 1; i <= playerCount; i++) {
       decks[`Player ${i}`] = getRandomCards(i === 1 ? 7 : 5);
     }
@@ -46,7 +48,7 @@ const PreviewGame = () => {
       name: playerName,
       displayName: i === 1 ? "You" : playerName,
       deck: playerDecks[playerName] || [],
-      isCurrentUser: i === 1
+      isCurrentUser: i === 1,
     });
   }
 
@@ -55,6 +57,14 @@ const PreviewGame = () => {
 
   // Determine current color from played card
   const currentColor = playedCard.slice(-1); // Get last character (R, G, B, Y)
+  const colorMap: { [key: string]: string } = {
+    R: "red",
+    G: "green",
+    B: "blue",
+    Y: "yellow",
+  };
+  const colorName = colorMap[currentColor] || "blue";
+  const turnType = currentTurn === "Player 1" ? "current" : "opponent";
 
   return (
     <div
@@ -66,30 +76,123 @@ const PreviewGame = () => {
         position: "relative",
       }}
     >
-      {/* Multi-layered Background */}
-      <GameBackground 
-        turn={currentTurn}
-        currentColor={currentColor}
-        currentUser="Player 1"
-        totalPlayers={playerCount}
-      />
+      {/* Multi-layered Background - matching GameBackground component */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          overflow: "hidden",
+          zIndex: 0,
+        }}
+      >
+        {/* Layer 1 - Base background */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundImage: "url('/bg_primary.webp')",
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            zIndex: 1,
+          }}
+        />
+
+        {/* Layer 2 - Color highlight */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundImage: `url('/highlight_${colorName}.svg')`,
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            zIndex: 2,
+            opacity: 0.5,
+          }}
+        />
+
+        {/* Layer 3 - Table image */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundImage: "url('/bg_secondary.webp')",
+            backgroundSize: "130%",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            zIndex: 3,
+            opacity: 0.8,
+          }}
+        />
+
+        {/* Layer 4 - Color-based layer */}
+        <div
+          style={{
+            position: "absolute",
+            top: "-17vw",
+            left: "0",
+            width: "100%",
+            height: "100%",
+            backgroundImage: `url('/assets/play_bg/${colorName}_layer.svg')`,
+            backgroundSize: "116%",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            zIndex: 4,
+            transition: "opacity 0.5s ease-in-out",
+            opacity: 0.6,
+          }}
+        />
+
+        {/* Layer 5 - Turn-based layer */}
+        <div
+          style={{
+            position: "absolute",
+            top: "-3vw",
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundImage: `url('/assets/play_bg/${turnType}.svg')`,
+            backgroundSize: "142%",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            zIndex: 5,
+            transition: "opacity 0.5s ease-in-out",
+            opacity: 0.9,
+          }}
+        />
+      </div>
       {/* Controls Bar */}
-      <div style={{
-        position: "fixed",
-        top: "20px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        display: "flex",
-        gap: "1rem",
-        alignItems: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
-        padding: "0.75rem 1.5rem",
-        borderRadius: "1rem",
-        zIndex: 1000,
-        boxShadow: "0 4px 12px rgba(0,0,0,0.5)"
-      }}>
+      <div
+        style={{
+          position: "fixed",
+          top: "20px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "1rem",
+          alignItems: "center",
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          padding: "0.75rem 1.5rem",
+          borderRadius: "1rem",
+          zIndex: 1000,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+        }}
+      >
         <button
-          onClick={() => router.push('/play')}
+          onClick={() => router.push("/play")}
           style={{
             backgroundColor: "#C89A4A",
             color: "white",
@@ -103,10 +206,12 @@ const PreviewGame = () => {
         >
           ← Back
         </button>
-        <label style={{ color: "white", fontWeight: "bold", fontSize: "0.875rem" }}>
+        <label
+          style={{ color: "white", fontWeight: "bold", fontSize: "0.875rem" }}
+        >
           Players:
         </label>
-        {[2, 3, 4].map(count => (
+        {[2, 3, 4].map((count) => (
           <button
             key={count}
             onClick={() => {
@@ -127,7 +232,14 @@ const PreviewGame = () => {
             {count}
           </button>
         ))}
-        <label style={{ color: "white", fontWeight: "bold", fontSize: "0.875rem", marginLeft: "0.5rem" }}>
+        <label
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            fontSize: "0.875rem",
+            marginLeft: "0.5rem",
+          }}
+        >
           Turn:
         </label>
         {players.map((p) => (
@@ -145,7 +257,7 @@ const PreviewGame = () => {
               cursor: "pointer",
             }}
           >
-            P{p.name.split(' ')[1]}
+            P{p.name.split(" ")[1]}
           </button>
         ))}
       </div>
@@ -161,7 +273,7 @@ const PreviewGame = () => {
           marginTop: "1rem",
           marginLeft: "1rem",
           position: "absolute",
-          zIndex: 50
+          zIndex: 50,
         }}
       >
         <button
@@ -177,12 +289,22 @@ const PreviewGame = () => {
             gap: "4px",
             padding: "0 12px",
             borderRadius: "18px",
-            boxShadow: "0 8px 16px rgba(0, 105, 227, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)",
+            boxShadow:
+              "0 8px 16px rgba(0, 105, 227, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)",
             transition: "all 0.2s ease",
           }}
           onClick={() => router.push("/play")}
         >
-          <svg width="24" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="24"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M24 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
@@ -198,7 +320,7 @@ const PreviewGame = () => {
           justifyContent: "center",
           gap: "2rem",
           height: "auto",
-          paddingTop: "180px"
+          paddingTop: "180px",
         }}
       >
         {opponents.map((opponent, index) => {
@@ -213,11 +335,11 @@ const PreviewGame = () => {
             if (index === 0) {
               // Left side, middle
               positionStyle = { position: "absolute", top: "26%", left: "5%" };
-              skewStyle = "skew(-12deg, -16deg)"
+              skewStyle = "skew(-12deg, -16deg)";
             } else if (index === 1) {
               // Right side, middle
               positionStyle = { position: "absolute", top: "26%", right: "5%" };
-              skewStyle = "skew(12deg, 16deg)"
+              skewStyle = "skew(12deg, 16deg)";
             } else {
               // Additional players just use absolute positioning
               positionStyle = { position: "absolute", top: "1px" };
@@ -226,14 +348,14 @@ const PreviewGame = () => {
             if (index === 0) {
               // Left side, middle
               positionStyle = { position: "absolute", top: "26%", left: "5%" };
-              skewStyle = "skew(-12deg, -16deg)"
+              skewStyle = "skew(-12deg, -16deg)";
             } else if (index === 1) {
               // Right side, middle
               positionStyle = { position: "absolute", top: "1px" };
             } else {
               // Additional players just use absolute positioning
               positionStyle = { position: "absolute", top: "26%", right: "5%" };
-              skewStyle = "skew(12deg, 16deg)"
+              skewStyle = "skew(12deg, 16deg)";
             }
           }
 
@@ -248,112 +370,126 @@ const PreviewGame = () => {
                 ...positionStyle,
               }}
             >
-            <div
-              style={{
-                color: "#94a3b8",
-                fontSize: "0.75rem",
-                marginBottom: "0.5rem",
-                visibility: currentTurn === opponent.name ? "visible" : "hidden",
-              }}
-            >
-              {`Thinking... (${turnTimeRemaining}s)`}
-            </div>
-            <div
-              className="avatar-container"
-              style={{
-                width: "2.5rem",
-                height: "2.5rem",
-                position: "relative",
-                marginBottom: "0.5rem",
-              }}
-            >
-              {currentTurn === opponent.name && (
-                <svg 
-                  width="2.5rem" 
-                  height="2.5rem" 
-                  viewBox="0 0 100 100"
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    transform: "rotate(-90deg)",
-                    zIndex: 1
-                  }}
-                >
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="48"
-                    fill="none"
-                    stroke="rgba(4, 81, 214, 0.8)"
-                    strokeWidth="8"
-                    strokeDasharray={`${(turnTimeRemaining/10) * 301.6} 301.6`}
-                    strokeLinecap="round"
-                  />
-                </svg>
-              )}
               <div
-                className="avatar"
+                style={{
+                  color: "#94a3b8",
+                  fontSize: "0.75rem",
+                  marginBottom: "0.5rem",
+                  visibility:
+                    currentTurn === opponent.name ? "visible" : "hidden",
+                }}
+              >
+                {`Thinking... (${turnTimeRemaining}s)`}
+              </div>
+              <div
+                className="avatar-container"
                 style={{
                   width: "2.5rem",
                   height: "2.5rem",
-                  borderRadius: "50%",
-                  overflow: "hidden",
                   position: "relative",
-                  boxShadow: currentTurn === opponent.name ? "0 0 15px 5px rgba(14, 165, 233, 0.7)" : "none",
-                  transform: currentTurn === opponent.name && pulseAnimation ? "scale(1.1)" : "scale(1)",
-                  transition: "all 0.3s ease",
-                  zIndex: 2
+                  marginBottom: "0.5rem",
                 }}
               >
-                <img
-                  src={`https://api.dicebear.com/9.x/micah/svg?seed=${opponent.name}`}
-                  alt={`${opponent.displayName} Avatar`}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              </div>
-            </div>
-            {/* Opponent's cards - matching PlayerViewofOpponent */}
-            <div style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: "0.5rem",
-              width: "100%",
-              maxWidth: "400px",
-              flexDirection:
-                playerCount === 4
-                  ? (index === 1 ? "row" : "column")
-                  : (playerCount === 2 && index === 0 ? "row" : "column")
-            }}>
-              {opponent.deck.map((item, i) => (
-                <div 
-                  key={item + i}
+                {currentTurn === opponent.name && (
+                  <svg
+                    width="2.5rem"
+                    height="2.5rem"
+                    viewBox="0 0 100 100"
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      transform: "rotate(-90deg)",
+                      zIndex: 1,
+                    }}
+                  >
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="48"
+                      fill="none"
+                      stroke="rgba(4, 81, 214, 0.8)"
+                      strokeWidth="8"
+                      strokeDasharray={`${
+                        (turnTimeRemaining / 10) * 301.6
+                      } 301.6`}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+                <div
+                  className="avatar"
                   style={{
+                    width: "2.5rem",
+                    height: "2.5rem",
+                    borderRadius: "50%",
+                    overflow: "hidden",
                     position: "relative",
-                    margin: "0 -10px",
+                    boxShadow:
+                      currentTurn === opponent.name
+                        ? "0 0 15px 5px rgba(14, 165, 233, 0.7)"
+                        : "none",
                     transform:
-                      (playerCount === 4 && index === 1 || playerCount == 2 && index === 0)
-                        ? `rotate(${i % 2 === 0 ? '-5' : '5'}deg)`
-                        : `translateY(${-54 * i * 1.1}px) ${skewStyle}`,
-                    zIndex: i
+                      currentTurn === opponent.name && pulseAnimation
+                        ? "scale(1.1)"
+                        : "scale(1)",
+                    transition: "all 0.3s ease",
+                    zIndex: 2,
                   }}
                 >
                   <img
-                    style={{ 
-                      pointerEvents: "none",
-                      width: "2.5rem",
-                      height: "4rem",
-                      borderRadius: "0.5rem",
+                    src={`https://api.dicebear.com/9.x/micah/svg?seed=${opponent.name}`}
+                    alt={`${opponent.displayName} Avatar`}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
                     }}
-                    alt={`opponent-cards-back`}
-                    className={currentTurn === opponent.name ? "glow" : ""}
-                    src={`../assets/card-back.png`}
                   />
                 </div>
-              ))}
+              </div>
+              {/* Opponent's cards - matching PlayerViewofOpponent */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "0.5rem",
+                  width: "100%",
+                  maxWidth: "400px",
+                  flexDirection: index != 4 ? "column" : "row",
+                }}
+              >
+                {opponent.deck.map((item, i) => (
+                  <div
+                    key={item + i}
+                    style={{
+                      position: "relative",
+                      margin: "0 -10px",
+                      transform:
+                        index != 4
+                          ? `rotate(${
+                              i % 2 === 0 ? "-2" : "2"
+                            }deg) translateY(${-54 * i}px)`
+                          : `rotate(${i % 2 === 0 ? "-5" : "5"}deg)`,
+                      zIndex: i,
+                    }}
+                  >
+                    <img
+                      style={{
+                        pointerEvents: "none",
+                        width: "2.5rem",
+                        height: "4rem",
+                        borderRadius: "0.5rem",
+                      }}
+                      alt={`opponent-cards-back`}
+                      className={currentTurn === opponent.name ? "glow" : ""}
+                      src={`../assets/card-back.png`}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
           );
         })}
       </div>
@@ -369,7 +505,7 @@ const PreviewGame = () => {
           justifyContent: "center",
           position: "relative",
           width: "100%",
-          marginBottom: "70px"
+          marginBottom: "70px",
         }}
       >
         <div
@@ -381,12 +517,19 @@ const PreviewGame = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            marginBottom: "20px"
+            marginBottom: "20px",
           }}
         >
           {/* CommonView - Draw pile, played card, UNO button */}
           <div style={{ position: "relative", width: "100%" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: "100vh" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                height: "100vh",
+              }}
+            >
               {/* Draw Pile */}
               <button
                 className="draw-deck"
@@ -404,7 +547,7 @@ const PreviewGame = () => {
                   zIndex: 10,
                   background: "none",
                   border: "none",
-                  cursor: "pointer"
+                  cursor: "pointer",
                 }}
                 role="button"
                 disabled={currentTurn !== "Player 1"}
@@ -413,23 +556,25 @@ const PreviewGame = () => {
               </button>
 
               {/* Played Card */}
-              <div style={{
-                position: "absolute",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                width: "fit-content",
-                margin: "0 auto",
-                left: "50%",
-                transform: "translateX(-50%)"
-              }}>
+              <div
+                style={{
+                  position: "absolute",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "fit-content",
+                  margin: "0 auto",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                }}
+              >
                 <img
                   style={{
                     pointerEvents: "none",
                     width: "5.5rem",
                     height: "8rem",
                     borderRadius: "0.5rem",
-                    boxShadow: "0 0 15px rgba(14, 165, 233, 0.5)"
+                    boxShadow: "0 0 15px rgba(14, 165, 233, 0.5)",
                   }}
                   alt={`cards-front ${playedCard}`}
                   src={`/assets/cards-front/${playedCard}.webp`}
@@ -444,7 +589,7 @@ const PreviewGame = () => {
                   position: "absolute",
                   bottom: "-56px",
                   left: "50%",
-                  transform: "translateX(-50%)"
+                  transform: "translateX(-50%)",
                 }}
               >
                 <button
@@ -454,11 +599,13 @@ const PreviewGame = () => {
                     fontWeight: "bold",
                     fontSize: "1rem",
                     width: "10rem",
-                    filter: currentTurn !== "Player 1" ? "grayscale(1)" : "none",
+                    filter:
+                      currentTurn !== "Player 1" ? "grayscale(1)" : "none",
                     marginTop: "10rem",
                     background: "none",
                     border: "none",
-                    cursor: currentTurn === "Player 1" ? "pointer" : "not-allowed"
+                    cursor:
+                      currentTurn === "Player 1" ? "pointer" : "not-allowed",
                   }}
                 >
                   <img src="/images/zunno-button.png" alt="uno" />
@@ -474,7 +621,7 @@ const PreviewGame = () => {
         className="player-section"
         style={{
           marginTop: "1rem",
-          paddingBottom: "86px"
+          paddingBottom: "86px",
         }}
       >
         <div
@@ -486,11 +633,17 @@ const PreviewGame = () => {
             position: "absolute",
             bottom: "38px",
             left: "50%",
-            transform: "translateX(-50%)"
+            transform: "translateX(-50%)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+              }}
+            >
               <div
                 style={{
                   backgroundColor: "rgba(76, 29, 29, 0.95)",
@@ -506,30 +659,36 @@ const PreviewGame = () => {
                   visibility: currentTurn === "Player 1" ? "visible" : "hidden",
                 }}
               >
-                {Math.floor(turnTimeRemaining / 60).toString().padStart(2, '0')}:{(turnTimeRemaining % 60).toString().padStart(2, '0')}
+                {Math.floor(turnTimeRemaining / 60)
+                  .toString()
+                  .padStart(2, "0")}
+                :{(turnTimeRemaining % 60).toString().padStart(2, "0")}
               </div>
             </div>
           </div>
         </div>
 
         {/* MainPlayerView - Player's hand with fan effect */}
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "flex-end",
-          padding: "0.5rem",
-          minHeight: "7rem",
-          position: "relative"
-        }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-end",
+            padding: "0.5rem",
+            minHeight: "7rem",
+            position: "relative",
+          }}
+        >
           {currentPlayer.deck.map((item, i) => {
             // Calculate position for fan effect
             const totalCards = currentPlayer.deck.length;
             const fanAngle = Math.min(40, totalCards * 5); // Max 40 degrees total fan
-            const cardAngle = (fanAngle / (totalCards - 1)) * (i - (totalCards - 1) / 2);
+            const cardAngle =
+              (fanAngle / (totalCards - 1)) * (i - (totalCards - 1) / 2);
             const isPlayable = currentTurn === "Player 1";
-            
+
             return (
-              <div 
+              <div
                 key={item + i}
                 style={{
                   position: "relative",
@@ -539,7 +698,7 @@ const PreviewGame = () => {
                   transition: "transform 0.2s ease-in-out",
                   zIndex: i,
                   zoom: currentTurn !== "Player 1" ? "0.85" : "1.04",
-                  filter: currentTurn !== "Player 1" ? "brightness(0.75)" : ""
+                  filter: currentTurn !== "Player 1" ? "brightness(0.75)" : "",
                 }}
                 onMouseEnter={(e) => {
                   if (isPlayable) {
@@ -559,7 +718,10 @@ const PreviewGame = () => {
                     height: "5.5rem",
                     borderRadius: "0.5rem",
                     cursor: currentTurn === "Player 1" ? "pointer" : "default",
-                    border: currentTurn === "Player 1" ? "2px solid rgba(14, 165, 233, 0.3)" : "none"
+                    border:
+                      currentTurn === "Player 1"
+                        ? "2px solid rgba(14, 165, 233, 0.3)"
+                        : "none",
                   }}
                   alt={`cards-front ${item}`}
                   className={currentTurn === "Player 1" ? "glow" : ""}
