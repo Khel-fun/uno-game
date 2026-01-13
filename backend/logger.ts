@@ -1,4 +1,4 @@
-import winston from 'winston';
+import winston, { transports } from 'winston';
 import path from 'path';
 import fs from 'fs';
 
@@ -7,14 +7,6 @@ const logsDir = path.join(__dirname, 'logs');
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir);
 }
-
-// Define log format
-const logFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.errors({ stack: true }),
-  winston.format.splat(),
-  winston.format.json()
-);
 
 // Define console format (more readable for development)
 const consoleFormat = winston.format.combine(
@@ -28,17 +20,17 @@ const consoleFormat = winston.format.combine(
 // Create the logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: format.combine(
-    format.timestamp(),
-    format.errors({ stack: true }),
-    format.splat(),
-    format.json()
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.splat(),
+    winston.format.json()
   ),
   transports: [
     new transports.Console({
-      format: format.combine(
-        format.colorize(),
-        format.simple()
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
       )
     }),
   ],

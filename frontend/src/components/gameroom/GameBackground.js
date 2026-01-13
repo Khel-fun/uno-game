@@ -108,7 +108,7 @@ const GameBackground = ({ turn, currentColor, currentUser, totalPlayers }) => {
           width: "100%",
           height: "100%",
           backgroundImage:
-            playerIndex === "current"
+            turnType === "current"
               ? `url('/assets/play_bg/current.svg')`
               : `url('/assets/play_bg/opponent.svg')`,
           backgroundSize: "142%",

@@ -5,7 +5,7 @@ const specials = ['skip', '_', 'D2']; // Skip, Reverse, Draw 2
 const wilds = ['W', 'D4W']; // Wild, Wild Draw 4
 
 function buildDeck() {
-  const deck = [];
+  const deck: string[] = [];
   colors.forEach((color) => {
     numbers.forEach((num) => {
       // One 0 per color, two of 1-9

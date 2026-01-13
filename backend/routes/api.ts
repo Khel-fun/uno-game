@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import os from "os";
 import gameStorage from "../services/storage/gameStorage";
 
-const router = express.Router();
+const router: express.Router = express.Router();
 
 router.get("/health", async (_req: Request, res: Response) => {
   const redisEnabled = gameStorage.isEnabled();
