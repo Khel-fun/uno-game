@@ -9,19 +9,16 @@ import { WalletConnection } from "@/components/WalletConnection";
 import { useConnect, useWalletClient } from "wagmi";
 import Link from "next/link";
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
-import { useChains } from 'wagmi'
+import { useChains } from "wagmi";
 import { client } from "@/utils/thirdWebClient";
 import { baseSepolia } from "@/lib/chains";
 import { unoGameABI } from "@/constants/unogameabi";
-import { getSelectedNetwork } from "@/utils/networkUtils";
 import { useReadContract, useSendTransaction } from "thirdweb/react";
 import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
-import ProfileDropdown from "@/components/profileDropdown"
+import ProfileDropdown from "@/components/profileDropdown";
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
 import socket, { socketManager } from "@/services/socket";
-import { AddToFarcaster } from "@/components/AddToFarcaster";
-import NetworkDropdown from '@/components/NetworkDropdown';
 
 // DIAM wallet integration removed
 
@@ -35,7 +32,7 @@ export default function PlayGame() {
   const { checkBalance } = useBalanceCheck();
   const router = useRouter();
   const chains = useChains();
-  
+
   // Use Wagmi hooks for wallet functionality
   const { address, isConnected } = useWalletAddress();
   const { data: walletClient } = useWalletClient();
@@ -49,7 +46,7 @@ export default function PlayGame() {
 
   const contract = getContract({
     client,
-    chain:  getSelectedNetwork(),
+    chain: baseSepolia,
     address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
     abi: unoGameABI,
   });
@@ -74,7 +71,7 @@ export default function PlayGame() {
     const handleGameRoomCreated = () => {
       refetchGames();
     };
-    
+
     socketManager.on("gameRoomCreated", handleGameRoomCreated);
 
     // Cleanup function
@@ -82,6 +79,28 @@ export default function PlayGame() {
       socketManager.off("gameRoomCreated", handleGameRoomCreated);
     };
   }, [refetchGames]);
+
+  // Register or login user when wallet connects
+  useEffect(() => {
+    if (isConnected && address && socketManager.isConnected()) {
+      // console.log("Registering/logging in user with wallet:", address);
+
+      socketManager.emit(
+        "registerOrLoginUser",
+        {
+          walletAddress: address,
+          username: address.slice(0, 8), // Optional: use short address as username
+        },
+        (error: string | null, data?: any) => {
+          if (error) {
+            console.error("Failed to register/login user:", error);
+          } else {
+            console.log("User registered/logged in successfully:", data);
+          }
+        }
+      );
+    }
+  }, [isConnected, address]);
 
   const openHandler = () => {
     setOpen(false);
@@ -112,7 +131,7 @@ export default function PlayGame() {
         contract: {
           address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
           abi: unoGameABI,
-          chain: getSelectedNetwork(),
+          chain: baseSepolia,
           client,
         },
         method: "createGame",
@@ -120,7 +139,7 @@ export default function PlayGame() {
       });
 
       sendTransaction(transaction, {
-        onSuccess: async(result) => {
+        onSuccess: async (result) => {
           toast({
             title: "Game created successfully!",
             description: "Game created successfully!",
@@ -129,18 +148,20 @@ export default function PlayGame() {
           });
 
           const receipt = await waitForReceipt({
-              client,
-              chain: getSelectedNetwork(),
-              transactionHash: result.transactionHash,
-            });
+            client,
+            chain: baseSepolia,
+            transactionHash: result.transactionHash,
+          });
 
-          const gameCreatedId = receipt.logs.find((log) => log.topics.length == 2 && log.topics[1])?.topics[1]
+          const gameCreatedId = receipt.logs.find(
+            (log) => log.topics.length == 2 && log.topics[1]
+          )?.topics[1];
 
           if (gameCreatedId) {
-              const gameId = BigInt(gameCreatedId); // Convert hex to decimal
-              setGameId(gameId);
-    
-              router.push(`/game/${gameId}`);
+            const gameId = BigInt(gameCreatedId); // Convert hex to decimal
+            setGameId(gameId);
+
+            router.push(`/game/${gameId}`);
           }
 
           refetchGames();
@@ -155,7 +176,7 @@ export default function PlayGame() {
             duration: 5000,
           });
           setCreateLoading(false);
-        }
+        },
       });
     } catch (error) {
       console.error("Failed to create game:", error);
@@ -181,18 +202,17 @@ export default function PlayGame() {
       }
 
       try {
-
         const transaction = prepareContractCall({
           contract: {
             address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
             abi: unoGameABI,
-            chain: getSelectedNetwork(),
+            chain: baseSepolia,
             client,
           },
           method: "createGame",
           params: [address as `0x${string}`, true],
         });
-  
+
         sendTransaction(transaction, {
           onSuccess: async (result) => {
             toast({
@@ -204,22 +224,30 @@ export default function PlayGame() {
 
             const receipt = await waitForReceipt({
               client,
-              chain: getSelectedNetwork(),
+              chain: baseSepolia,
               transactionHash: result.transactionHash,
             });
 
-            const gameCreatedId = receipt.logs.find((log) => log.topics.length == 2 && log.topics[1])?.topics[1]
+            const gameCreatedId = receipt.logs.find(
+              (log) => log.topics.length == 2 && log.topics[1]
+            )?.topics[1];
 
             if (gameCreatedId) {
               const gameId = BigInt(gameCreatedId); // Convert hex to decimal
               setGameId(gameId);
-    
+
               // Emit socket event to create computer game room using global socket manager
-              socketManager.emit("createComputerGame", {
-                gameId: gameId.toString(),
-                playerAddress: address
-              });
-    
+              if (socketManager.isConnected()) {
+                socketManager.emit("createComputerGame", {
+                  gameId: gameId.toString(),
+                  playerAddress: address,
+                });
+              } else {
+                console.warn(
+                  "Socket not connected, cannot create computer game room"
+                );
+              }
+
               // Navigate to game room with computer mode flag
               router.push(`/game/${gameId}?mode=computer`);
             }
@@ -236,7 +264,7 @@ export default function PlayGame() {
               duration: 5000,
             });
             setComputerCreateLoading(false);
-          }
+          },
         });
 
         // toast({
@@ -290,7 +318,7 @@ export default function PlayGame() {
         contract: {
           address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
           abi: unoGameABI,
-          chain: getSelectedNetwork(),
+          chain: baseSepolia,
           client,
         },
         method: "joinGame",
@@ -315,9 +343,8 @@ export default function PlayGame() {
             variant: "destructive",
             duration: 5000,
           });
-        }
+        },
       });
-
     } catch (error) {
       console.error("Failed to join game:", error);
       setJoiningGameId(null);
@@ -334,38 +361,38 @@ export default function PlayGame() {
   // useEffect(() => {
   //   if (isConfirmed && hash) {
   //     // console.log("Transaction confirmed with hash:", hash);
-      
+
   //     // Check if this was a create game transaction
   //     if (createLoading) {
   //       // console.log("Game created successfully");
-        
+
   //       if (socket && socket.current) {
   //         socket.current.emit("createGameRoom");
   //       }
-        
+
   //       refetchGames();
   //       setCreateLoading(false);
-        
+
   //       toast({
   //         title: "Success",
   //         description: "Game created successfully!",
   //         duration: 3000,
   //       });
   //     }
-      
+
   //     // Check if this was a join game transaction
   //     if (joiningGameId !== null) {
   //       // console.log(`Joined game ${joiningGameId.toString()} successfully`);
-        
+
   //       const gameIdToJoin = joiningGameId;
   //       setJoiningGameId(null);
-        
+
   //       toast({
-  //         title: "Success", 
+  //         title: "Success",
   //         description: "Joined game successfully!",
   //         duration: 3000,
   //       });
-        
+
   //       // Navigate to the game room
   //       router.push(`/game/${gameIdToJoin.toString()}`);
   //     }
@@ -378,7 +405,7 @@ export default function PlayGame() {
   //     console.error("Transaction error:", error);
   //     setCreateLoading(false);
   //     setJoiningGameId(null);
-      
+
   //     toast({
   //       title: "Transaction Failed",
   //       description: error.message || "Transaction failed. Please try again.",
@@ -408,7 +435,6 @@ export default function PlayGame() {
         </div>
 
         <div className="flex items-center space-x-3">
-          <AddToFarcaster variant="compact" />
           {process.env.NEXT_PUBLIC_ENVIRONMENT === "development" && (
             <Link href="/preview-game">
               <button className="px-4 py-2 bg-purple-600/30 hover:bg-purple-600/50 text-white rounded-lg text-sm font-medium transition-all duration-200 border border-purple-500/30">
@@ -416,10 +442,7 @@ export default function PlayGame() {
               </button>
             </Link>
           )}
-          <NetworkDropdown />
-          {isConnected && address && (
-            <ProfileDropdown address={address} />
-          )}
+          {isConnected && address && <ProfileDropdown address={address} />}
         </div>
       </div>
 
@@ -439,16 +462,20 @@ export default function PlayGame() {
             <div
               className="h-28 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden"
               style={{
-                background: 'radial-gradient(73.45% 290.46% at 73.45% 17.68%, #9E2B31 0%, #D4D42E 100%)'
+                background:
+                  "radial-gradient(73.45% 290.46% at 73.45% 17.68%, #9E2B31 0%, #D4D42E 100%)",
               }}
               onClick={createGame}
             >
               <div className="absolute left-0 top-0 opacity-100">
                 <div className="w-24 h-28 rounded-lg flex items-center justify-center relative overflow-hidden">
-                  <img 
-                    src="/images/hand_uno.png" 
-                    className="w-full h-full object-cover" 
-                    style={{maskImage: 'linear-gradient(to left, transparent 0%, black 50%)'}}
+                  <img
+                    src="/images/hand_uno.png"
+                    className="w-full h-full object-cover"
+                    style={{
+                      maskImage:
+                        "linear-gradient(to left, transparent 0%, black 50%)",
+                    }}
                   />
                 </div>
               </div>
@@ -471,16 +498,20 @@ export default function PlayGame() {
             <div
               className="h-28 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden"
               style={{
-                background: 'radial-gradient(39.28% 143.53% at 36% -12.35%, #2E94D4 0%, #410B4A 100%)'
+                background:
+                  "radial-gradient(39.28% 143.53% at 36% -12.35%, #2E94D4 0%, #410B4A 100%)",
               }}
               onClick={startComputerGame}
             >
               <div className="absolute right-0 top-0 opacity-100">
                 <div className="w-24 h-28 rounded-lg flex items-center justify-center">
-                  <img 
-                  src="/images/bot_uno.png"
-                  className="w-full h-full object-cover" 
-                  style={{maskImage: 'linear-gradient(to right, transparent 0%, black 50%)'}}
+                  <img
+                    src="/images/bot_uno.png"
+                    className="w-full h-full object-cover"
+                    style={{
+                      maskImage:
+                        "linear-gradient(to right, transparent 0%, black 50%)",
+                    }}
                   />
                 </div>
               </div>
@@ -546,22 +577,19 @@ export default function PlayGame() {
                       </svg>
                     </div>
                   </div>
-                  {joiningGameId !== null &&
-                    joiningGameId === game && (
-                      <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
-                        <div className="text-white font-medium">Joining...</div>
-                      </div>
-                    )}
+                  {joiningGameId !== null && joiningGameId === game && (
+                    <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
+                      <div className="text-white font-medium">Joining...</div>
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
               // Placeholder rooms when no games available
               <>
-                    <div className="flex items-center justify-between">
-                      <div className="text-gray-400 text-sm">
-                        No room available
-                      </div>
-                    </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-gray-400 text-sm">No room available</div>
+                </div>
               </>
             )}
           </div>
@@ -569,9 +597,9 @@ export default function PlayGame() {
       )}
       {/* <BottomNavigation /> */}
       <Toaster />
-      <LowBalanceDrawer 
-        open={showLowBalanceDrawer} 
-        onClose={() => setShowLowBalanceDrawer(false)} 
+      <LowBalanceDrawer
+        open={showLowBalanceDrawer}
+        onClose={() => setShowLowBalanceDrawer(false)}
       />
     </div>
   );

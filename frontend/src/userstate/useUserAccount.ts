@@ -13,7 +13,7 @@ export function useUserAccount() {
   
   // Connect to Wagmi account with ENS support
   const { address: wagmiAddress, isConnected: wagmiIsConnected } = useWalletAddress();
-  const { data: ensName } = useEnsName({ address: wagmiAddress });
+  const { data: ensName } = useEnsName({ address: wagmiAddress as `0x${string}` });
   const { data: ensAvatar } = useEnsAvatar({ name: ensName || undefined });
 
   // Update account state when Wagmi account changes

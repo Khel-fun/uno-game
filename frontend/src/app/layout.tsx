@@ -1,11 +1,11 @@
-import './globals.css'
-import { Inter } from 'next/font/google'
-import { Providers } from './provider'
-import { Analytics } from "@vercel/analytics/react"
-import '@coinbase/onchainkit/styles.css';
-import './globals.css';
+import "./globals.css";
+import { Inter } from "next/font/google";
+import { Providers } from "./provider";
+import { Analytics } from "@vercel/analytics/react";
+import "@coinbase/onchainkit/styles.css";
+import "./globals.css";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 // Define miniapp configuration
 const miniappConfig = {
@@ -18,9 +18,9 @@ const miniappConfig = {
       url: "https://zunno.xyz/images/logo.png",
       name: "Zunno",
       splashImageUrl: "https://zunno.xyz/images/logo.png",
-      splashBackgroundColor: "#0000a8"
-    }
-  }
+      splashBackgroundColor: "#0000a8",
+    },
+  },
 };
 
 // For backward compatibility
@@ -34,33 +34,31 @@ const frameConfig = {
       name: "Zunno",
       url: "https://zunno.xyz/",
       splashImageUrl: "https://zunno.xyz/images/logo.png",
-      splashBackgroundColor: "#0000a8"
-    }
-  }
+      splashBackgroundColor: "#0000a8",
+    },
+  },
 };
 
 export const metadata = {
-  title:  'Zunno',
-  description: 'A decentralized UNO game built on chain',
+  title: "Zunno",
+  description: "A decentralized UNO game built on chain",
   other: {
-    'fc:miniapp': JSON.stringify(miniappConfig),
-    'fc:frame': JSON.stringify(frameConfig),
+    "fc:miniapp": JSON.stringify(miniappConfig),
+    "fc:frame": JSON.stringify(frameConfig),
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
       <body className={`bg-cover bg-black ${inter.className}`}>
         <Analytics />
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
-  )
+  );
 }

@@ -1,0 +1,29 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_ENABLED=true
+      - NODE_ENV=development
+      - LOG_LEVEL=info
+    depends_on:
+      - redis
+
+  redis:
+    image: redis/redis-stack:latest
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    volumes:
+      - redis-data:/redis-stack
+    environment:
+      - REDIS_ARGS=--save 60 1 --appendonly yes --dir /redis-stack --loglevel warning
+
+
+volumes:
+  redis-data:
+    driver: local
