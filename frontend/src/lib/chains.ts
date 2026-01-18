@@ -1,18 +1,19 @@
 import { defineChain } from "thirdweb";
 
-export const baseSepolia = defineChain({
-  id: 84532,
-  name: "Base Sepolia",
+export const celoSepolia = defineChain({
+  id: 11142220,
+  name: "Celo Sepolia",
   nativeCurrency: {
     decimals: 18,
-    name: "Base Sepolia",
-    symbol: "ETH",
+    name: "CELO",
+    symbol: "CELO",
   },
-  rpc: "https://sepolia.base.org",
-  blockExplorers: [{
-      name: "BaseScan",
-      url: "https://sepolia.basescan.org",
-  }],
+  rpc: "https://forno.celo-sepolia.celo-testnet.org",
+  blockExplorers: [
+    {
+      name: "Celoscan",
+      url: "https://celo-sepolia.blockscout.com/",
+    },
+  ],
   testnet: true,
 });
-
