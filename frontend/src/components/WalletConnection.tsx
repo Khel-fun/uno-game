@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { useActiveAccount, ConnectButton } from "thirdweb/react";
 import { createWallet, inAppWallet } from "thirdweb/wallets";
 import { client } from "@/utils/thirdWebClient";
-import { celoSepolia } from "@/lib/chains";
+import { celoSepolia, baseSepolia } from "@/lib/chains";
 import { isMiniPay } from "@/utils/miniPayUtils";
-import { celoSepolia as celoSepoliaWagmi } from "@/config/networks";
+import { celoSepolia as celoSepoliaWagmi, baseSepolia as baseSepoliaWagmi } from "@/config/networks";
 
 const wallet = inAppWallet();
 

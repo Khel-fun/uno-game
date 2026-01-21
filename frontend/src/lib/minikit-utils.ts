@@ -22,10 +22,10 @@ export const getMiniKitChain = () => {
     },
     rpcUrls: {
       default: {
-        http: ["https://forno.celo-sepolia.celo-testnet.org"],
+        http: ["https://rpc.ankr.com/celo_sepolia"],
       },
       public: {
-        http: ["https://forno.celo-sepolia.celo-testnet.org"],
+        http: ["https://rpc.ankr.com/celo_sepolia"],
       },
     },
   };

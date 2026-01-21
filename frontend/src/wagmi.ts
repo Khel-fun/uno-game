@@ -7,7 +7,7 @@ import {
 } from "@rainbow-me/rainbowkit/wallets";
 import { useMemo } from "react";
 import { http, createConfig } from "wagmi";
-import { celoSepolia } from "@/config/networks";
+import { celoSepolia, baseSepolia } from "@/config/networks";
 
 export function useWagmiConfig() {
   const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? "";
@@ -36,11 +36,12 @@ export function useWagmiConfig() {
     );
 
     const wagmiConfig = createConfig({
-      chains: [celoSepolia],
+      chains: [baseSepolia, celoSepolia],
       // turn off injected provider discovery
       multiInjectedProviderDiscovery: false,
       ssr: true,
       transports: {
+        [baseSepolia.id]: http(),
         [celoSepolia.id]: http(),
       },
     });

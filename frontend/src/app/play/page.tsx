@@ -9,24 +9,20 @@ import { WalletConnection } from "@/components/WalletConnection";
 import {
   useConnect,
   useWalletClient,
-  useChainId,
   useAccount,
   useSendTransaction as useWagmiSendTransaction,
-  useWaitForTransactionReceipt,
   usePublicClient,
 } from "wagmi";
 import Link from "next/link";
-import { useChains } from "wagmi";
 import { client } from "@/utils/thirdWebClient";
-import { celoSepolia } from "@/lib/chains";
 import { unoGameABI } from "@/constants/unogameabi";
-import { getSelectedNetwork } from "@/utils/networkUtils";
-import { useReadContract, useSendTransaction } from "thirdweb/react";
-import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
+import { getNetworkForChain } from "@/utils/networkUtils";
+import { useReadContract } from "thirdweb/react";
+import { getContract } from "thirdweb";
 import ProfileDropdown from "@/components/profileDropdown";
 import { useBalanceCheck } from "@/hooks/useBalanceCheck";
 import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
-import socket, { socketManager } from "@/services/socket";
+import { socketManager } from "@/services/socket";
 import { AddToFarcaster } from "@/components/AddToFarcaster";
 import NetworkDropdown from "@/components/NetworkDropdown";
 import {
@@ -39,15 +35,51 @@ import {
   supportsFeeAbstraction,
   getFeeCurrency,
   sendMiniPayTransaction,
-  verifyContractExists,
   checkCUSDBalance,
   getMiniPayAddress,
 } from "@/utils/miniPayUtils";
-import { encodeFunctionData } from "viem";
+import { encodeFunctionData, decodeEventLog, keccak256, toBytes } from "viem";
 import { useNetworkSelection } from "@/hooks/useNetworkSelection";
 
-// DIAM wallet integration removed
+// GameCreated event signature hash - GameCreated(uint256 indexed gameId, address indexed creator)
+const GAME_CREATED_EVENT_SIGNATURE = keccak256(toBytes("GameCreated(uint256,address)"));
 
+/**
+ * Extract gameId from transaction receipt logs
+ * The GameCreated event has signature: GameCreated(uint256 indexed gameId, address indexed creator)
+ * This creates 3 topics: [eventSignature, gameId, creator]
+ */
+function extractGameIdFromLogs(logs: any[], contractAddress?: string): bigint | null {
+  // Find the GameCreated event log
+  for (let i = 0; i < logs.length; i++) {
+    const log = logs[i];
+    
+    // Check if this log matches our event signature
+    if (log.topics && log.topics.length >= 2) {
+      const eventSig = log.topics[0]?.toLowerCase();
+      const expectedSig = GAME_CREATED_EVENT_SIGNATURE.toLowerCase();
+      
+      if (eventSig === expectedSig) {
+        // If contract address provided, verify it matches
+        if (contractAddress && log.address?.toLowerCase() !== contractAddress.toLowerCase()) {
+          continue;
+        }
+        
+        // Second topic is the gameId (indexed)
+        const gameIdHex = log.topics[1];
+        if (gameIdHex) {
+          const gameId = BigInt(gameIdHex);
+          return gameId;
+        }
+      }
+    }
+  }
+  
+  console.error("Could not find GameCreated event in logs");
+  return null;
+}
+
+// DIAM wallet integration removed
 export default function PlayGame() {
   const [open, setOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -61,26 +93,27 @@ export default function PlayGame() {
   const [miniPayAddress, setMiniPayAddress] = useState<string | null>(null);
   const { checkBalance } = useBalanceCheck();
   const router = useRouter();
-  const chains = useChains();
 
   // Get the network selected from dropdown
   const { selectedNetwork, isInitialized } = useNetworkSelection();
-  const chainId = selectedNetwork.id; // Use selected network's chain ID instead of wallet's current chain
-
+  
   // Use wagmi's useAccount directly for MiniPay compatibility
-  const { address: wagmiAddress, isConnected } = useAccount();
+  const { address: wagmiAddress, isConnected, chain: walletChain } = useAccount();
+  
+  // Use wallet's actual chain for transactions, fallback to selected network for display
+  const chainId = walletChain?.id || selectedNetwork.id;
 
   // Use MiniPay address if available, otherwise use wagmi address
   const address =
     isMiniPayWallet && miniPayAddress ? miniPayAddress : wagmiAddress;
   const { data: walletClient } = useWalletClient();
   const { account: recoilAccount } = useUserAccount();
-  const { mutate: sendTransaction } = useSendTransaction();
 
-  // Wagmi transaction hooks for MiniPay (legacy transactions with feeCurrency)
-  const { sendTransaction: sendWagmiTransaction, data: wagmiTxHash } =
+  // Wagmi transaction hooks for wallet transactions
+  const { sendTransactionAsync: sendWagmiTransaction } =
     useWagmiSendTransaction();
-  const publicClient = usePublicClient();
+  // Use public client for the wallet's current chain
+  const publicClient = usePublicClient({ chainId });
 
   const { toast } = useToast();
 
@@ -113,10 +146,14 @@ export default function PlayGame() {
     loadBalance();
   }, [isMiniPayWallet, address, chainId]);
 
+  // Use the selected network's chain for contract interactions
+  const selectedChain = getNetworkForChain(chainId);
+  const contractAddress = getContractAddress(chainId) as `0x${string}`;
+
   const contract = getContract({
     client,
-    chain: getSelectedNetwork(),
-    address: getContractAddress(chainId || 11142220) as `0x${string}`,
+    chain: selectedChain,
+    address: contractAddress,
     abi: unoGameABI,
   });
 
@@ -241,74 +278,93 @@ export default function PlayGame() {
             variant: "success",
           });
 
-          const gameCreatedId = receipt.logs.find(
-            (log) => log.topics.length == 2 && log.topics[1],
-          )?.topics[1];
+          const gameId = extractGameIdFromLogs(receipt.logs, contractAddress);
 
-          if (gameCreatedId) {
-            const gameId = BigInt(gameCreatedId);
+          if (gameId) {
             setGameId(gameId);
             router.push(`/game/${gameId}`);
+          } else {
+            console.error("Failed to extract gameId from transaction logs");
+            toast({
+              title: "Warning",
+              description: "Game created but could not get game ID. Please check your games.",
+              variant: "default",
+              duration: 5000,
+            });
           }
 
           refetchGames();
         }
         setCreateLoading(false);
-      } else if (!isMiniPayWallet) {
-        // Use ThirdWeb for browser/Farcaster
-        const transaction = prepareContractCall({
-          contract: {
-            address: getContractAddress(chainId) as `0x${string}`,
-            abi: unoGameABI,
-            chain: getSelectedNetwork(),
-            client,
-          },
-          method: "createGame",
-          params: [address as `0x${string}`, false],
+      } else if (!isMiniPayWallet && isConnected && address) {
+        // Use wagmi's sendTransaction for browser wallets
+        const contractAddr = getContractAddress(chainId) as `0x${string}`;
+        
+        const data = encodeFunctionData({
+          abi: unoGameABI,
+          functionName: "createGame",
+          args: [address as `0x${string}`, false],
         });
 
-        sendTransaction(transaction, {
-          onSuccess: async (result) => {
-            toast({
-              title: "Game created successfully!",
-              description: "Game created successfully!",
-              duration: 5000,
-              variant: "success",
+        try {
+          const hash = await sendWagmiTransaction({
+            to: contractAddr,
+            data,
+          });
+
+          toast({
+            title: "Transaction Sent!",
+            description: "Waiting for confirmation...",
+            duration: 5000,
+            variant: "default",
+          });
+
+          if (publicClient) {
+            const receipt = await publicClient.waitForTransactionReceipt({
+              hash,
             });
 
-            const receipt = await waitForReceipt({
-              client,
-              chain: getSelectedNetwork(),
-              transactionHash: result.transactionHash,
-            });
+            const gameId = extractGameIdFromLogs(receipt.logs, contractAddr);
 
-            const gameCreatedId = receipt.logs.find(
-              (log) => log.topics.length == 2 && log.topics[1],
-            )?.topics[1];
-
-            if (gameCreatedId) {
-              const gameId = BigInt(gameCreatedId);
+            if (gameId) {
               setGameId(gameId);
+              
+              toast({
+                title: "Game created successfully!",
+                description: "Redirecting to game...",
+                duration: 5000,
+                variant: "success",
+              });
+              
               router.push(`/game/${gameId}`);
+            } else {
+              console.error("Failed to extract gameId from transaction logs");
+              toast({
+                title: "Warning",
+                description: "Game created but could not get game ID. Please check your games.",
+                variant: "default",
+                duration: 5000,
+              });
             }
 
             refetchGames();
-            setCreateLoading(false);
-          },
-          onError: (error) => {
-            console.error("Transaction failed:", error);
-            toast({
-              title: "Error",
-              description: "Failed to create game. Please try again.",
-              variant: "destructive",
-              duration: 5000,
-            });
-            setCreateLoading(false);
-          },
-        });
+          }
+          setCreateLoading(false);
+        } catch (txError) {
+          console.error("Transaction failed:", txError);
+          toast({
+            title: "Error",
+            description: "Failed to create game. Please try again.",
+            variant: "destructive",
+            duration: 5000,
+          });
+          setCreateLoading(false);
+        }
+      } else {
+        throw new Error("Wallet not connected");
       }
     } catch (error: any) {
-      console.error("[MiniPay] Failed to create game:", error);
+      console.error("Failed to create game:", error);
       setTransactionStatus(`❌ Error: ${error?.message || error?.toString()}`);
 
       toast({
@@ -337,7 +393,7 @@ export default function PlayGame() {
       try {
         // Use MiniPay native transaction method for fee abstraction
         if (isMiniPayWallet && address) {
-          const contractAddress = getContractAddress(chainId) as `0x${string}`;
+          const contractAddr = getContractAddress(chainId) as `0x${string}`;
           const data = encodeFunctionData({
             abi: unoGameABI,
             functionName: "createGame",
@@ -345,7 +401,7 @@ export default function PlayGame() {
           });
 
           const hash = await sendMiniPayTransaction(
-            contractAddress,
+            contractAddr,
             data,
             address as string,
             chainId,
@@ -370,12 +426,9 @@ export default function PlayGame() {
               variant: "success",
             });
 
-            const gameCreatedId = receipt.logs.find(
-              (log) => log.topics.length == 2 && log.topics[1],
-            )?.topics[1];
+            const gameId = extractGameIdFromLogs(receipt.logs, contractAddr);
 
-            if (gameCreatedId) {
-              const gameId = BigInt(gameCreatedId);
+            if (gameId) {
               setGameId(gameId);
 
               socketManager.emit("createComputerGame", {
@@ -384,46 +437,57 @@ export default function PlayGame() {
               });
 
               router.push(`/game/${gameId}?mode=computer`);
+            } else {
+              console.error("Failed to extract gameId from transaction logs");
+              toast({
+                title: "Warning",
+                description: "Game created but could not get game ID. Please check your games.",
+                variant: "default",
+                duration: 5000,
+              });
             }
 
             refetchGames();
           }
           setComputerCreateLoading(false);
-        } else {
-          // Use ThirdWeb for browser/Farcaster
-          const transaction = prepareContractCall({
-            contract: {
-              address: getContractAddress(chainId) as `0x${string}`,
-              abi: unoGameABI,
-              chain: getSelectedNetwork(),
-              client,
-            },
-            method: "createGame",
-            params: [address as `0x${string}`, true],
+        } else if (isConnected && address) {
+          // Use wagmi's sendTransaction for browser wallets
+          const contractAddr = getContractAddress(chainId) as `0x${string}`;
+          const data = encodeFunctionData({
+            abi: unoGameABI,
+            functionName: "createGame",
+            args: [address as `0x${string}`, true],
           });
 
-          sendTransaction(transaction, {
-            onSuccess: async (result) => {
-              toast({
-                title: "Game created successfully!",
-                description: "Game created successfully!",
-                duration: 5000,
-                variant: "success",
+          try {
+            const hash = await sendWagmiTransaction({
+              to: contractAddr,
+              data,
+            });
+
+            toast({
+              title: "Transaction Sent!",
+              description: "Waiting for confirmation...",
+              duration: 5000,
+              variant: "default",
+            });
+
+            if (publicClient) {
+              const receipt = await publicClient.waitForTransactionReceipt({
+                hash,
               });
 
-              const receipt = await waitForReceipt({
-                client,
-                chain: getSelectedNetwork(),
-                transactionHash: result.transactionHash,
-              });
+              const gameId = extractGameIdFromLogs(receipt.logs, contractAddr);
 
-              const gameCreatedId = receipt.logs.find(
-                (log) => log.topics.length == 2 && log.topics[1],
-              )?.topics[1];
-
-              if (gameCreatedId) {
-                const gameId = BigInt(gameCreatedId);
+              if (gameId) {
                 setGameId(gameId);
+
+                toast({
+                  title: "Game created successfully!",
+                  description: "Starting computer game...",
+                  duration: 5000,
+                  variant: "success",
+                });
 
                 socketManager.emit("createComputerGame", {
                   gameId: gameId.toString(),
@@ -431,32 +495,35 @@ export default function PlayGame() {
                 });
 
                 router.push(`/game/${gameId}?mode=computer`);
+              } else {
+                console.error("Failed to extract gameId from transaction logs");
+                toast({
+                  title: "Warning",
+                  description: "Game created but could not get game ID. Please check your games.",
+                  variant: "default",
+                  duration: 5000,
+                });
               }
 
               refetchGames();
-              setComputerCreateLoading(false);
-            },
-            onError: (error) => {
-              console.error("Transaction failed:", error);
-              toast({
-                title: "Error",
-                description: "Failed to create game. Please try again.",
-                variant: "destructive",
-                duration: 5000,
-              });
-              setComputerCreateLoading(false);
-            },
-          });
+            }
+            setComputerCreateLoading(false);
+          } catch (txError) {
+            console.error("Transaction failed:", txError);
+            toast({
+              title: "Error",
+              description: "Failed to create game. Please try again.",
+              variant: "destructive",
+              duration: 5000,
+            });
+            setComputerCreateLoading(false);
+          }
+        } else {
+          throw new Error("Wallet not connected");
         }
-
-        // toast({
-        //   title: "Computer Game Started",
-        //   description: "Starting game against computer opponent!",
-        //   duration: 3000,
-        // });
       } catch (error: any) {
-        console.error("[MiniPay] Failed to create computer game:", error);
-        console.error("[MiniPay] Error details:", {
+        console.error("Failed to create computer game:", error);
+        console.error("Error details:", {
           message: error?.message,
           code: error?.code,
           data: error?.data,
@@ -514,7 +581,7 @@ export default function PlayGame() {
 
       // Use MiniPay native transaction method for fee abstraction
       if (isMiniPayWallet && address) {
-        const contractAddress = getContractAddress(chainId) as `0x${string}`;
+        const contractAddr = getContractAddress(chainId) as `0x${string}`;
         const data = encodeFunctionData({
           abi: unoGameABI,
           functionName: "joinGame",
@@ -522,7 +589,7 @@ export default function PlayGame() {
         });
 
         const hash = await sendMiniPayTransaction(
-          contractAddress,
+          contractAddr,
           data,
           address as string,
           chainId,
@@ -548,62 +615,108 @@ export default function PlayGame() {
           });
         }
 
+        setJoiningGameId(null);
         router.push(`/game/${gameId}`);
-      } else {
-        // Use ThirdWeb for browser/Farcaster
-        const transaction = prepareContractCall({
-          contract: {
-            address: getContractAddress(chainId) as `0x${string}`,
-            abi: unoGameABI,
-            chain: getSelectedNetwork(),
-            client,
-          },
-          method: "joinGame",
-          params: [BigInt(gameId.toString()), address as `0x${string}`],
+      } else if (isConnected && address) {
+        // Use wagmi's sendTransaction for browser wallets (works without thirdweb active account)
+        const contractAddr = getContractAddress(chainId) as `0x${string}`;
+        const data = encodeFunctionData({
+          abi: unoGameABI,
+          functionName: "joinGame",
+          args: [BigInt(gameId.toString()), address as `0x${string}`],
         });
 
-        sendTransaction(transaction, {
-          onSuccess: (result) => {
-            toast({
-              title: "Game joined successfully!",
-              description: "Game joined successfully!",
-              duration: 5000,
-              variant: "success",
+        try {
+          const hash = await sendWagmiTransaction({
+            to: contractAddr,
+            data,
+          });
+
+          toast({
+            title: "Transaction Sent!",
+            description: "Waiting for confirmation...",
+            duration: 5000,
+            variant: "default",
+          });
+
+          if (publicClient) {
+            await publicClient.waitForTransactionReceipt({
+              hash,
             });
+          }
+
+          toast({
+            title: "Game joined successfully!",
+            description: "Redirecting to game...",
+            duration: 5000,
+            variant: "success",
+          });
+
+          setJoiningGameId(null);
+          router.push(`/game/${gameId}`);
+        } catch (txError: any) {
+          console.error("Transaction failed:", txError);
+          
+          // Check if user is already joined (AlreadyJoined error)
+          const errorMessage = txError?.message || txError?.toString() || "";
+          if (errorMessage.includes("AlreadyJoined") || errorMessage.includes("already joined")) {
+            toast({
+              title: "Already in this game!",
+              description: "Redirecting to game room...",
+              duration: 3000,
+              variant: "default",
+            });
+            setJoiningGameId(null);
             router.push(`/game/${gameId}`);
-          },
-          onError: (error) => {
-            console.error("Transaction failed:", error);
-            toast({
-              title: "Error",
-              description: "Failed to join game. Please try again.",
-              variant: "destructive",
-              duration: 5000,
-            });
-          },
-        });
+            return;
+          }
+          
+          setJoiningGameId(null);
+          toast({
+            title: "Error",
+            description: "Failed to join game. Please try again.",
+            variant: "destructive",
+            duration: 5000,
+          });
+        }
+      } else {
+        throw new Error("Wallet not connected");
       }
     } catch (error: any) {
-      console.error("[MiniPay] Failed to join game:", error);
-      console.error("[MiniPay] Error details:", {
+      console.error("Failed to join game:", error);
+      console.error("Error details:", {
         message: error?.message,
         code: error?.code,
         data: error?.data,
       });
 
+      // Check if user is already joined (AlreadyJoined error)
+      const errorMessage = error?.message || error?.toString() || "";
+      if (errorMessage.includes("AlreadyJoined") || errorMessage.includes("already joined")) {
+        toast({
+          title: "Already in this game!",
+          description: "Redirecting to game room...",
+          duration: 3000,
+          variant: "default",
+        });
+        setJoiningGameId(null);
+        router.push(`/game/${gameId}`);
+        return;
+      }
+
       setJoiningGameId(null);
 
-      const errorMessage =
+      const errMsg =
         error?.message || error?.toString() || "Unknown error";
       const diagnostics = isMiniPayWallet
-        ? `\n\nDiagnostics:\nChain: ${chainId}\nFee Currency: ${getFeeCurrency(chainId)}\nContract: ${getContractAddress(chainId)}\nWallet Client: ${walletClient ? "OK" : "Missing"}\nPublic Client: ${publicClient ? "OK" : "Missing"}\nError: ${errorMessage.substring(0, 150)}`
+        ? `\n\nDiagnostics:\nChain: ${chainId}\nFee Currency: ${getFeeCurrency(chainId)}\nContract: ${getContractAddress(chainId)}\nWallet Client: ${walletClient ? "OK" : "Missing"}\nPublic Client: ${publicClient ? "OK" : "Missing"}\nError: ${errMsg.substring(0, 150)}`
         : "";
 
       toast({
         title: "Failed to Join Game",
         description: isMiniPayWallet
           ? diagnostics
-          : `Failed to join game. ${errorMessage.substring(0, 100)}`,
+          : `Failed to join game. ${errMsg.substring(0, 100)}`,
         variant: "destructive",
         duration: 15000,
       });

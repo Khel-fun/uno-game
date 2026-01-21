@@ -18,7 +18,7 @@ export const celoSepolia = {
   name: "Celo Sepolia",
   nativeCurrency: { name: "CELO", symbol: "CELO", decimals: 18 },
   rpcUrls: {
-    default: { http: ["https://forno.celo-sepolia.celo-testnet.org"] },
+    default: { http: ["https://rpc.ankr.com/celo_sepolia"] },
   },
   blockExplorers: {
     default: { name: "Celoscan", url: "https://celo-sepolia.blockscout.com/" },
@@ -50,20 +50,20 @@ export interface NetworkConfig {
 
 export const SUPPORTED_NETWORKS: NetworkConfig[] = [
   {
-    id: 11142220,
-    name: "celoSepolia",
-    displayName: "Celo Sepolia",
-    icon: "/celo-logo.svg",
-    chain: celoSepolia,
-    contractAddress: process.env.NEXT_PUBLIC_CELO_SEPOLIA_CONTRACT_ADDRESS,
-  },
-  {
     id: 84532,
     name: "baseSepolia",
     displayName: "Base Sepolia",
     icon: "/base-logo.svg",
     chain: baseSepolia,
     contractAddress: process.env.NEXT_PUBLIC_BASE_SEPOLIA_CONTRACT_ADDRESS,
+  },
+  {
+    id: 11142220,
+    name: "celoSepolia",
+    displayName: "Celo Sepolia",
+    icon: "/celo-logo.svg",
+    chain: celoSepolia,
+    contractAddress: process.env.NEXT_PUBLIC_CELO_SEPOLIA_CONTRACT_ADDRESS,
   },
 ];
 

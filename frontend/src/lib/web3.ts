@@ -2,9 +2,6 @@ import { ethers } from "ethers";
 import { UnoGameContract } from "./types";
 import UNOContractJson from "../constants/UnoGame.json";
 import { getContractAddress } from "@/config/networks";
-import * as dotenv from "dotenv";
-
-dotenv.config();
 
 async function verifyContract(provider: ethers.Provider, address: string) {
   const code = await provider.getCode(address);
@@ -19,7 +16,7 @@ async function verifyContract(provider: ethers.Provider, address: string) {
  */
 function getRpcUrl(chainId: number): string {
   const rpcUrls: Record<number, string> = {
-    11142220: "https://forno.celo-sepolia.celo-testnet.org", // Celo Sepolia
+    11142220: "https://rpc.ankr.com/celo_sepolia", // Celo Sepolia
     84532: "https://sepolia.base.org", // Base Sepolia
   };
 
@@ -31,19 +28,17 @@ function getRpcUrl(chainId: number): string {
   return rpcUrl;
 }
 
+/**
+ * Get a read-only contract instance for fetching game state
+ * This does NOT require a private key - it uses a public RPC provider
+ */
 export async function getContractNew(chainId: number) {
   try {
     console.log('getContractNew called with chainId:', chainId);
     const rpcUrl = getRpcUrl(chainId);
     console.log('Using RPC URL:', rpcUrl);
     const provider = new ethers.JsonRpcProvider(rpcUrl);
-    const KEY = process.env.NEXT_PUBLIC_PRIVATE_KEY;
 
-    if (!KEY) {
-      throw new Error("Private key is missing");
-    }
-
-    const wallet = new ethers.Wallet(KEY, provider);
     const contractAddress = getContractAddress(chainId);
     console.log('Contract address for chain', chainId, ':', contractAddress);
     if (!contractAddress) {
@@ -53,17 +48,18 @@ export async function getContractNew(chainId: number) {
 
     await verifyContract(provider, contractAddress);
 
+    // Use read-only contract (no signer needed for read operations)
     const gameContract = new ethers.Contract(
       contractAddress,
       contractABI,
-      wallet,
+      provider,
     ) as ethers.Contract & UnoGameContract;
     console.log('Contract created successfully at:', contractAddress, 'on chain:', chainId);
 
-    return { contract: gameContract, wallet: wallet.address };
+    return { contract: gameContract, provider };
   } catch (error) {
     console.error("Failed to connect to contract:", error);
 
-    return { account: null, contract: null };
+    return { contract: null, provider: null };
   }
 }
