@@ -1,0 +1,8 @@
+[package]
+name = "shuffle_circuit"
+type = "bin"
+authors = [""]
+compiler_version = ">=0.34.0"
+
+[dependencies]
+zk_uno = { path = "../lib" }
