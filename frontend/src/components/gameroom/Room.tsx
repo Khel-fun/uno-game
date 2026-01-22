@@ -39,8 +39,6 @@ import {
   getSupportedChainIds,
 } from "@/config/networks";
 import { useNetworkSelection } from "@/hooks/useNetworkSelection";
-import { useBalanceCheck } from "@/hooks/useBalanceCheck";
-import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
 import { MAX_PLAYERS } from "@/constants/gameConstants";
 import { useWalletStorage } from "@/hooks/useWalletStorage";
 import {
@@ -78,6 +76,7 @@ const Room = () => {
   const { address } = useWalletStorage(); // Use wallet storage hook for persistent address
   const [contract, setContract] = useState<UnoGameContract | null>(null);
   const [gameId, setGameId] = useState<bigint | null>(null);
+  const [gameChainId, setGameChainId] = useState<number | null>(null);
 
   const { toast } = useToast();
 
@@ -85,9 +84,7 @@ const Room = () => {
     useState<OffChainGameState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [playerHand, setPlayerHand] = useState<string[]>([]);
-  const [showLowBalanceDrawer, setShowLowBalanceDrawer] = useState(false);
   const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
-  const { checkBalance } = useBalanceCheck();
 
   // Get the network selected from dropdown
   const { selectedNetwork } = useNetworkSelection();
@@ -169,6 +166,20 @@ const Room = () => {
     const setup = async () => {
       if (account) {
         try {
+          // If we already have a gameChainId and it's different from current chainId,
+          // warn the user and don't fetch from wrong chain
+          if (gameChainId !== null && gameChainId !== chainId) {
+            console.warn(`Network mismatch! Game was created on chain ${gameChainId} but you're on chain ${chainId}`);
+            setError(`Please switch back to the original network (Chain ID: ${gameChainId}) to continue this game.`);
+            toast({
+              title: "Network Mismatch",
+              description: `This game was created on a different network. Please switch back to continue.`,
+              variant: "destructive",
+              duration: 8000,
+            });
+            return;
+          }
+          
           // Reset contract state when chainId changes to prevent stale data
           setContract(null);
           setOffChainGameState(null);
@@ -190,6 +201,12 @@ const Room = () => {
             const bigIntId = BigInt(id as string);
             // console.log('Setting game ID:', bigIntId.toString());
             setGameId(bigIntId);
+            
+            // Store the chain ID this game belongs to (only set once)
+            if (gameChainId === null) {
+              console.log('Setting game chain ID to:', chainId);
+              setGameChainId(chainId);
+            }
 
             // console.log('Fetching game state...');
             const gameState = await fetchGameState(
@@ -216,7 +233,7 @@ const Room = () => {
       }
     };
     setup();
-  }, [id, account, chainId]);
+  }, [id, account, chainId, gameChainId, toast]);
 
   useEffect(() => {
     if (
@@ -557,15 +574,6 @@ const Room = () => {
       console.error("Missing required data to start game");
       setError("Missing required data to start game");
       return;
-    }
-
-    // Skip balance check for MiniPay (uses cUSD fee abstraction)
-    if (!isMiniPayWallet) {
-      const hasSufficientBalance = await checkBalance();
-      if (!hasSufficientBalance) {
-        setShowLowBalanceDrawer(true);
-        return;
-      }
     }
 
     try {
@@ -1118,19 +1126,11 @@ const Room = () => {
           playerCount={users.length}
         />
       )}
-      <LowBalanceDrawer
-        open={showLowBalanceDrawer}
-        onClose={() => setShowLowBalanceDrawer(false)}
-      />
     </div>
   ) : (
     <>
       <CenterInfo msg="Room is full" />
       <Toaster />
-      <LowBalanceDrawer
-        open={showLowBalanceDrawer}
-        onClose={() => setShowLowBalanceDrawer(false)}
-      />
     </>
   );
 };

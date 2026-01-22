@@ -10,8 +10,6 @@ import ColourDialog from "./colourDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
-import { useBalanceCheck } from "@/hooks/useBalanceCheck";
-import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
 import { ethers } from "ethers";
 import {
   isMiniPay,
@@ -90,9 +88,7 @@ const Game = ({
   const [dialogCallback, setDialogCallback] = useState(null);
   const [rewardGiven, setRewardGiven] = useState(false);
   const [computerMoveCounter, setComputerMoveCounter] = useState(0);
-  const [showLowBalanceDrawer, setShowLowBalanceDrawer] = useState(false);
   const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
-  const { checkBalance } = useBalanceCheck();
 
   // Get the network selected from dropdown
   const { selectedNetwork } = useNetworkSelection();
@@ -740,15 +736,6 @@ const Game = ({
     setRewardGiven(true);
 
     try {
-      // Skip balance check for MiniPay (uses cUSD fee abstraction)
-      if (!isMiniPayWallet) {
-        const hasSufficientBalance = await checkBalance();
-        if (!hasSufficientBalance) {
-          setShowLowBalanceDrawer(true);
-          return;
-        }
-      }
-
       const gameResultData = {
         winnerAddress: address,
         winnerPlayer: winnerName,
@@ -942,10 +929,6 @@ const Game = ({
         <CenterInfo msg={`Game Over: ${winner} wins!!`} />
       )}
       <Toaster />
-      <LowBalanceDrawer
-        open={showLowBalanceDrawer}
-        onClose={() => setShowLowBalanceDrawer(false)}
-      />
     </div>
   );
 };
