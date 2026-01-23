@@ -86,12 +86,10 @@ export default function PlayGame() {
   const [computerCreateLoading, setComputerCreateLoading] = useState(false);
   const [joiningGameId, setJoiningGameId] = useState<BigInt | null>(null);
   const [gameId, setGameId] = useState<BigInt | null>(null);
-  const [showLowBalanceDrawer, setShowLowBalanceDrawer] = useState(false);
   const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
   const [transactionStatus, setTransactionStatus] = useState<string>("");
   const [cusdBalance, setCusdBalance] = useState<string>("");
   const [miniPayAddress, setMiniPayAddress] = useState<string | null>(null);
-  const { checkBalance } = useBalanceCheck();
   const router = useRouter();
 
   // Get the network selected from dropdown
@@ -202,15 +200,6 @@ export default function PlayGame() {
         duration: 5000,
       });
       return;
-    }
-
-    // Skip balance check for MiniPay (uses cUSD fee abstraction)
-    if (!isMiniPayWallet) {
-      const hasSufficientBalance = await checkBalance();
-      if (!hasSufficientBalance) {
-        setShowLowBalanceDrawer(true);
-        return;
-      }
     }
 
     try {
@@ -380,16 +369,6 @@ export default function PlayGame() {
   const startComputerGame = async () => {
     setComputerCreateLoading(true);
     if (contract && address) {
-      // Skip balance check for MiniPay (uses cUSD fee abstraction)
-      if (!isMiniPayWallet) {
-        const hasSufficientBalance = await checkBalance();
-        if (!hasSufficientBalance) {
-          setShowLowBalanceDrawer(true);
-          setComputerCreateLoading(false);
-          return;
-        }
-      }
-
       try {
         // Use MiniPay native transaction method for fee abstraction
         if (isMiniPayWallet && address) {
@@ -565,15 +544,6 @@ export default function PlayGame() {
         duration: 5000,
       });
       return;
-    }
-
-    // Skip balance check for MiniPay (uses cUSD fee abstraction)
-    if (!isMiniPayWallet) {
-      const hasSufficientBalance = await checkBalance();
-      if (!hasSufficientBalance) {
-        setShowLowBalanceDrawer(true);
-        return;
-      }
     }
 
     try {
@@ -1000,10 +970,6 @@ export default function PlayGame() {
       )}
       {/* <BottomNavigation /> */}
       <Toaster />
-      <LowBalanceDrawer
-        open={showLowBalanceDrawer}
-        onClose={() => setShowLowBalanceDrawer(false)}
-      />
     </div>
   );
 }
