@@ -20,8 +20,6 @@ import { getNetworkForChain } from "@/utils/networkUtils";
 import { useReadContract } from "thirdweb/react";
 import { getContract } from "thirdweb";
 import ProfileDropdown from "@/components/profileDropdown";
-import { useBalanceCheck } from "@/hooks/useBalanceCheck";
-import { LowBalanceDrawer } from "@/components/LowBalanceDrawer";
 import { socketManager } from "@/services/socket";
 import { AddToFarcaster } from "@/components/AddToFarcaster";
 import NetworkDropdown from "@/components/NetworkDropdown";
