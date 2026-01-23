@@ -1,47 +1,66 @@
 // Poseidon hashing utilities for ZK UNO
+// Migrated from Pedersen to Poseidon for zk-kit compatibility
+
+// Import from external poseidon library (noir-lang/poseidon)
+use poseidon::poseidon::bn254::hash_2;
+use poseidon::poseidon::bn254::hash_3;
+use poseidon::poseidon::bn254::hash_4;
 
 use crate::constants::{DOMAIN_CARD_UID, DOMAIN_CARD_COMMITMENT, DOMAIN_MERKLE_NODE, DOMAIN_BITSET_COMPRESS};
 
+/// Poseidon hash wrapper for 2 elements
+/// Compatible with zk-kit LeanIMT
+pub fn poseidon_hash_2(a: Field, b: Field) -> Field {
+    hash_2([a, b])
+}
+
+/// Poseidon hash wrapper for array (used by binary_merkle_root)
+pub fn poseidon_hasher(inputs: [Field; 2]) -> Field {
+    hash_2(inputs)
+}
+
 /// Hash a card to generate unique identifier
-/// card_uid = Pedersen(domain || color || type || copy_index)
+/// card_uid = Poseidon(domain || color || type || copy_index)
 /// 
 /// DEPRECATED: Use get_card_uid() from card_uids module instead for better performance
 /// This function is kept for testing/validation purposes only
 pub fn hash_card_uid(color: u8, card_type: u8, copy_index: u8) -> Field {
-    let inputs = [
+    hash_4([
         DOMAIN_CARD_UID,
         color as Field,
         card_type as Field,
         copy_index as Field
-    ];
-    std::hash::pedersen_hash(inputs)
+    ])
 }
 
-/// Create card commitment (leaf)
-/// commitment = Pedersen(domain || card_uid || nonce)
+/// Create card commitment (Merkle leaf)
+/// commitment = Poseidon(DOMAIN_CARD_COMMITMENT || card_uid || nonce)
 pub fn hash_card_commitment(card_uid: Field, nonce: Field) -> Field {
-    std::hash::pedersen_hash([DOMAIN_CARD_COMMITMENT, card_uid, nonce])
+    hash_3([DOMAIN_CARD_COMMITMENT, card_uid, nonce])
 }
 
 /// Hash two Merkle tree nodes
-/// node = Pedersen(domain || left || right)
+/// node = Poseidon(left || right)
+/// Note: No domain separation for Merkle nodes to be compatible with zk-kit LeanIMT
 pub fn hash_merkle_node(left: Field, right: Field) -> Field {
-    std::hash::pedersen_hash([DOMAIN_MERKLE_NODE, left, right])
+    hash_2([left, right])
 }
 
-/// Compress a bitset chunk using Pedersen
+/// Hash two Merkle tree nodes with domain separation (legacy, for backward compatibility)
+pub fn hash_merkle_node_with_domain(left: Field, right: Field) -> Field {
+    hash_3([DOMAIN_MERKLE_NODE, left, right])
+}
+
+/// Compress a bitset chunk using Poseidon
 /// Used for bitset state commitments
 pub fn hash_bitset_chunk(bits: [u1; 16]) -> Field {
-    // Convert bits to Fields and hash
-    let mut fields: [Field; 17] = [0; 17];
-    fields[0] = DOMAIN_BITSET_COMPRESS;
-    
+    // Convert bits to Fields - we'll hash in groups
+    let mut value: Field = DOMAIN_BITSET_COMPRESS;
     for i in 0..16 {
-        fields[i + 1] = bits[i] as Field;
+        // Pack bits into a single field for efficient hashing
+        value = value * 2 + bits[i] as Field;
     }
-    
-    // Use Pedersen hash for all fields
-    std::hash::pedersen_hash(fields)
+    hash_2([DOMAIN_BITSET_COMPRESS, value])
 }
 
 /// Iteratively compress a full bitset
@@ -75,7 +94,7 @@ pub fn compress_bitset<let N: u32>(bits: [u1; N]) -> Field {
             }
         }
         
-        // Hash all chunk hashes together
+        // Hash all chunk hashes together using Merkle-like structure
         let mut result = chunk_hashes[0];
         for i in 1..chunk_count {
             if i < 7 {
@@ -128,6 +147,18 @@ fn test_hash_card_commitment() {
     
     // Same card with different nonces should give different commitments
     assert(commit1 != commit2);
+}
+
+#[test]
+fn test_hash_merkle_node() {
+    let left: Field = 123;
+    let right: Field = 456;
+    
+    let node1 = hash_merkle_node(left, right);
+    let node2 = hash_merkle_node(right, left);
+    
+    // Order matters
+    assert(node1 != node2);
 }
 
 #[test]

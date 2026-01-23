@@ -1,6 +1,9 @@
 // Play validation circuit  
 // Proves that a card play is legal according to UNO rules
 
+// Import poseidon from external library
+use poseidon::poseidon::bn254::hash_4;
+
 use dep::zk_uno::types::{Card, MerkleProof};
 use dep::zk_uno::cards::encoding::{can_play_card, encode_card, decode_card_components};
 use dep::zk_uno::utils::hash::hash_card_commitment;
@@ -55,8 +58,8 @@ fn main(
     let is_legal = played_is_wild | top_is_wild | same_color | same_type;
     assert(is_legal, "Illegal card play");
     
-    // Verify move commitment matches
-    let computed_commitment = std::hash::pedersen_hash([game_id, player_id, played_card_uid, commitment_nonce]);
+    // Verify move commitment matches using Poseidon
+    let computed_commitment = hash_4([game_id, player_id, played_card_uid, commitment_nonce]);
     assert(computed_commitment == move_commitment, "Invalid move commitment");
 }
 
@@ -125,8 +128,8 @@ pub fn create_move_commitment(
     card_uid: Field,
     nonce: Field
 ) -> Field {
-    // Create a commitment that can be verified on-chain
-    std::hash::pedersen_hash([game_id, player_id, card_uid, nonce])
+    // Create a commitment that can be verified on-chain using Poseidon
+    hash_4([game_id, player_id, card_uid, nonce])
 }
 
 /// Verify a move matches a committed hash

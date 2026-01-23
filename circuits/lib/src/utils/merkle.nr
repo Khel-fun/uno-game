@@ -1,28 +1,45 @@
 // Merkle tree utilities for ZK UNO
+// Uses zk-kit binary_merkle_root for LeanIMT compatibility
+
+// Import from external poseidon library (noir-lang/poseidon)
+use poseidon::poseidon::bn254::hash_2;
+use binary_merkle_root::binary_merkle_root;
 
 use crate::types::{MERKLE_DEPTH, MerkleProof};
 use crate::utils::hash::hash_merkle_node;
 
-/// Verify a Merkle inclusion proof
+/// Poseidon hasher compatible with zk-kit LeanIMT
+/// This is the hash function used for Merkle tree nodes
+pub fn poseidon_hasher(inputs: [Field; 2]) -> Field {
+    hash_2(inputs)
+}
+
+/// Calculate Merkle root using zk-kit binary_merkle_root
+/// Compatible with LeanIMT in TypeScript (@zk-kit/lean-imt)
+/// 
+/// Parameters:
+/// - leaf: The leaf value to verify
+/// - depth: The actual depth of the proof (can be less than MAX_DEPTH)
+/// - indices: Direction bits (0 = left, 1 = right) for each level
+/// - siblings: Sibling hashes at each level
+pub fn compute_merkle_root(
+    leaf: Field,
+    depth: u32,
+    indices: [u1; MERKLE_DEPTH],
+    siblings: [Field; MERKLE_DEPTH]
+) -> Field {
+    binary_merkle_root(poseidon_hasher, leaf, depth, indices, siblings)
+}
+
+/// Verify a Merkle inclusion proof using zk-kit binary_merkle_root
 /// Proves that a leaf exists at a specific position in the tree
 pub fn verify_merkle_proof(
     leaf: Field,
     proof: MerkleProof,
     root: Field
 ) -> bool {
-    let mut computed = leaf;
-    
-    for i in 0..MERKLE_DEPTH {
-        if proof.indices[i] == 0 {
-            // Leaf is on the left
-            computed = hash_merkle_node(computed, proof.path[i]);
-        } else {
-            // Leaf is on the right
-            computed = hash_merkle_node(proof.path[i], computed);
-        }
-    }
-    
-    computed == root
+    let computed_root = compute_merkle_root(leaf, MERKLE_DEPTH, proof.indices, proof.path);
+    computed_root == root
 }
 
 /// Assert that a Merkle proof is valid
@@ -31,8 +48,33 @@ pub fn assert_merkle_proof(
     proof: MerkleProof,
     root: Field
 ) {
-    let valid = verify_merkle_proof(leaf, proof, root);
-    assert(valid, "Invalid Merkle proof");
+    let computed_root = compute_merkle_root(leaf, MERKLE_DEPTH, proof.indices, proof.path);
+    assert(computed_root == root, "Invalid Merkle proof");
+}
+
+/// Verify a Merkle proof with dynamic depth
+/// Useful when the tree depth varies
+pub fn verify_merkle_proof_with_depth(
+    leaf: Field,
+    depth: u32,
+    indices: [u1; MERKLE_DEPTH],
+    siblings: [Field; MERKLE_DEPTH],
+    root: Field
+) -> bool {
+    let computed_root = binary_merkle_root(poseidon_hasher, leaf, depth, indices, siblings);
+    computed_root == root
+}
+
+/// Assert a Merkle proof with dynamic depth
+pub fn assert_merkle_proof_with_depth(
+    leaf: Field,
+    depth: u32,
+    indices: [u1; MERKLE_DEPTH],
+    siblings: [Field; MERKLE_DEPTH],
+    root: Field
+) {
+    let computed_root = binary_merkle_root(poseidon_hasher, leaf, depth, indices, siblings);
+    assert(computed_root == root, "Invalid Merkle proof");
 }
 
 /// Verify multiple Merkle proofs against the same root
@@ -64,7 +106,7 @@ pub fn assert_multiple_proofs<let N: u32>(
 
 /// Compute Merkle root from a set of leaves (for testing)
 /// Note: This is expensive in-circuit and should only be used for small trees
-unconstrained pub fn compute_merkle_root<let N: u32>(leaves: [Field; N]) -> Field {
+unconstrained pub fn compute_merkle_root_from_leaves<let N: u32>(leaves: [Field; N]) -> Field {
     assert(N > 0, "Cannot compute root of empty tree");
     assert(N <= 128, "Tree too large for MERKLE_DEPTH=7");
     
@@ -102,7 +144,7 @@ unconstrained pub fn compute_merkle_root<let N: u32>(leaves: [Field; N]) -> Fiel
 
 /// Generate a Merkle path for a specific leaf index (for testing)
 /// This is used off-circuit to prepare witness data
-unconstrained fn generate_merkle_path<let N: u32>(
+unconstrained pub fn generate_merkle_path<let N: u32>(
     leaves: [Field; N],
     leaf_index: u32
 ) -> MerkleProof {
@@ -157,20 +199,6 @@ unconstrained fn generate_merkle_path<let N: u32>(
 }
 
 #[test]
-fn test_merkle_proof_single_leaf() {
-    let leaf: Field = 12345;
-    let _root = leaf;  // Single leaf tree
-    
-    let _proof = MerkleProof {
-        path: [0; MERKLE_DEPTH],
-        indices: [0; MERKLE_DEPTH]
-    };
-    
-    // Note: This test would need to be adjusted based on your Merkle tree construction
-    // For a single leaf, the root should equal the leaf
-}
-
-#[test]
 fn test_merkle_proof_two_leaves() {
     let leaf0: Field = 100;
     let leaf1: Field = 200;
@@ -179,15 +207,38 @@ fn test_merkle_proof_two_leaves() {
     let root = hash_merkle_node(leaf0, leaf1);
     
     // Proof for first leaf (index 0, left side)
-    // Since leaf0 is on the left, we hash: hash(leaf0, leaf1)
-    // Path contains siblings at each level
     let proof0 = MerkleProof {
         path: [leaf1, 0, 0, 0, 0, 0, 0],
         indices: [0, 0, 0, 0, 0, 0, 0]  // 0 means leaf is on left
     };
     
-    // This should pass: recompute root from leaf0
-    // Level 0: hash(leaf0, path[0]) = hash(leaf0, leaf1) = root
-    let computed_root = hash_merkle_node(leaf0, proof0.path[0]);
-    assert(computed_root == root, "Manual root computation failed");
+    // Verify using binary_merkle_root with depth 1
+    let computed_root = binary_merkle_root(poseidon_hasher, leaf0, 1, proof0.indices, proof0.path);
+    assert(computed_root == root, "Merkle root computation failed");
+}
+
+#[test]
+fn test_merkle_proof_four_leaves() {
+    let leaf0: Field = 100;
+    let leaf1: Field = 200;
+    let leaf2: Field = 300;
+    let leaf3: Field = 400;
+    
+    // Level 1 hashes
+    let hash01 = hash_merkle_node(leaf0, leaf1);
+    let hash23 = hash_merkle_node(leaf2, leaf3);
+    
+    // Root
+    let root = hash_merkle_node(hash01, hash23);
+    
+    // Proof for leaf0 (index 0)
+    // Path: [leaf1, hash23, 0, 0, 0, 0, 0]
+    // Indices: [0, 0, ...] (left at both levels)
+    let proof0 = MerkleProof {
+        path: [leaf1, hash23, 0, 0, 0, 0, 0],
+        indices: [0, 0, 0, 0, 0, 0, 0]
+    };
+    
+    let computed_root = binary_merkle_root(poseidon_hasher, leaf0, 2, proof0.indices, proof0.path);
+    assert(computed_root == root, "Merkle root computation failed for leaf0");
 }
