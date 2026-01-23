@@ -2,10 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "./interfaces/IShuffleVerifier.sol";
-import "./interfaces/IDealVerifier.sol";
-import "./interfaces/IDrawVerifier.sol";
-import "./interfaces/IPlayVerifier.sol";
+import "./interfaces/IUltraVerifier.sol";
 
 /**
  * @title UnoGame
@@ -17,10 +14,10 @@ contract UnoGame is ReentrancyGuard {
     uint256[] private _activeGames;
 
     // ZK Verifier contracts for different circuit types
-    IShuffleVerifier public shuffleVerifier;
-    IDealVerifier public dealVerifier;
-    IDrawVerifier public drawVerifier;
-    IPlayVerifier public playVerifier;
+    IUltraVerifier public shuffleVerifier;
+    IUltraVerifier public dealVerifier;
+    IUltraVerifier public drawVerifier;
+    IUltraVerifier public playVerifier;
 
     enum GameStatus { NotStarted, Started, Ended }
     
@@ -89,10 +86,10 @@ contract UnoGame is ReentrancyGuard {
             revert InvalidVerifierAddress();
         }
         
-        shuffleVerifier = IShuffleVerifier(_shuffleVerifier);
-        dealVerifier = IDealVerifier(_dealVerifier);
-        drawVerifier = IDrawVerifier(_drawVerifier);
-        playVerifier = IPlayVerifier(_playVerifier);
+        shuffleVerifier = IUltraVerifier(_shuffleVerifier);
+        dealVerifier = IUltraVerifier(_dealVerifier);
+        drawVerifier = IUltraVerifier(_drawVerifier);
+        playVerifier = IUltraVerifier(_playVerifier);
     }
 
     /**
@@ -380,9 +377,9 @@ contract UnoGame is ReentrancyGuard {
             revert InvalidVerifierAddress();
         }
         
-        shuffleVerifier = IShuffleVerifier(_shuffleVerifier);
-        dealVerifier = IDealVerifier(_dealVerifier);
-        drawVerifier = IDrawVerifier(_drawVerifier);
-        playVerifier = IPlayVerifier(_playVerifier);
+        shuffleVerifier = IUltraVerifier(_shuffleVerifier);
+        dealVerifier = IUltraVerifier(_dealVerifier);
+        drawVerifier = IUltraVerifier(_drawVerifier);
+        playVerifier = IUltraVerifier(_playVerifier);
     }
 }

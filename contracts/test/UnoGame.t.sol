@@ -3,16 +3,13 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../src/UnoGame.sol";
-import "../src/interfaces/IShuffleVerifier.sol";
-import "../src/interfaces/IDealVerifier.sol";
-import "../src/interfaces/IDrawVerifier.sol";
-import "../src/interfaces/IPlayVerifier.sol";
+import "../src/interfaces/IUltraVerifier.sol";
 
 /**
  * @title MockVerifier
  * @notice Mock verifier for testing - always returns true or configurable response
  */
-contract MockVerifier is IShuffleVerifier, IDealVerifier, IDrawVerifier, IPlayVerifier {
+contract MockVerifier is IUltraVerifier {
     bool public shouldPass = true;
 
     function setVerificationResult(bool _shouldPass) external {
