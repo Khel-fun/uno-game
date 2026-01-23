@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import dynamic from 'next/dynamic';
 import Game from "./Game";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import socket, { socketManager } from "@/services/socket";
@@ -49,6 +50,14 @@ import {
   getFeeCurrency,
 } from "@/utils/miniPayUtils";
 import { encodeFunctionData } from "viem";
+import { useZKGameIntegration } from "@/hooks/useZKGameIntegration";
+import { useZK } from "@/lib/zk";
+
+// Dynamic import for ZK components to avoid SSR issues
+const ZKProofPanel = dynamic(() => import('./ZKProofPanel').then(mod => mod.ZKProofPanel), { 
+  ssr: false,
+  loading: () => null 
+});
 
 type User = {
   id: string;
@@ -101,6 +110,16 @@ const Room = () => {
   
   // Use public client for the wallet's current chain
   const publicClient = usePublicClient({ chainId });
+
+  // ZK Proofs state and integration
+  const [zkEnabled, setZkEnabled] = useState(true);
+  const zkContext = useZK();
+  const zkIntegration = useZKGameIntegration({
+    onProofGenerated: zkContext.trackProof,
+  });
+  
+  // Use stats from zkIntegration
+  const zkStats = zkIntegration.stats;
   
   // Get the selected chain for thirdweb contract calls
   const selectedChain = getNetworkForChain(chainId);
@@ -742,6 +761,12 @@ const Room = () => {
         backgroundAttachment: "fixed",
       }}
     >
+      {/* ZK Proof Panel */}
+      <ZKProofPanel
+        enabled={zkEnabled}
+        onToggle={setZkEnabled}
+        stats={zkStats}
+      />
       <button
         className="glossy-button glossy-button-blue"
         style={{
@@ -788,6 +813,8 @@ const Room = () => {
               currentUser={currentUser}
               isComputerMode={isComputerMode}
               playerCount={users.length}
+              onZKStateChange={zkEnabled ? zkIntegration.onGameStateChange : undefined}
+              zkReady={zkIntegration.isReady}
             />
           ) : (
             <div
@@ -1156,6 +1183,8 @@ const Room = () => {
           currentUser={currentUser}
           isComputerMode={false}
           playerCount={users.length}
+          onZKStateChange={zkEnabled ? zkIntegration.onGameStateChange : undefined}
+          zkReady={zkIntegration.isReady}
         />
       )}
       <LowBalanceDrawer

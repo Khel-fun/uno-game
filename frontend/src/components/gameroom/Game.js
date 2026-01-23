@@ -73,9 +73,22 @@ const isSkipCard = (card) => card.startsWith("skip");
 const isReverseCard = (card) => card.startsWith("_");
 const isDraw2Card = (card) => card.startsWith("D2");
 const isValidPlay = (card, currentColor, currentNumber) => {
+  // Wild cards are always playable
   if (isWildCard(card)) return true;
+  
+  // If game state is not initialized yet, don't allow play
+  if (!currentColor || currentColor === "" || currentNumber === undefined || currentNumber === "") {
+    console.log("[Game] Invalid move: Game state not initialized", { currentColor, currentNumber });
+    return false;
+  }
+  
   const { color, number } = parseCard(card);
-  return color === currentColor || String(number) === String(currentNumber);
+  
+  // Color match or number match
+  const colorMatch = color === currentColor;
+  const numberMatch = String(number) === String(currentNumber);
+  
+  return colorMatch || numberMatch;
 };
 
 const Game = ({
@@ -83,6 +96,8 @@ const Game = ({
   currentUser,
   isComputerMode = false,
   playerCount = 2,
+  onZKStateChange,
+  zkReady = false,
 }) => {
   const [gameState, dispatch] = useReducer(gameReducer, initialGameState);
 
@@ -312,6 +327,11 @@ const Game = ({
     socket.on("initGameState", (state) => {
       dispatch(state);
       playShufflingSound();
+      
+      // Notify ZK integration of initial game state
+      if (onZKStateChange && zkReady) {
+        onZKStateChange(state, currentUser);
+      }
     });
 
     socket.on("updateGameState", (state) => {
@@ -326,13 +346,18 @@ const Game = ({
         isUnoButtonPressed: false,
         drawButtonPressed: state.drawButtonPressed || false,
       });
+      
+      // Notify ZK integration of game state update
+      if (onZKStateChange && zkReady) {
+        onZKStateChange(state, currentUser);
+      }
     });
 
     return () => {
       socket.off("initGameState");
       socket.off("updateGameState");
     };
-  }, []);
+  }, [onZKStateChange, zkReady, currentUser]);
 
   // Player deck lookup
   const decks = {

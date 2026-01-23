@@ -244,16 +244,16 @@ export const unoGameABI = [
 
 // Contract addresses for each network
 export const CONTRACT_ADDRESSES = {
-  baseSepolia: "0xbc2dB200412954577F9c84FD00b6c14E6c8bc18f",
+  baseSepolia: "0xCaa7e88f568A78046d017fa360e514e1526005b6",
 } as const;
 
 // Verifier addresses
 export const VERIFIER_ADDRESSES = {
   baseSepolia: {
-    shuffle: "0xaFDe698BFc358BE5D0a6e8F726b32a5fCb7f6DF9",
-    deal: "0xeC2006F5E6C2A454296910cbf48CE9c0a272b596",
-    draw: "0x9c1ABC478A33b99b680eaABe67D7C7c26217DeEa",
-    play: "0x2F3B0d2B958661971fd92524aab6439134103C93",
+    shuffle: "0x9D2fE939001325fF9fb58C2a22dB60549D4Ba1dA",
+    deal: "0x4AeaB7206A19EE01FbAEC8aee3654e4E93B59BE6",
+    draw: "0x4d9CA273817BfEf07a9D73E23072DEabeb825060",
+    play: "0xB99a5Cb916bd38353C435d52dDfCb9F7b51bfF0a",
   },
 } as const;
 
