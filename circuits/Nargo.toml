@@ -1,0 +1,5 @@
+[workspace]
+members = ["lib", "shuffle", "deal", "draw", "play"]
+default-member = "shuffle"
+
+# Noir 1.0.0-beta.18 compatible workspace

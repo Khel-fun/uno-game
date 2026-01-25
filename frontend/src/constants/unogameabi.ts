@@ -1,256 +1,273 @@
 export const unoGameABI = [
+  // Constructor
   {
-    inputs: [],
-    name: "ReentrancyGuardReentrantCall",
-    type: "error",
-  },
-  {
-    anonymous: false,
+    type: "constructor",
     inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "gameId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
+      { name: "_shuffleVerifier", type: "address", internalType: "address" },
+      { name: "_dealVerifier", type: "address", internalType: "address" },
+      { name: "_drawVerifier", type: "address", internalType: "address" },
+      { name: "_playVerifier", type: "address", internalType: "address" },
     ],
+    stateMutability: "nonpayable",
+  },
+  // Errors
+  { type: "error", name: "AlreadyJoined", inputs: [] },
+  { type: "error", name: "GameFull", inputs: [] },
+  { type: "error", name: "InvalidGameId", inputs: [] },
+  { type: "error", name: "InvalidGameStatus", inputs: [] },
+  { type: "error", name: "InvalidProof", inputs: [] },
+  { type: "error", name: "InvalidVerifierAddress", inputs: [] },
+  { type: "error", name: "NotEnoughPlayers", inputs: [] },
+  { type: "error", name: "PlayerNotInGame", inputs: [] },
+  { type: "error", name: "ReentrancyGuardReentrantCall", inputs: [] },
+  // Events
+  {
+    type: "event",
     name: "GameCreated",
-    type: "event",
+    inputs: [
+      { name: "gameId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "creator", type: "address", indexed: true, internalType: "address" },
+    ],
+    anonymous: false,
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "gameId",
-        type: "uint256",
-      },
-    ],
+    type: "event",
     name: "GameEnded",
-    type: "event",
+    inputs: [
+      { name: "gameId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "winner", type: "address", indexed: true, internalType: "address" },
+    ],
+    anonymous: false,
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "gameId",
-        type: "uint256",
-      },
-    ],
+    type: "event",
     name: "GameStarted",
-    type: "event",
+    inputs: [
+      { name: "gameId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "deckCommitment", type: "bytes32", indexed: false, internalType: "bytes32" },
+    ],
+    anonymous: false,
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "gameId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "moveHash",
-        type: "bytes32",
-      },
-    ],
+    type: "event",
     name: "MoveCommitted",
-    type: "event",
-  },
-  {
+    inputs: [
+      { name: "gameId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "player", type: "address", indexed: true, internalType: "address" },
+      { name: "moveHash", type: "bytes32", indexed: false, internalType: "bytes32" },
+    ],
     anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "gameId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "player",
-        type: "address",
-      },
-    ],
-    name: "PlayerJoined",
+  },
+  {
     type: "event",
+    name: "PlayerJoined",
+    inputs: [
+      { name: "gameId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "player", type: "address", indexed: true, internalType: "address" },
+    ],
+    anonymous: false,
   },
   {
+    type: "event",
+    name: "ProofVerified",
     inputs: [
-      {
-        internalType: "uint256",
-        name: "gameId",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes32",
-        name: "moveHash",
-        type: "bytes32",
-      },
+      { name: "gameId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "player", type: "address", indexed: true, internalType: "address" },
+      { name: "circuitType", type: "uint8", indexed: false, internalType: "enum UnoGame.CircuitType" },
     ],
+    anonymous: false,
+  },
+  // Functions
+  {
+    type: "function",
     name: "commitMove",
+    inputs: [
+      { name: "gameId", type: "uint256", internalType: "uint256" },
+      { name: "moveHash", type: "bytes32", internalType: "bytes32" },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "commitMove",
     inputs: [
-      {
-        internalType: "address",
-        name: "_creator",
-        type: "address",
-      },
-      {
-        internalType: "bool",
-        name: "_isBot",
-        type: "bool",
-      },
+      { name: "gameId", type: "uint256", internalType: "uint256" },
+      { name: "moveHash", type: "bytes32", internalType: "bytes32" },
+      { name: "proof", type: "bytes", internalType: "bytes" },
+      { name: "publicInputs", type: "bytes32[]", internalType: "bytes32[]" },
+      { name: "circuitType", type: "uint8", internalType: "enum UnoGame.CircuitType" },
     ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "createGame",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
+    inputs: [
+      { name: "_creator", type: "address", internalType: "address" },
+      { name: "_isBot", type: "bool", internalType: "bool" },
     ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "gameId",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes32",
-        name: "gameHash",
-        type: "bytes32",
-      },
-    ],
+    type: "function",
+    name: "dealVerifier",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "contract IDealVerifier" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "drawVerifier",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "contract IDrawVerifier" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "endGame",
+    inputs: [
+      { name: "gameId", type: "uint256", internalType: "uint256" },
+      { name: "gameHash", type: "bytes32", internalType: "bytes32" },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "getActiveGames",
-    outputs: [
-      {
-        internalType: "uint256[]",
-        name: "",
-        type: "uint256[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "gameId",
-        type: "uint256",
-      },
-    ],
-    name: "getGame",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "id",
-        type: "uint256",
-      },
-      {
-        internalType: "address[]",
-        name: "players",
-        type: "address[]",
-      },
-      {
-        internalType: "enum UnoGame.GameStatus",
-        name: "status",
-        type: "uint8",
-      },
-      {
-        internalType: "uint256",
-        name: "startTime",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "endTime",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes32",
-        name: "gameHash",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32[]",
-        name: "moves",
-        type: "bytes32[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [],
-    name: "getNotStartedGames",
+    outputs: [{ name: "", type: "uint256[]", internalType: "uint256[]" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getGame",
+    inputs: [{ name: "gameId", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      { name: "id", type: "uint256", internalType: "uint256" },
+      { name: "players", type: "address[]", internalType: "address[]" },
+      { name: "status", type: "uint8", internalType: "enum UnoGame.GameStatus" },
+      { name: "startTime", type: "uint256", internalType: "uint256" },
+      { name: "endTime", type: "uint256", internalType: "uint256" },
+      { name: "deckCommitment", type: "bytes32", internalType: "bytes32" },
+      { name: "moveCommitments", type: "bytes32[]", internalType: "bytes32[]" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getGameProofs",
+    inputs: [{ name: "gameId", type: "uint256", internalType: "uint256" }],
     outputs: [
       {
-        internalType: "uint256[]",
         name: "",
-        type: "uint256[]",
+        type: "tuple[]",
+        internalType: "struct UnoGame.MoveProof[]",
+        components: [
+          { name: "commitment", type: "bytes32", internalType: "bytes32" },
+          { name: "proof", type: "bytes", internalType: "bytes" },
+          { name: "publicInputs", type: "bytes32[]", internalType: "bytes32[]" },
+          { name: "player", type: "address", internalType: "address" },
+          { name: "timestamp", type: "uint256", internalType: "uint256" },
+          { name: "verified", type: "bool", internalType: "bool" },
+        ],
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "gameId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_joinee",
-        type: "address",
-      },
-    ],
+    type: "function",
+    name: "getNotStartedGames",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256[]", internalType: "uint256[]" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "joinGame",
+    inputs: [
+      { name: "gameId", type: "uint256", internalType: "uint256" },
+      { name: "_joinee", type: "address", internalType: "address" },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "gameId",
-        type: "uint256",
-      },
-    ],
+    type: "function",
+    name: "playVerifier",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "contract IPlayVerifier" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "shuffleVerifier",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "contract IShuffleVerifier" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "startGame",
+    inputs: [
+      { name: "gameId", type: "uint256", internalType: "uint256" },
+      { name: "deckCommitment", type: "bytes32", internalType: "bytes32" },
+      { name: "shuffleProof", type: "bytes", internalType: "bytes" },
+      { name: "publicInputs", type: "bytes32[]", internalType: "bytes32[]" },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
+  },
+  {
     type: "function",
+    name: "startGame",
+    inputs: [{ name: "gameId", type: "uint256", internalType: "uint256" }],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "updateVerifiers",
+    inputs: [
+      { name: "_shuffleVerifier", type: "address", internalType: "address" },
+      { name: "_dealVerifier", type: "address", internalType: "address" },
+      { name: "_drawVerifier", type: "address", internalType: "address" },
+      { name: "_playVerifier", type: "address", internalType: "address" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
   },
 ] as const;
+
+// Contract addresses for each network
+export const CONTRACT_ADDRESSES = {
+  baseSepolia: "0xCaa7e88f568A78046d017fa360e514e1526005b6",
+} as const;
+
+// Verifier addresses
+export const VERIFIER_ADDRESSES = {
+  baseSepolia: {
+    shuffle: "0x9D2fE939001325fF9fb58C2a22dB60549D4Ba1dA",
+    deal: "0x4AeaB7206A19EE01FbAEC8aee3654e4E93B59BE6",
+    draw: "0x4d9CA273817BfEf07a9D73E23072DEabeb825060",
+    play: "0xB99a5Cb916bd38353C435d52dDfCb9F7b51bfF0a",
+  },
+} as const;
+
+// Circuit types enum matching the contract
+export enum CircuitType {
+  Shuffle = 0,
+  Deal = 1,
+  Draw = 2,
+  Play = 3,
+}
+
+// Game status enum matching the contract
+export enum GameStatus {
+  NotStarted = 0,
+  Active = 1,
+  Ended = 2,
+}

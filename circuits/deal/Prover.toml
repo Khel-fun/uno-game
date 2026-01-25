@@ -1,0 +1,5 @@
+card_uids = ["", "", "", "", ""]
+merkle_root = ""
+nonces = ["", "", "", "", ""]
+player_id = ""
+positions = ["", "", "", "", ""]

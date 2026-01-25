@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import dynamic from 'next/dynamic';
 import Game from "./Game";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import socket, { socketManager } from "@/services/socket";
@@ -26,11 +27,10 @@ import {
 } from "../../lib/gameLogic";
 import { updateGlobalCardHashMap } from "../../lib/globalState";
 import { unoGameABI } from "@/constants/unogameabi";
+import { prepareContractCall, getContract, waitForReceipt } from "thirdweb";
 import { useSendTransaction } from "thirdweb/react";
-import { prepareContractCall } from "thirdweb";
-import { celoSepolia } from "@/lib/chains";
 import { client } from "@/utils/thirdWebClient";
-import { getSelectedNetwork } from "@/utils/networkUtils";
+import { getNetworkForChain } from "@/utils/networkUtils";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import {
@@ -41,13 +41,21 @@ import {
 import { useNetworkSelection } from "@/hooks/useNetworkSelection";
 import { MAX_PLAYERS } from "@/constants/gameConstants";
 import { useWalletStorage } from "@/hooks/useWalletStorage";
+import { useAccount, usePublicClient, useSendTransaction as useWagmiSendTransaction } from "wagmi";
 import {
   isMiniPay,
   sendMiniPayTransaction,
   getFeeCurrency,
 } from "@/utils/miniPayUtils";
 import { encodeFunctionData } from "viem";
-import { useChainId } from "wagmi";
+import { useZKGameIntegration } from "@/hooks/useZKGameIntegration";
+import { useZK } from "@/lib/zk";
+
+// Dynamic import for ZK components to avoid SSR issues
+const ZKProofPanel = dynamic(() => import('./ZKProofPanel').then(mod => mod.ZKProofPanel), { 
+  ssr: false,
+  loading: () => null 
+});
 
 type User = {
   id: string;
@@ -73,12 +81,19 @@ const Room = () => {
   const [startGameLoading, setStartGameLoading] = useState(false);
   const hasJoinedRoom = useRef(false);
   const { account, bytesAddress } = useUserAccount();
-  const { address } = useWalletStorage(); // Use wallet storage hook for persistent address
+  const { address: storedAddress } = useWalletStorage(); // Use wallet storage hook for persistent address
   const [contract, setContract] = useState<UnoGameContract | null>(null);
   const [gameId, setGameId] = useState<bigint | null>(null);
   const [gameChainId, setGameChainId] = useState<number | null>(null);
 
   const { toast } = useToast();
+
+  // Use wagmi for wallet connection (works with both MetaMask and other connectors)
+  const { address: wagmiAddress, isConnected: isWalletConnected, chain: walletChain } = useAccount();
+  const { sendTransactionAsync: sendWagmiTransaction } = useWagmiSendTransaction();
+  
+  // Prefer wagmi address, fallback to stored address
+  const address = wagmiAddress || storedAddress;
 
   const [offChainGameState, setOffChainGameState] =
     useState<OffChainGameState | null>(null);
@@ -86,11 +101,28 @@ const Room = () => {
   const [playerHand, setPlayerHand] = useState<string[]>([]);
   const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
 
-  // Get the network selected from dropdown
+  // Get the network selected from dropdown - but prioritize wallet's actual chain
   const { selectedNetwork } = useNetworkSelection();
-  const chainId = selectedNetwork.id; // Use selected network's chain ID instead of wallet's current chain
+  const chainId = walletChain?.id || selectedNetwork.id;
+  
+  // Use public client for the wallet's current chain
+  const publicClient = usePublicClient({ chainId });
 
-  const { mutate: sendTransaction } = useSendTransaction();
+  // ZK Proofs state and integration
+  const [zkEnabled, setZkEnabled] = useState(true);
+  const zkContext = useZK();
+  const zkIntegration = useZKGameIntegration({
+    onProofGenerated: zkContext.trackProof,
+  });
+  
+  // Use stats from zkIntegration
+  const zkStats = zkIntegration.stats;
+  
+  // Get the selected chain for thirdweb contract calls
+  const selectedChain = getNetworkForChain(chainId);
+  const contractAddress = getContractAddress(chainId) as `0x${string}`;
+
+  const { mutate: sendThirdwebTransaction } = useSendTransaction();
 
   // Detect MiniPay wallet on mount
   useEffect(() => {
@@ -164,7 +196,9 @@ const Room = () => {
 
   useEffect(() => {
     const setup = async () => {
-      if (account) {
+      // Use account or fallback to address for contract setup
+      const userAccount = account || address;
+      if (userAccount) {
         try {
           // If we already have a gameChainId and it's different from current chainId,
           // warn the user and don't fetch from wrong chain
@@ -184,7 +218,7 @@ const Room = () => {
           setContract(null);
           setOffChainGameState(null);
           
-          console.log('Setting up contract with chainId:', chainId);
+          console.log('Setting up contract with chainId:', chainId, 'account:', userAccount);
           const contractResult = await getContractNew(chainId);
           console.log('Contract result:', contractResult);
 
@@ -212,7 +246,7 @@ const Room = () => {
             const gameState = await fetchGameState(
               contractResult.contract,
               bigIntId,
-              account,
+              userAccount,
             );
             // Set the offChainGameState from the game state
             if (gameState) {
@@ -233,7 +267,7 @@ const Room = () => {
       }
     };
     setup();
-  }, [id, account, chainId, gameChainId, toast]);
+  }, [id, account, address, chainId]);
 
   useEffect(() => {
     if (
@@ -569,10 +603,25 @@ const Room = () => {
   };
 
   const handleStartGame = async () => {
-    // console.log('Starting game with:', { address, account, offChainGameState, gameId })
-    if (!address || !account || !offChainGameState || !gameId) {
-      console.error("Missing required data to start game");
-      setError("Missing required data to start game");
+    const userAccount = account || address;
+    console.log('Starting game with:', { address, account, userAccount, offChainGameState: !!offChainGameState, gameId, isWalletConnected });
+    
+    // Check for wallet connection first
+    if (!isWalletConnected && !isMiniPayWallet) {
+      console.error("Wallet not connected");
+      setError("Please connect your wallet to start the game");
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to start the game",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
+    
+    if (!address || !userAccount || !offChainGameState || !gameId) {
+      console.error("Missing required data to start game", { address, userAccount, offChainGameState: !!offChainGameState, gameId });
+      setError("Missing required data to start game. Please refresh the page.");
       return;
     }
 
@@ -588,9 +637,9 @@ const Room = () => {
           );
         }
 
-        const contractAddress = getContractAddress(chainId) as `0x${string}`;
+        const contractAddr = getContractAddress(chainId) as `0x${string}`;
 
-        if (!contractAddress) {
+        if (!contractAddr) {
           throw new Error("Contract address not configured");
         }
 
@@ -602,7 +651,7 @@ const Room = () => {
 
         // Use direct eth_sendTransaction for MiniPay
         const hash = await sendMiniPayTransaction(
-          contractAddress,
+          contractAddr,
           data,
           address as string,
           chainId,
@@ -627,38 +676,48 @@ const Room = () => {
 
         initializeGameAfterStart();
         setStartGameLoading(false);
+      } else if (isWalletConnected && address) {
+        // Use wagmi's sendTransaction for browser wallets (MetaMask, etc.)
+        const data = encodeFunctionData({
+          abi: unoGameABI,
+          functionName: "startGame",
+          args: [gameId],
+        });
+
+        try {
+          const hash = await sendWagmiTransaction({
+            to: contractAddress,
+            data,
+          });
+
+          toast({
+            title: "Transaction Sent!",
+            description: "Waiting for confirmation...",
+            duration: 5000,
+            variant: "default",
+          });
+
+          // Wait for transaction confirmation
+          if (publicClient) {
+            await publicClient.waitForTransactionReceipt({ hash });
+          }
+
+          toast({
+            title: "Game started successfully!",
+            description: "Game started successfully!",
+            duration: 5000,
+            variant: "success",
+          });
+
+          initializeGameAfterStart();
+          setStartGameLoading(false);
+        } catch (txError) {
+          console.error("Transaction failed:", txError);
+          setError("Failed to start game");
+          setStartGameLoading(false);
+        }
       } else {
-        // Non-MiniPay transaction (browser with MetaMask, etc.)
-        const transaction = prepareContractCall({
-          contract: {
-            address: getContractAddress(chainId) as `0x${string}`,
-            abi: unoGameABI,
-            chain: getSelectedNetwork(),
-            client,
-          },
-          method: "startGame",
-          params: [gameId],
-        });
-
-        sendTransaction(transaction, {
-          onSuccess: async (result) => {
-            // console.log("Transaction successful:", result);
-            toast({
-              title: "Game started successfully!",
-              description: "Game started successfully!",
-              duration: 5000,
-              variant: "success",
-            });
-
-            initializeGameAfterStart();
-            setStartGameLoading(false);
-          },
-          onError: (error) => {
-            console.error("Transaction failed:", error);
-            setError("Failed to start game");
-            setStartGameLoading(false);
-          },
-        });
+        throw new Error("No wallet connected");
       }
     } catch (error) {
       console.error("Failed to start game:", error);
@@ -710,6 +769,12 @@ const Room = () => {
         backgroundAttachment: "fixed",
       }}
     >
+      {/* ZK Proof Panel */}
+      <ZKProofPanel
+        enabled={zkEnabled}
+        onToggle={setZkEnabled}
+        stats={zkStats}
+      />
       <button
         className="glossy-button glossy-button-blue"
         style={{
@@ -756,6 +821,8 @@ const Room = () => {
               currentUser={currentUser}
               isComputerMode={isComputerMode}
               playerCount={users.length}
+              onZKStateChange={zkEnabled ? zkIntegration.onGameStateChange : undefined}
+              zkReady={zkIntegration.isReady}
             />
           ) : (
             <div
@@ -1124,6 +1191,8 @@ const Room = () => {
           currentUser={currentUser}
           isComputerMode={false}
           playerCount={users.length}
+          onZKStateChange={zkEnabled ? zkIntegration.onGameStateChange : undefined}
+          zkReady={zkIntegration.isReady}
         />
       )}
     </div>

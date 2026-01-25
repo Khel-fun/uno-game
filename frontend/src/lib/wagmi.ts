@@ -2,7 +2,7 @@ import { Chain } from "wagmi/chains";
 import { createConfig } from "wagmi";
 import { http } from "viem";
 import { coinbaseWallet, injected } from "wagmi/connectors";
-import { celoSepolia } from "@/config/networks";
+import { celoSepolia, baseSepolia } from "@/config/networks";
 
 export const arbitriumSepolia = {
   id: 421614,
@@ -18,7 +18,7 @@ export const arbitriumSepolia = {
 } as const satisfies Chain;
 
 export const config = createConfig({
-  chains: [celoSepolia],
+  chains: [baseSepolia, celoSepolia],
   connectors: [
     coinbaseWallet({
       appName: "Zunno",
@@ -27,6 +27,7 @@ export const config = createConfig({
   ],
   ssr: true,
   transports: {
+    [baseSepolia.id]: http(),
     [celoSepolia.id]: http(),
   },
 });

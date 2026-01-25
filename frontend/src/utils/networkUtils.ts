@@ -3,6 +3,33 @@ import { defineChain } from 'thirdweb';
 
 const NETWORK_STORAGE_KEY = 'zunno_selected_network';
 
+// Convert wagmi chain to thirdweb chain format
+const convertToThirdwebChain = (wagmiChain: any) => {
+  return defineChain({
+    id: wagmiChain.id,
+    name: wagmiChain.name,
+    nativeCurrency: wagmiChain.nativeCurrency,
+    rpc: wagmiChain.rpcUrls.default.http[0],
+    blockExplorers: wagmiChain.blockExplorers ? [{
+      name: wagmiChain.blockExplorers.default.name,
+      url: wagmiChain.blockExplorers.default.url,
+    }] : undefined,
+    testnet: wagmiChain.testnet || false,
+  });
+};
+
+/**
+ * Get thirdweb chain for a specific chainId
+ * This ensures we use the correct RPC for the given chain
+ */
+export const getNetworkForChain = (chainId: number) => {
+  const network = getNetworkById(chainId);
+  if (network) {
+    return convertToThirdwebChain(network.chain);
+  }
+  return convertToThirdwebChain(DEFAULT_NETWORK.chain);
+};
+
 export const getSelectedNetwork = () => {
   if (typeof window === 'undefined') {
     return convertToThirdwebChain(DEFAULT_NETWORK.chain);
@@ -38,18 +65,4 @@ export const setSelectedNetwork = (chainId: number) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem(NETWORK_STORAGE_KEY, chainId.toString());
   }
-};
-
-const convertToThirdwebChain = (wagmiChain: any) => {
-  return defineChain({
-    id: wagmiChain.id,
-    name: wagmiChain.name,
-    nativeCurrency: wagmiChain.nativeCurrency,
-    rpc: wagmiChain.rpcUrls.default.http[0],
-    blockExplorers: wagmiChain.blockExplorers ? [{
-      name: wagmiChain.blockExplorers.default.name,
-      url: wagmiChain.blockExplorers.default.url,
-    }] : undefined,
-    testnet: wagmiChain.testnet || false,
-  });
 };

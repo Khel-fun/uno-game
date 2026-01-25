@@ -1,0 +1,25 @@
+# Play Circuit Prover Inputs
+# Public inputs
+game_id = "0x0000000000000000000000000000000000000000000000000000000000000001"
+player_id = "0x0000000000000000000000000000000000000000000000000000000000000002"
+move_commitment = "0x0000000000000000000000000000000000000000000000000000000000000003"
+hand_merkle_root = "0x0000000000000000000000000000000000000000000000000000000000000004"
+top_card_commitment = "0x0000000000000000000000000000000000000000000000000000000000000005"
+
+# Private witnesses - played card (Red 5, copy 0)
+played_card_color = 1  # Red
+played_card_type = 5   # Number 5
+played_card_copy = 0
+played_card_nonce = "0x0000000000000000000000000000000000000000000000000000000000000100"
+
+# Merkle proof for played card (depth 7)
+played_card_merkle_path = { path = ["0", "0", "0", "0", "0", "0", "0"], indices = [0, 0, 0, 0, 0, 0, 0] }
+
+# Private witnesses - top card on discard pile (Red 7, copy 0)
+top_card_color = 1     # Red (same color, valid play)
+top_card_type = 7      # Number 7
+top_card_copy = 0
+top_card_nonce = "0x0000000000000000000000000000000000000000000000000000000000000200"
+
+# Move commitment nonce
+commitment_nonce = "0x0000000000000000000000000000000000000000000000000000000000000300"
