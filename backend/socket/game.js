@@ -11,9 +11,42 @@ module.exports = function gameHandler(io, socket, { gameStateManager, userManage
     io.to(roomId).emit('userJoined', socket.id);
   });
 
-  // Create a new game room (broadcast)
-  socket.on('createGameRoom', () => {
-    io.emit('gameRoomCreated');
+  // Create a new game room (broadcast) with optional game code registration
+  socket.on('createGameRoom', ({ gameId, isPrivate, gameCode } = {}, callback) => {
+    let code = null;
+    if (gameId) {
+      const roomId = `game-${gameId}`;
+      // Use frontend-provided game code (matches on-chain hash), or generate one
+      code = gameStateManager.registerGameCode(gameId, roomId, !!isPrivate, gameCode || null);
+      logger.info('Game room created: gameId=%s, isPrivate=%s, code=%s', gameId, isPrivate, code);
+    }
+    io.emit('gameRoomCreated', { gameId, isPrivate });
+    callback?.({ gameCode: code });
+  });
+
+  // Validate a game code and return associated gameId
+  socket.on('validateGameCode', ({ gameCode }, callback) => {
+    if (!gameCode) {
+      callback?.({ error: 'Game code is required' });
+      return;
+    }
+    const entry = gameStateManager.getGameByCode(gameCode.toUpperCase());
+    if (!entry) {
+      callback?.({ error: 'Invalid game code' });
+      return;
+    }
+    callback?.({ gameId: entry.gameId, roomId: entry.roomId, isPrivate: entry.isPrivate });
+  });
+
+  // Get game code for a specific game
+  socket.on('getGameCode', ({ gameId }, callback) => {
+    const code = gameStateManager.getCodeByGameId(gameId);
+    callback?.({ gameCode: code });
+  });
+
+  // Delete a game code (when game is deleted on-chain)
+  socket.on('deleteGameCode', ({ gameId }) => {
+    gameStateManager.deleteGameCode(gameId);
   });
 
   /**
