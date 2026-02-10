@@ -263,13 +263,13 @@ function OnChainVerificationSection({ proofs }: OnChainVerificationSectionProps)
     }
   }, [proofs, verificationResults, handleVerifyOnChain]);
 
-  const displayProofs = showAll ? proofs : proofs.slice(0, 5);
+  const displayProofs = showAll ? proofs : proofs.slice(-5).reverse();
   const unverifiedCount = proofs.filter(p => !verificationResults[p.id]).length;
 
   return (
     <div className="bg-white/5 rounded-lg p-3 text-xs space-y-2">
       <div className="flex items-center justify-between mb-2">
-        <div className="font-medium text-gray-300">On-Chain Verification</div>
+        <div className="font-medium text-gray-300">On-Chain Verification ({proofs.length})</div>
         {unverifiedCount > 0 && (
           <button
             onClick={handleVerifyAll}
@@ -286,7 +286,7 @@ function OnChainVerificationSection({ proofs }: OnChainVerificationSectionProps)
         ✓ Verifying on Base Sepolia
       </div>
 
-      <div className="space-y-1 max-h-[200px] overflow-y-auto">
+      <div className="space-y-1 max-h-[180px] overflow-y-auto custom-scrollbar">
         {displayProofs.map((proof) => {
           const result = verificationResults[proof.id];
           const isVerifying = verifyingId === proof.id;
@@ -376,9 +376,9 @@ function OnChainVerificationSection({ proofs }: OnChainVerificationSectionProps)
       {proofs.length > 5 && (
         <button
           onClick={() => setShowAll(!showAll)}
-          className="w-full text-center text-gray-400 hover:text-white transition-colors"
+          className="w-full text-center text-gray-400 hover:text-white transition-colors py-1"
         >
-          {showAll ? 'Show Less' : `Show All (${proofs.length})`}
+          {showAll ? '▲ Show Latest 5' : `▼ Load More (${proofs.length - 5} older)`}
         </button>
       )}
     </div>
@@ -465,10 +465,10 @@ export function ZKProofPanel({ enabled, onToggle, stats }: ZKProofPanelProps) {
       </div>
 
       {/* Main Panel */}
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 right-4 z-50 max-h-[80vh]">
         <motion.div
           layout
-          className="bg-black/80 backdrop-blur-md rounded-xl border border-white/10 text-white overflow-hidden shadow-2xl"
+          className="bg-black/80 backdrop-blur-md rounded-xl border border-white/10 text-white overflow-hidden shadow-2xl max-w-sm"
         >
           {/* Header - Always visible */}
           <button
@@ -502,8 +502,9 @@ export function ZKProofPanel({ enabled, onToggle, stats }: ZKProofPanelProps) {
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 className="border-t border-white/10"
+                style={{ maxHeight: '70vh', overflow: 'hidden' }}
               >
-                <div className="p-4 space-y-4">
+                <div className="p-4 space-y-4 max-h-[65vh] overflow-y-auto custom-scrollbar">
                   {/* Toggle */}
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-300">Enable ZK Proofs</span>

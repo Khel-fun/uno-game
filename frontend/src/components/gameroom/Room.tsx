@@ -538,9 +538,16 @@ const Room = () => {
         throw new Error("No game data returned from contract");
       }
 
-      // Extract the data from the result
-      const [id, players, status, startTime, endTime, gameHash, moves] =
-        gameData;
+      // Extract the data from the GameView struct
+      const gameDataAny = gameData as any;
+      const id = gameData.id ?? gameDataAny[0];
+      const creator = gameData.creator ?? gameDataAny[1];
+      const players = gameData.players ?? gameDataAny[2];
+      const status = gameData.status ?? gameDataAny[3];
+      const startTime = gameData.startTime ?? gameDataAny[7];
+      const endTime = gameData.endTime ?? gameDataAny[8];
+      const gameHash = gameData.deckCommitment ?? gameDataAny[9];
+      const moves = gameData.moveCommitments ?? gameDataAny[10];
       // console.log('On chain game state: ', { id, players, status, startTime, endTime, gameHash, moves })
 
       const formattedGameData = {
@@ -762,6 +769,7 @@ const Room = () => {
       style={{
         height: "100svh",
         width: "100vw",
+        overflow: "hidden",
         backgroundImage: "url('/bg_primary.webp')",
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
