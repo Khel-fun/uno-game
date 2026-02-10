@@ -3,4 +3,4 @@
  * Shared constants used across the frontend
  */
 
-export const MAX_PLAYERS = 3;
+export const MAX_PLAYERS = 4;

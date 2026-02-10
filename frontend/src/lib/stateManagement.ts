@@ -11,23 +11,15 @@ export async function reconstructOffChainState(
     playerAddress: string
   ): Promise<OffChainGameState> {
     const gameData = await contract.getGame(gameId);
-    const players = gameData[1]; // Extract players from tuple
-    const actions = await contract.getGameActions(gameId);
+    const players = gameData.players; // GameView struct field
   
     let offChainState = initializeOffChainState(gameId, players);
   
     localActionCache[gameId.toString()] = [];
   
-    for (const action of actions) {
-        const reconstructedAction = reconstructActionFromHash(action.actionHash, playerAddress, gameId);
-        offChainState = applyActionToOffChainState(offChainState, reconstructedAction);
-    
-        localActionCache[gameId.toString()].push(reconstructedAction);
-    }
-  
-    if (hashState(offChainState) !== gameData[5]) { // gameHash is at index 5
-      throw new Error('Reconstructed state does not match on-chain hash');
-    }
+    // Note: getGameActions does not exist on the current contract.
+    // Game action replay is handled via off-chain socket state, not on-chain.
+    // This function currently just initializes a fresh off-chain state.
   
     return offChainState;
   }
@@ -49,15 +41,19 @@ export async function reconstructOffChainState(
   }
 
   export function verifyOffChainState(offChainState: OffChainGameState, onChainState: [
-    bigint,           // id
-    string[],         // players
-    number,           // status
-    bigint,           // startTime
-    bigint,           // endTime
-    string,           // gameHash
-    string[]          // moves
+    bigint,           // id (0)
+    string,           // creator (1)
+    string[],         // players (2)
+    number,           // status (3)
+    boolean,          // isPrivate (4)
+    string,           // gameCodeHash (5)
+    bigint,           // maxPlayers (6)
+    bigint,           // startTime (7)
+    bigint,           // endTime (8)
+    string,           // deckCommitment (9)
+    string[]          // moveCommitments (10)
   ]): boolean {
-    return hashState(offChainState) === onChainState[5]; // gameHash is at index 5
+    return hashState(offChainState) === onChainState[9]; // deckCommitment at index 9
   }
 
   export function updateOffChainState(currentState: OffChainGameState, action: Action): OffChainGameState {

@@ -45,22 +45,34 @@ export interface Action {
   cardHash?: string;
 }
 
+export interface GameViewResult {
+  id: bigint;
+  creator: string;
+  players: string[];
+  status: number;
+  isPrivate: boolean;
+  gameCodeHash: string;
+  maxPlayers: bigint;
+  startTime: bigint;
+  endTime: bigint;
+  deckCommitment: string;
+  moveCommitments: string[];
+}
+
 export interface UnoGameContract {
-  createGame: (account: `0x${string}` | undefined) => Promise<any>;
-  joinGame: (gameId: bigint, address: `0x${string}`| undefined) => Promise<any>;
+  createGame: (account: `0x${string}` | undefined, isBot?: boolean) => Promise<any>;
+  joinGame: (gameId: bigint, address: `0x${string}` | undefined) => Promise<any>;
+  joinGameWithCode: (gameId: bigint, address: `0x${string}` | undefined, gameCode: string) => Promise<any>;
   startGame: (gameId: bigint) => Promise<any>;
   commitMove: (gameId: bigint, moveHash: string) => Promise<any>;
-  getGame: (gameId: bigint) => Promise<[
-    bigint,           // id
-    string[],         // players
-    number,           // status
-    bigint,           // startTime
-    bigint,           // endTime
-    string,           // gameHash
-    string[]          // moves
-  ]>;
+  getGame: (gameId: bigint) => Promise<GameViewResult>;
   getGameActions: (gameId: bigint) => Promise<{ actionHash: string }[]>;
   endGame: (gameId: bigint, gameHash: string) => Promise<any>;
+  deleteGame: (gameId: bigint) => Promise<any>;
   getActiveGames: () => Promise<bigint[]>;
   getNotStartedGames: () => Promise<bigint[]>;
+  getPublicNotStartedGames: () => Promise<bigint[]>;
+  getGamesByCreator: (creator: string) => Promise<bigint[]>;
+  getGameCount: () => Promise<bigint>;
+  isGamePrivate: (gameId: bigint) => Promise<boolean>;
 }
