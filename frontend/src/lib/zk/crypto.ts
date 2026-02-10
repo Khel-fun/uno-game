@@ -18,13 +18,15 @@ export const DECK_SIZE = 108;
 // BN254 field modulus
 export const FIELD_MODULUS = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
 
-// Cached Barretenberg instance - still needed for proof generation
+// Cached Barretenberg instance - used for low-level crypto ops if needed
+// bb.js v0.87.0: Barretenberg.new() still available for low-level API
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let bbInstance: any = null;
 let bbLoadPromise: Promise<void> | null = null;
 
 /**
- * Initialize Barretenberg WASM (for proof generation)
+ * Initialize Barretenberg WASM (for low-level operations)
+ * bb.js v0.87.0: Barretenberg.new() accepts optional { threads } config
  */
 async function initBarretenberg(): Promise<typeof bbInstance> {
   if (bbInstance) return bbInstance;
@@ -36,8 +38,8 @@ async function initBarretenberg(): Promise<typeof bbInstance> {
       }
       
       const { Barretenberg } = await import('@aztec/bb.js');
-      bbInstance = await Barretenberg.new();
-      console.log('[ZK Crypto] Barretenberg initialized');
+      bbInstance = await Barretenberg.new({ threads: 1 });
+      console.log('[ZK Crypto] Barretenberg initialized (bb.js v0.87.0)');
     })();
   }
   

@@ -52,11 +52,11 @@ function fieldToDecimalString(field: Field | number | undefined | null): string 
 let Noir: NoirType | null = null;
 let UltraHonkBackend: UltraHonkBackendType | null = null;
 let Barretenberg: BarretenbergType | null = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let barretenbergApi: any = null;
+let bbApi: InstanceType<BarretenbergType> | null = null;
 let modulesLoaded = false;
 let wasmInitialized = false;
 let initializationPromise: Promise<void> | null = null;
+let crsInterceptorInstalled = false;
 
 /**
  * Initialize WASM modules for Noir
@@ -90,6 +90,42 @@ async function initializeWasm(): Promise<void> {
   }
 }
 
+/**
+ * Install a fetch interceptor that redirects CRS requests from crs.aztec.network
+ * to our local Next.js API proxy, avoiding CORS issues with COEP headers.
+ */
+function installCrsInterceptor(): void {
+  if (crsInterceptorInstalled || typeof window === 'undefined') return;
+  
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    let url: string;
+    if (input instanceof URL) {
+      url = input.toString();
+    } else if (input instanceof Request) {
+      url = input.url;
+    } else {
+      url = input;
+    }
+    
+    // Intercept CRS requests to aztec CDN and route through our proxy
+    if (url.includes('crs.aztec.network')) {
+      const crsUrl = new URL(url);
+      const proxyUrl = `/api/crs${crsUrl.pathname}${crsUrl.search}`;
+      console.log(`[ZK] CRS interceptor: ${url} -> ${proxyUrl}`);
+      return originalFetch(proxyUrl, {
+        ...init,
+        mode: 'same-origin',
+      });
+    }
+    
+    return originalFetch(input, init);
+  };
+  
+  crsInterceptorInstalled = true;
+  console.log('[ZK] CRS fetch interceptor installed');
+}
+
 async function loadModules(): Promise<void> {
   // Use a singleton promise to prevent duplicate initialization
   if (initializationPromise) {
@@ -103,9 +139,12 @@ async function loadModules(): Promise<void> {
   }
 
   initializationPromise = (async () => {
-    console.log('[ZK] Loading Noir and Barretenberg modules...');
+console.log('[ZK] Loading Noir and Barretenberg modules...');
     
     try {
+      // Install CRS fetch interceptor before loading bb.js
+      installCrsInterceptor();
+      
       // First initialize WASM modules
       await initializeWasm();
       
@@ -118,12 +157,12 @@ async function loadModules(): Promise<void> {
       Noir = noirModule.Noir as unknown as NoirType;
       UltraHonkBackend = bbModule.UltraHonkBackend as unknown as UltraHonkBackendType;
       Barretenberg = bbModule.Barretenberg as unknown as BarretenbergType;
-      
-      // Initialize Barretenberg API for advanced operations
+
+      // Initialize the shared Barretenberg API instance
+      // UltraHonkBackend constructor requires (acirBytecode, api)
       console.log('[ZK] Initializing Barretenberg API...');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      barretenbergApi = await (Barretenberg as any).new();
-      console.log('[ZK] Barretenberg API initialized successfully');
+      bbApi = await (Barretenberg as any).new();
+      console.log('[ZK] Barretenberg API initialized');
       
       modulesLoaded = true;
       console.log('[ZK] All modules loaded successfully');
@@ -167,11 +206,11 @@ async function loadCircuit(artifact: CircuitArtifact): Promise<CachedCircuit> {
   const compiled: CompiledCircuitType = await response.json();
 
   // Initialize Noir and backend
-  // bb.js 3.0.0: UltraHonkBackend takes bytecode and barretenberg API
+  // UltraHonkBackend constructor: (acirBytecode: string, api: Barretenberg)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const noir = new (Noir as any)(compiled);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const backend = new (UltraHonkBackend as any)(compiled.bytecode, barretenbergApi);
+  const backend = new (UltraHonkBackend as any)(compiled.bytecode, bbApi);
 
   // Try to load verification key if it exists
   let vk: Uint8Array | null = null;
@@ -194,16 +233,15 @@ async function loadCircuit(artifact: CircuitArtifact): Promise<CachedCircuit> {
 
 /**
  * Get or generate verification key for a circuit
- * Uses keccakZK option for EVM-compatible ZK verification
- * (BaseZKHonkVerifier requires ZK-enabled proofs)
+ * Uses verifierTarget: 'evm' to match on-chain BaseZKHonkVerifier (ZK + keccak)
  */
 async function getVerificationKey(circuit: CachedCircuit): Promise<Uint8Array> {
   if (circuit.vk) {
     return circuit.vk;
   }
 
-  console.log('[ZK] Generating verification key (keccakZK for EVM ZK verifiers)...');
-  const vk = await circuit.backend.getVerificationKey({ keccakZK: true });
+  console.log('[ZK] Generating verification key (verifierTarget: evm for ZKHonk verifiers)...');
+  const vk = await circuit.backend.getVerificationKey({ verifierTarget: 'evm' as const });
   circuit.vk = vk;
   return vk;
 }
@@ -260,10 +298,10 @@ async function generateProof(
   console.log(`[ZK] Executing circuit with inputs...`);
   const { witness } = await circuit.noir.execute(inputs);
 
-  // Generate the proof with keccakZK option for EVM-compatible ZK verification
-  // (BaseZKHonkVerifier contracts require ZK-enabled proofs)
-  console.log(`[ZK] Generating proof (keccakZK for EVM ZK verifiers)...`);
-  const proof = await circuit.backend.generateProof(witness, { keccakZK: true });
+  // Generate ZK proof with verifierTarget: 'evm' to match on-chain BaseZKHonkVerifier
+  // The deployed Solidity verifiers use ZKTranscript + Honk.ZKProof (ZK + keccak)
+  console.log(`[ZK] Generating proof (verifierTarget: evm for ZKHonk verifiers)...`);
+  const proof = await circuit.backend.generateProof(witness, { verifierTarget: 'evm' as const });
 
   // Get verification key
   const vk = await getVerificationKey(circuit);
@@ -292,13 +330,16 @@ async function verifyProofLocally(
 
   try {
     console.log(`[ZK] Verifying proof for ${circuitName}...`);
+    console.log(`[ZK] Proof size: ${proof.proof.length} bytes, public inputs: ${proof.publicInputs.length}`);
     const circuit = await loadCircuit(artifact);
     
-    // Use keccakZK option for EVM-compatible ZK verification
+    // verifierTarget: 'evm' to match on-chain BaseZKHonkVerifier (ZK + keccak)
     const isValid = await circuit.backend.verifyProof({
       proof: proof.proof,
       publicInputs: proof.publicInputs as string[],
-    }, { keccakZK: true });
+    }, { verifierTarget: 'evm' as const });
+    
+    console.log(`[ZK] Verification result for ${circuitName}: ${isValid}`);
 
     return { valid: isValid };
   } catch (error) {
@@ -454,12 +495,18 @@ export async function preloadCircuits(): Promise<void> {
 }
 
 /**
- * Clear the circuit cache (useful for memory management)
- * Note: bb.js 3.0 UltraHonkBackend doesn't require explicit destroy
+ * Clear the circuit cache and reset module state
  */
 export function clearCircuitCache(): void {
   circuitCache.clear();
-  console.log('[ZK] Circuit cache cleared');
+  modulesLoaded = false;
+  wasmInitialized = false;
+  initializationPromise = null;
+  Noir = null;
+  UltraHonkBackend = null;
+  Barretenberg = null;
+  bbApi = null;
+  console.log('[ZK] Circuit cache and module state cleared');
 }
 
 // Export types for external use

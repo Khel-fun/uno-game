@@ -33,7 +33,7 @@ import { client } from "@/utils/thirdWebClient";
 import { getNetworkForChain } from "@/utils/networkUtils";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import {
+import {  
   getContractAddress,
   isSupportedChain,
   getSupportedChainIds,

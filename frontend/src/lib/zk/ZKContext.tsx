@@ -105,6 +105,16 @@ export function ZKProvider({
       const message = error instanceof Error ? error.message : 'Failed to load circuits';
       console.error('[ZK Context] Load error:', error);
       loadingRef.current = false; // Allow retry on error
+      loadedRef.current = false; // Reset loaded state so reload is possible
+      
+      // Clear any partially loaded state
+      try {
+        const proofService = await getProofService();
+        proofService.clearCircuitCache();
+      } catch {
+        // Ignore cleanup errors
+      }
+      
       setState(prev => ({
         ...prev,
         isLoading: false,

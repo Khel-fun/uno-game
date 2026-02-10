@@ -312,17 +312,17 @@ export function useZKGameIntegration(options: UseZKGameIntegrationOptions = {}) 
       
       notifyZK('success', 'play', `Proof generated in ${Math.round(genDuration)}ms`);
       
+      // Track the proof immediately (before verification) so it appears in UI
+      if (onProofGeneratedRef.current) {
+        onProofGeneratedRef.current('play', proof);
+      }
+      
       // Verify locally after generation
       const verificationService = await import('../lib/zk/verificationService');
       const verifyResult = await verificationService.verifyLocally('play', proof);
       
       if (verifyResult.valid) {
         notifyZK('success', 'play', `Proof verified locally`);
-        
-        // Track the proof for on-chain verification UI
-        if (onProofGeneratedRef.current) {
-          onProofGeneratedRef.current('play', proof);
-        }
         
         // Submit to zkVerify in the background (don't await - don't block gameplay)
         verificationService.submitToZkVerify('play', proof)
@@ -339,6 +339,7 @@ export function useZKGameIntegration(options: UseZKGameIntegrationOptions = {}) 
           });
       } else {
         notifyZK('error', 'play', `Local verification failed: ${verifyResult.error}`);
+        console.warn('[ZK] Play proof local verification failed but proof was still tracked for UI');
       }
       
       const totalDuration = performance.now() - startTime;
@@ -488,17 +489,17 @@ export function useZKGameIntegration(options: UseZKGameIntegrationOptions = {}) 
       
       notifyZK('success', 'draw', `Proof generated in ${Math.round(genDuration)}ms`);
       
+      // Track the proof immediately (before verification) so it appears in UI
+      if (onProofGeneratedRef.current) {
+        onProofGeneratedRef.current('draw', proof);
+      }
+      
       // Verify locally after generation
       const verificationService = await import('../lib/zk/verificationService');
       const verifyResult = await verificationService.verifyLocally('draw', proof);
       
       if (verifyResult.valid) {
         notifyZK('success', 'draw', `Proof verified locally`);
-        
-        // Track the proof for on-chain verification UI
-        if (onProofGeneratedRef.current) {
-          onProofGeneratedRef.current('draw', proof);
-        }
         
         // Submit to zkVerify in the background (don't await - don't block gameplay)
         verificationService.submitToZkVerify('draw', proof)
@@ -515,6 +516,7 @@ export function useZKGameIntegration(options: UseZKGameIntegrationOptions = {}) 
           });
       } else {
         notifyZK('error', 'draw', `Local verification failed: ${verifyResult.error}`);
+        console.warn('[ZK] Draw proof local verification failed but proof was still tracked for UI');
       }
       
       const totalDuration = performance.now() - startTime;

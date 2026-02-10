@@ -93,4 +93,4 @@ export { useZKGame } from './useZKGame';
 export type { ZKGameState, ZKGameActions, ZKGameProofs } from './useZKGame';
 
 // Context Provider
-export { ZKProvider, useZK } from './ZKContext';
+export { ZKProvider, useZK, type ProofRecord } from './ZKContext';
