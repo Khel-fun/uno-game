@@ -1,585 +1,927 @@
-{
-    "abi": [
-        {
-            "type": "function",
-            "name": "commitMove",
-            "inputs": [
+﻿{
+    "abi":  [
                 {
-                    "name": "gameId",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "type":  "constructor",
+                    "inputs":  [
+                                   {
+                                       "name":  "_shuffleVerifier",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "_dealVerifier",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "_drawVerifier",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "_playVerifier",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   }
+                               ],
+                    "stateMutability":  "nonpayable"
                 },
                 {
-                    "name": "moveHash",
-                    "type": "bytes32",
-                    "internalType": "bytes32"
-                }
-            ],
-            "outputs": [],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "createGame",
-            "inputs": [
-                {
-                    "name": "_creator",
-                    "type": "address",
-                    "internalType": "address"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "endGame",
-            "inputs": [
-                {
-                    "name": "gameId",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "type":  "function",
+                    "name":  "MAX_PLAYERS",
+                    "inputs":  [
+
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "uint256",
+                                        "internalType":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view"
                 },
                 {
-                    "name": "gameHash",
-                    "type": "bytes32",
-                    "internalType": "bytes32"
-                }
-            ],
-            "outputs": [],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "getActiveGames",
-            "inputs": [],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256[]",
-                    "internalType": "uint256[]"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "getGame",
-            "inputs": [
-                {
-                    "name": "gameId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "id",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "type":  "function",
+                    "name":  "commitMove",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "moveHash",
+                                       "type":  "bytes32",
+                                       "internalType":  "bytes32"
+                                   }
+                               ],
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable"
                 },
                 {
-                    "name": "players",
-                    "type": "address[]",
-                    "internalType": "address[]"
+                    "type":  "function",
+                    "name":  "commitMove",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "moveHash",
+                                       "type":  "bytes32",
+                                       "internalType":  "bytes32"
+                                   },
+                                   {
+                                       "name":  "proof",
+                                       "type":  "bytes",
+                                       "internalType":  "bytes"
+                                   },
+                                   {
+                                       "name":  "publicInputs",
+                                       "type":  "bytes32[]",
+                                       "internalType":  "bytes32[]"
+                                   },
+                                   {
+                                       "name":  "circuitType",
+                                       "type":  "uint8",
+                                       "internalType":  "enum UnoGame.CircuitType"
+                                   }
+                               ],
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable"
                 },
                 {
-                    "name": "status",
-                    "type": "uint8",
-                    "internalType": "enum UnoGame.GameStatus"
+                    "type":  "function",
+                    "name":  "createGame",
+                    "inputs":  [
+                                   {
+                                       "name":  "_creator",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "_isBot",
+                                       "type":  "bool",
+                                       "internalType":  "bool"
+                                   }
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "uint256",
+                                        "internalType":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "nonpayable"
                 },
                 {
-                    "name": "startTime",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "type":  "function",
+                    "name":  "createGame",
+                    "inputs":  [
+                                   {
+                                       "name":  "_creator",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "_isBot",
+                                       "type":  "bool",
+                                       "internalType":  "bool"
+                                   },
+                                   {
+                                       "name":  "_isPrivate",
+                                       "type":  "bool",
+                                       "internalType":  "bool"
+                                   },
+                                   {
+                                       "name":  "_gameCodeHash",
+                                       "type":  "bytes32",
+                                       "internalType":  "bytes32"
+                                   },
+                                   {
+                                       "name":  "_maxPlayers",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   }
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "uint256",
+                                        "internalType":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "nonpayable"
                 },
                 {
-                    "name": "endTime",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "type":  "function",
+                    "name":  "dealVerifier",
+                    "inputs":  [
+
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "address",
+                                        "internalType":  "contract IUltraVerifier"
+                                    }
+                                ],
+                    "stateMutability":  "view"
                 },
                 {
-                    "name": "gameHash",
-                    "type": "bytes32",
-                    "internalType": "bytes32"
+                    "type":  "function",
+                    "name":  "deleteGame",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   }
+                               ],
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable"
                 },
                 {
-                    "name": "moves",
-                    "type": "bytes32[]",
-                    "internalType": "bytes32[]"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "getNotStartedGames",
-            "inputs": [],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256[]",
-                    "internalType": "uint256[]"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "joinGame",
-            "inputs": [
-                {
-                    "name": "gameId",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "type":  "function",
+                    "name":  "drawVerifier",
+                    "inputs":  [
+
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "address",
+                                        "internalType":  "contract IUltraVerifier"
+                                    }
+                                ],
+                    "stateMutability":  "view"
                 },
                 {
-                    "name": "_joinee",
-                    "type": "address",
-                    "internalType": "address"
-                }
-            ],
-            "outputs": [],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "startGame",
-            "inputs": [
-                {
-                    "name": "gameId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "event",
-            "name": "GameCreated",
-            "inputs": [
-                {
-                    "name": "gameId",
-                    "type": "uint256",
-                    "indexed": true,
-                    "internalType": "uint256"
+                    "type":  "function",
+                    "name":  "endGame",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "gameHash",
+                                       "type":  "bytes32",
+                                       "internalType":  "bytes32"
+                                   }
+                               ],
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable"
                 },
                 {
-                    "name": "creator",
-                    "type": "address",
-                    "indexed": false,
-                    "internalType": "address"
-                }
-            ],
-            "anonymous": false
-        },
-        {
-            "type": "event",
-            "name": "GameEnded",
-            "inputs": [
-                {
-                    "name": "gameId",
-                    "type": "uint256",
-                    "indexed": true,
-                    "internalType": "uint256"
-                }
-            ],
-            "anonymous": false
-        },
-        {
-            "type": "event",
-            "name": "GameStarted",
-            "inputs": [
-                {
-                    "name": "gameId",
-                    "type": "uint256",
-                    "indexed": true,
-                    "internalType": "uint256"
-                }
-            ],
-            "anonymous": false
-        },
-        {
-            "type": "event",
-            "name": "MoveCommitted",
-            "inputs": [
-                {
-                    "name": "gameId",
-                    "type": "uint256",
-                    "indexed": true,
-                    "internalType": "uint256"
+                    "type":  "function",
+                    "name":  "getActiveGames",
+                    "inputs":  [
+
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "uint256[]",
+                                        "internalType":  "uint256[]"
+                                    }
+                                ],
+                    "stateMutability":  "view"
                 },
                 {
-                    "name": "moveHash",
-                    "type": "bytes32",
-                    "indexed": false,
-                    "internalType": "bytes32"
-                }
-            ],
-            "anonymous": false
-        },
-        {
-            "type": "event",
-            "name": "PlayerJoined",
-            "inputs": [
-                {
-                    "name": "gameId",
-                    "type": "uint256",
-                    "indexed": true,
-                    "internalType": "uint256"
+                    "type":  "function",
+                    "name":  "getGame",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   }
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "view_",
+                                        "type":  "tuple",
+                                        "internalType":  "struct UnoGame.GameView",
+                                        "components":  [
+                                                           {
+                                                               "name":  "id",
+                                                               "type":  "uint256",
+                                                               "internalType":  "uint256"
+                                                           },
+                                                           {
+                                                               "name":  "creator",
+                                                               "type":  "address",
+                                                               "internalType":  "address"
+                                                           },
+                                                           {
+                                                               "name":  "players",
+                                                               "type":  "address[]",
+                                                               "internalType":  "address[]"
+                                                           },
+                                                           {
+                                                               "name":  "status",
+                                                               "type":  "uint8",
+                                                               "internalType":  "enum UnoGame.GameStatus"
+                                                           },
+                                                           {
+                                                               "name":  "isPrivate",
+                                                               "type":  "bool",
+                                                               "internalType":  "bool"
+                                                           },
+                                                           {
+                                                               "name":  "gameCodeHash",
+                                                               "type":  "bytes32",
+                                                               "internalType":  "bytes32"
+                                                           },
+                                                           {
+                                                               "name":  "maxPlayers",
+                                                               "type":  "uint256",
+                                                               "internalType":  "uint256"
+                                                           },
+                                                           {
+                                                               "name":  "startTime",
+                                                               "type":  "uint256",
+                                                               "internalType":  "uint256"
+                                                           },
+                                                           {
+                                                               "name":  "endTime",
+                                                               "type":  "uint256",
+                                                               "internalType":  "uint256"
+                                                           },
+                                                           {
+                                                               "name":  "deckCommitment",
+                                                               "type":  "bytes32",
+                                                               "internalType":  "bytes32"
+                                                           },
+                                                           {
+                                                               "name":  "moveCommitments",
+                                                               "type":  "bytes32[]",
+                                                               "internalType":  "bytes32[]"
+                                                           }
+                                                       ]
+                                    }
+                                ],
+                    "stateMutability":  "view"
                 },
                 {
-                    "name": "player",
-                    "type": "address",
-                    "indexed": false,
-                    "internalType": "address"
+                    "type":  "function",
+                    "name":  "getGameCount",
+                    "inputs":  [
+
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "uint256",
+                                        "internalType":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view"
+                },
+                {
+                    "type":  "function",
+                    "name":  "getGameProofs",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   }
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "tuple[]",
+                                        "internalType":  "struct UnoGame.MoveProof[]",
+                                        "components":  [
+                                                           {
+                                                               "name":  "commitment",
+                                                               "type":  "bytes32",
+                                                               "internalType":  "bytes32"
+                                                           },
+                                                           {
+                                                               "name":  "proof",
+                                                               "type":  "bytes",
+                                                               "internalType":  "bytes"
+                                                           },
+                                                           {
+                                                               "name":  "publicInputs",
+                                                               "type":  "bytes32[]",
+                                                               "internalType":  "bytes32[]"
+                                                           },
+                                                           {
+                                                               "name":  "player",
+                                                               "type":  "address",
+                                                               "internalType":  "address"
+                                                           },
+                                                           {
+                                                               "name":  "timestamp",
+                                                               "type":  "uint256",
+                                                               "internalType":  "uint256"
+                                                           },
+                                                           {
+                                                               "name":  "verified",
+                                                               "type":  "bool",
+                                                               "internalType":  "bool"
+                                                           }
+                                                       ]
+                                    }
+                                ],
+                    "stateMutability":  "view"
+                },
+                {
+                    "type":  "function",
+                    "name":  "getGamesByCreator",
+                    "inputs":  [
+                                   {
+                                       "name":  "_creator",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   }
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "uint256[]",
+                                        "internalType":  "uint256[]"
+                                    }
+                                ],
+                    "stateMutability":  "view"
+                },
+                {
+                    "type":  "function",
+                    "name":  "getNotStartedGames",
+                    "inputs":  [
+
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "uint256[]",
+                                        "internalType":  "uint256[]"
+                                    }
+                                ],
+                    "stateMutability":  "view"
+                },
+                {
+                    "type":  "function",
+                    "name":  "getPublicNotStartedGames",
+                    "inputs":  [
+
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "uint256[]",
+                                        "internalType":  "uint256[]"
+                                    }
+                                ],
+                    "stateMutability":  "view"
+                },
+                {
+                    "type":  "function",
+                    "name":  "isGamePrivate",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   }
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "bool",
+                                        "internalType":  "bool"
+                                    }
+                                ],
+                    "stateMutability":  "view"
+                },
+                {
+                    "type":  "function",
+                    "name":  "joinGame",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "_joinee",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   }
+                               ],
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable"
+                },
+                {
+                    "type":  "function",
+                    "name":  "joinGameWithCode",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "_joinee",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "_gameCode",
+                                       "type":  "string",
+                                       "internalType":  "string"
+                                   }
+                               ],
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable"
+                },
+                {
+                    "type":  "function",
+                    "name":  "owner",
+                    "inputs":  [
+
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "address",
+                                        "internalType":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view"
+                },
+                {
+                    "type":  "function",
+                    "name":  "playVerifier",
+                    "inputs":  [
+
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "address",
+                                        "internalType":  "contract IUltraVerifier"
+                                    }
+                                ],
+                    "stateMutability":  "view"
+                },
+                {
+                    "type":  "function",
+                    "name":  "renounceOwnership",
+                    "inputs":  [
+
+                               ],
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable"
+                },
+                {
+                    "type":  "function",
+                    "name":  "shuffleVerifier",
+                    "inputs":  [
+
+                               ],
+                    "outputs":  [
+                                    {
+                                        "name":  "",
+                                        "type":  "address",
+                                        "internalType":  "contract IUltraVerifier"
+                                    }
+                                ],
+                    "stateMutability":  "view"
+                },
+                {
+                    "type":  "function",
+                    "name":  "startGame",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "deckCommitment",
+                                       "type":  "bytes32",
+                                       "internalType":  "bytes32"
+                                   },
+                                   {
+                                       "name":  "shuffleProof",
+                                       "type":  "bytes",
+                                       "internalType":  "bytes"
+                                   },
+                                   {
+                                       "name":  "publicInputs",
+                                       "type":  "bytes32[]",
+                                       "internalType":  "bytes32[]"
+                                   }
+                               ],
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable"
+                },
+                {
+                    "type":  "function",
+                    "name":  "startGame",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "internalType":  "uint256"
+                                   }
+                               ],
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable"
+                },
+                {
+                    "type":  "function",
+                    "name":  "transferOwnership",
+                    "inputs":  [
+                                   {
+                                       "name":  "newOwner",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   }
+                               ],
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable"
+                },
+                {
+                    "type":  "function",
+                    "name":  "updateVerifiers",
+                    "inputs":  [
+                                   {
+                                       "name":  "_shuffleVerifier",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "_dealVerifier",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "_drawVerifier",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "_playVerifier",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   }
+                               ],
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable"
+                },
+                {
+                    "type":  "event",
+                    "name":  "GameCreated",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "indexed":  true,
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "creator",
+                                       "type":  "address",
+                                       "indexed":  true,
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "isPrivate",
+                                       "type":  "bool",
+                                       "indexed":  false,
+                                       "internalType":  "bool"
+                                   }
+                               ],
+                    "anonymous":  false
+                },
+                {
+                    "type":  "event",
+                    "name":  "GameDeleted",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "indexed":  true,
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "creator",
+                                       "type":  "address",
+                                       "indexed":  true,
+                                       "internalType":  "address"
+                                   }
+                               ],
+                    "anonymous":  false
+                },
+                {
+                    "type":  "event",
+                    "name":  "GameEnded",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "indexed":  true,
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "winner",
+                                       "type":  "address",
+                                       "indexed":  true,
+                                       "internalType":  "address"
+                                   }
+                               ],
+                    "anonymous":  false
+                },
+                {
+                    "type":  "event",
+                    "name":  "GameStarted",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "indexed":  true,
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "deckCommitment",
+                                       "type":  "bytes32",
+                                       "indexed":  false,
+                                       "internalType":  "bytes32"
+                                   }
+                               ],
+                    "anonymous":  false
+                },
+                {
+                    "type":  "event",
+                    "name":  "MoveCommitted",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "indexed":  true,
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "player",
+                                       "type":  "address",
+                                       "indexed":  true,
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "moveHash",
+                                       "type":  "bytes32",
+                                       "indexed":  false,
+                                       "internalType":  "bytes32"
+                                   }
+                               ],
+                    "anonymous":  false
+                },
+                {
+                    "type":  "event",
+                    "name":  "OwnershipTransferred",
+                    "inputs":  [
+                                   {
+                                       "name":  "previousOwner",
+                                       "type":  "address",
+                                       "indexed":  true,
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "newOwner",
+                                       "type":  "address",
+                                       "indexed":  true,
+                                       "internalType":  "address"
+                                   }
+                               ],
+                    "anonymous":  false
+                },
+                {
+                    "type":  "event",
+                    "name":  "PlayerJoined",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "indexed":  true,
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "player",
+                                       "type":  "address",
+                                       "indexed":  true,
+                                       "internalType":  "address"
+                                   }
+                               ],
+                    "anonymous":  false
+                },
+                {
+                    "type":  "event",
+                    "name":  "ProofVerified",
+                    "inputs":  [
+                                   {
+                                       "name":  "gameId",
+                                       "type":  "uint256",
+                                       "indexed":  true,
+                                       "internalType":  "uint256"
+                                   },
+                                   {
+                                       "name":  "player",
+                                       "type":  "address",
+                                       "indexed":  true,
+                                       "internalType":  "address"
+                                   },
+                                   {
+                                       "name":  "circuitType",
+                                       "type":  "uint8",
+                                       "indexed":  false,
+                                       "internalType":  "enum UnoGame.CircuitType"
+                                   }
+                               ],
+                    "anonymous":  false
+                },
+                {
+                    "type":  "error",
+                    "name":  "AlreadyJoined",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "GameAlreadyStarted",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "GameFull",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "InvalidGameCode",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "InvalidGameId",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "InvalidGameStatus",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "InvalidMaxPlayers",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "InvalidProof",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "InvalidVerifierAddress",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "NotEnoughPlayers",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "NotGameCreator",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "OwnableInvalidOwner",
+                    "inputs":  [
+                                   {
+                                       "name":  "owner",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   }
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "OwnableUnauthorizedAccount",
+                    "inputs":  [
+                                   {
+                                       "name":  "account",
+                                       "type":  "address",
+                                       "internalType":  "address"
+                                   }
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "PlayerNotInGame",
+                    "inputs":  [
+
+                               ]
+                },
+                {
+                    "type":  "error",
+                    "name":  "ReentrancyGuardReentrantCall",
+                    "inputs":  [
+
+                               ]
                 }
-            ],
-            "anonymous": false
-        },
-        {
-            "type": "error",
-            "name": "ReentrancyGuardReentrantCall",
-            "inputs": []
-        }
-    ],
-    "bytecode": {
-        "object": "0x6080604052348015600f57600080fd5b506001600055610ea7806100246000396000f3fe608060405234801561001057600080fd5b50600436106100885760003560e01c8063a2f77bcc1161005b578063a2f77bcc146100f4578063cc3415d81461011a578063e5ed1d5914610122578063ead00e021461013557600080fd5b80631b76929c1461008d57806326826f62146100ab578063474d0b5a146100c05780636e1ef8b2146100e1575b600080fd5b610095610148565b6040516100a29190610b96565b60405180910390f35b6100be6100b9366004610bd9565b6101a0565b005b6100d36100ce366004610c12565b610293565b6040519081526020016100a2565b6100be6100ef366004610bd9565b610417565b610107610102366004610c34565b6104ff565b6040516100a29796959493929190610cc1565b610095610618565b6100be610130366004610c34565b610790565b6100be610143366004610d50565b6108af565b6060600280548060200260200160405190810160405280929190818152602001828054801561019657602002820191906000526020600020905b815481526020019060010190808311610182575b5050505050905090565b8160016000821180156101b557506001548211155b6101da5760405162461bcd60e51b81526004016101d190610d7c565b60405180910390fd5b60008281526003602052604090208160028111156101fa576101fa610c4d565b60028083015460ff169081111561021357610213610c4d565b146102305760405162461bcd60e51b81526004016101d190610da5565b6000858152600360209081526040808320600681018054600181018255908552938390209093018790555186815287917f8da9ca3f91d5711e050b7b3cd914a0e574d11bf428d5150a622d83903d479d5c910160405180910390a2505050505050565b600061029d610a09565b600180549060006102ad83610dfd565b9091555050600180546040805160e08101825282815281516000808252602080830185528084019283528385018290524260608501526080840182905260a084018290528451828152808201865260c085015285825260038152939020825181559051805194959294919361032793850192910190610ae1565b5060408201518160020160006101000a81548160ff0219169083600281111561035257610352610c4d565b0217905550606082015160038201556080820151600482015560a0820151600582015560c08201518051610390916006840191602090910190610b46565b5050600280546001810182556000919091527f405787fa12a823e0f2b7631cc41b3ba8828b3321ca811111fa75cd3aa3bb5ace01829055506040516001600160a01b038416815281907fc3e0f84839dc888c892a013d10c8f9d6dc05a21a879d0ce468ca558013e9121c9060200160405180910390a290506104126001600055565b919050565b81600160008211801561042c57506001548211155b6104485760405162461bcd60e51b81526004016101d190610d7c565b600082815260036020526040902081600281111561046857610468610c4d565b60028083015460ff169081111561048157610481610c4d565b1461049e5760405162461bcd60e51b81526004016101d190610da5565b60008581526003602052604090206002808201805460ff19169091179055600581018590556104cc86610a33565b60405186907fce24807f7e4b60b4e641462f13029fa5e5f79075bbc3f8e5cd43ecd19661d76090600090a2505050505050565b6000606060008060008060606000600360008a815260200190815260200160002090508060000154816001018260020160009054906101000a900460ff1683600301548460040154856005015486600601858054806020026020016040519081016040528092919081815260200182805480156105a557602002820191906000526020600020905b81546001600160a01b03168152600190910190602001808311610587575b50505050509550808054806020026020016040519081016040528092919081815260200182805480156105f757602002820191906000526020600020905b8154815260200190600101908083116105e3575b50505050509050975097509750975097509750975050919395979092949650565b60025460609060009067ffffffffffffffff81111561063957610639610e16565b604051908082528060200260200182016040528015610662578160200160208202803683370190505b5090506000805b6002548110156106f65760006002828154811061068857610688610e2c565b60009182526020822001549150600082815260036020526040902060029081015460ff16908111156106bc576106bc610c4d565b036106ed57808484815181106106d4576106d4610e2c565b6020908102919091010152826106e981610dfd565b9350505b50600101610669565b5060008167ffffffffffffffff81111561071257610712610e16565b60405190808252806020026020018201604052801561073b578160200160208202803683370190505b50905060005b828110156107885783818151811061075b5761075b610e2c565b602002602001015182828151811061077557610775610e2c565b6020908102919091010152600101610741565b509392505050565b80600080821180156107a457506001548211155b6107c05760405162461bcd60e51b81526004016101d190610d7c565b60008281526003602052604090208160028111156107e0576107e0610c4d565b60028083015460ff16908111156107f9576107f9610c4d565b146108165760405162461bcd60e51b81526004016101d190610da5565b600084815260036020526040902060018101546002111561086e5760405162461bcd60e51b81526020600482015260126024820152714e6f7420656e6f75676820706c617965727360701b60448201526064016101d1565b60028101805460ff1916600117905560405185907f50ad08f58a27f2851d7e3a1b3a6a46b290f2ce677e99642d30ff639721e7779090600090a25050505050565b6108b7610a09565b81600080821180156108cb57506001548211155b6108e75760405162461bcd60e51b81526004016101d190610d7c565b600082815260036020526040902081600281111561090757610907610c4d565b60028083015460ff169081111561092057610920610c4d565b1461093d5760405162461bcd60e51b81526004016101d190610da5565b60008581526003602052604090206001810154600a1161098e5760405162461bcd60e51b815260206004820152600c60248201526b11d85b59481a5cc8199d5b1b60a21b60448201526064016101d1565b600181810180549182018155600090815260209081902090910180546001600160a01b0319166001600160a01b03881690811790915560405190815287917f87969bc7faf902221a147b95ceba76e011c5efb0339a0a8ee7a2bb82d9cfbbd6910160405180910390a250505050610a056001600055565b5050565b600260005403610a2c57604051633ee5aeb560e01b815260040160405180910390fd5b6002600055565b60005b600254811015610a05578160028281548110610a5457610a54610e2c565b906000526020600020015403610ad95760028054610a7490600190610e42565b81548110610a8457610a84610e2c565b906000526020600020015460028281548110610aa257610aa2610e2c565b6000918252602090912001556002805480610abf57610abf610e5b565b600190038181906000526020600020016000905590555050565b600101610a36565b828054828255906000526020600020908101928215610b36579160200282015b82811115610b3657825182546001600160a01b0319166001600160a01b03909116178255602090920191600190910190610b01565b50610b42929150610b81565b5090565b828054828255906000526020600020908101928215610b36579160200282015b82811115610b36578251825591602001919060010190610b66565b5b80821115610b425760008155600101610b82565b602080825282518282018190526000918401906040840190835b81811015610bce578351835260209384019390920191600101610bb0565b509095945050505050565b60008060408385031215610bec57600080fd5b50508035926020909101359150565b80356001600160a01b038116811461041257600080fd5b600060208284031215610c2457600080fd5b610c2d82610bfb565b9392505050565b600060208284031215610c4657600080fd5b5035919050565b634e487b7160e01b600052602160045260246000fd5b60038110610c8157634e487b7160e01b600052602160045260246000fd5b9052565b600081518084526020840193506020830160005b82811015610cb7578151865260209586019590910190600101610c99565b5093949350505050565b600060e0820189835260e060208401528089518083526101008501915060208b01925060005b81811015610d0e5783516001600160a01b0316835260209384019390920191600101610ce7565b5050610d1d604085018a610c63565b8760608501528660808501528560a085015283810360c0850152610d418186610c85565b9b9a5050505050505050505050565b60008060408385031215610d6357600080fd5b82359150610d7360208401610bfb565b90509250929050565b6020808252600f908201526e125b9d985b1a590819d85b59481251608a1b604082015260600190565b60208082526022908201527f47616d65206973206e6f7420696e207468652072657175697265642073746174604082015261757360f01b606082015260800190565b634e487b7160e01b600052601160045260246000fd5b600060018201610e0f57610e0f610de7565b5060010190565b634e487b7160e01b600052604160045260246000fd5b634e487b7160e01b600052603260045260246000fd5b81810381811115610e5557610e55610de7565b92915050565b634e487b7160e01b600052603160045260246000fdfea2646970667358221220b1d960e76ab0161d28b160c5f84d631a362f834ee1f61627fd146d34541a434864736f6c634300081c0033",
-        "sourceMap": "118:4381:21:-:0;;;;;;;;;;;;-1:-1:-1;1713:1:19;1917:7;:21;118:4381:21;;;;;;",
-        "linkReferences": {}
-    },
-    "deployedBytecode": {
-        "object": "0x608060405234801561001057600080fd5b50600436106100885760003560e01c8063a2f77bcc1161005b578063a2f77bcc146100f4578063cc3415d81461011a578063e5ed1d5914610122578063ead00e021461013557600080fd5b80631b76929c1461008d57806326826f62146100ab578063474d0b5a146100c05780636e1ef8b2146100e1575b600080fd5b610095610148565b6040516100a29190610b96565b60405180910390f35b6100be6100b9366004610bd9565b6101a0565b005b6100d36100ce366004610c12565b610293565b6040519081526020016100a2565b6100be6100ef366004610bd9565b610417565b610107610102366004610c34565b6104ff565b6040516100a29796959493929190610cc1565b610095610618565b6100be610130366004610c34565b610790565b6100be610143366004610d50565b6108af565b6060600280548060200260200160405190810160405280929190818152602001828054801561019657602002820191906000526020600020905b815481526020019060010190808311610182575b5050505050905090565b8160016000821180156101b557506001548211155b6101da5760405162461bcd60e51b81526004016101d190610d7c565b60405180910390fd5b60008281526003602052604090208160028111156101fa576101fa610c4d565b60028083015460ff169081111561021357610213610c4d565b146102305760405162461bcd60e51b81526004016101d190610da5565b6000858152600360209081526040808320600681018054600181018255908552938390209093018790555186815287917f8da9ca3f91d5711e050b7b3cd914a0e574d11bf428d5150a622d83903d479d5c910160405180910390a2505050505050565b600061029d610a09565b600180549060006102ad83610dfd565b9091555050600180546040805160e08101825282815281516000808252602080830185528084019283528385018290524260608501526080840182905260a084018290528451828152808201865260c085015285825260038152939020825181559051805194959294919361032793850192910190610ae1565b5060408201518160020160006101000a81548160ff0219169083600281111561035257610352610c4d565b0217905550606082015160038201556080820151600482015560a0820151600582015560c08201518051610390916006840191602090910190610b46565b5050600280546001810182556000919091527f405787fa12a823e0f2b7631cc41b3ba8828b3321ca811111fa75cd3aa3bb5ace01829055506040516001600160a01b038416815281907fc3e0f84839dc888c892a013d10c8f9d6dc05a21a879d0ce468ca558013e9121c9060200160405180910390a290506104126001600055565b919050565b81600160008211801561042c57506001548211155b6104485760405162461bcd60e51b81526004016101d190610d7c565b600082815260036020526040902081600281111561046857610468610c4d565b60028083015460ff169081111561048157610481610c4d565b1461049e5760405162461bcd60e51b81526004016101d190610da5565b60008581526003602052604090206002808201805460ff19169091179055600581018590556104cc86610a33565b60405186907fce24807f7e4b60b4e641462f13029fa5e5f79075bbc3f8e5cd43ecd19661d76090600090a2505050505050565b6000606060008060008060606000600360008a815260200190815260200160002090508060000154816001018260020160009054906101000a900460ff1683600301548460040154856005015486600601858054806020026020016040519081016040528092919081815260200182805480156105a557602002820191906000526020600020905b81546001600160a01b03168152600190910190602001808311610587575b50505050509550808054806020026020016040519081016040528092919081815260200182805480156105f757602002820191906000526020600020905b8154815260200190600101908083116105e3575b50505050509050975097509750975097509750975050919395979092949650565b60025460609060009067ffffffffffffffff81111561063957610639610e16565b604051908082528060200260200182016040528015610662578160200160208202803683370190505b5090506000805b6002548110156106f65760006002828154811061068857610688610e2c565b60009182526020822001549150600082815260036020526040902060029081015460ff16908111156106bc576106bc610c4d565b036106ed57808484815181106106d4576106d4610e2c565b6020908102919091010152826106e981610dfd565b9350505b50600101610669565b5060008167ffffffffffffffff81111561071257610712610e16565b60405190808252806020026020018201604052801561073b578160200160208202803683370190505b50905060005b828110156107885783818151811061075b5761075b610e2c565b602002602001015182828151811061077557610775610e2c565b6020908102919091010152600101610741565b509392505050565b80600080821180156107a457506001548211155b6107c05760405162461bcd60e51b81526004016101d190610d7c565b60008281526003602052604090208160028111156107e0576107e0610c4d565b60028083015460ff16908111156107f9576107f9610c4d565b146108165760405162461bcd60e51b81526004016101d190610da5565b600084815260036020526040902060018101546002111561086e5760405162461bcd60e51b81526020600482015260126024820152714e6f7420656e6f75676820706c617965727360701b60448201526064016101d1565b60028101805460ff1916600117905560405185907f50ad08f58a27f2851d7e3a1b3a6a46b290f2ce677e99642d30ff639721e7779090600090a25050505050565b6108b7610a09565b81600080821180156108cb57506001548211155b6108e75760405162461bcd60e51b81526004016101d190610d7c565b600082815260036020526040902081600281111561090757610907610c4d565b60028083015460ff169081111561092057610920610c4d565b1461093d5760405162461bcd60e51b81526004016101d190610da5565b60008581526003602052604090206001810154600a1161098e5760405162461bcd60e51b815260206004820152600c60248201526b11d85b59481a5cc8199d5b1b60a21b60448201526064016101d1565b600181810180549182018155600090815260209081902090910180546001600160a01b0319166001600160a01b03881690811790915560405190815287917f87969bc7faf902221a147b95ceba76e011c5efb0339a0a8ee7a2bb82d9cfbbd6910160405180910390a250505050610a056001600055565b5050565b600260005403610a2c57604051633ee5aeb560e01b815260040160405180910390fd5b6002600055565b60005b600254811015610a05578160028281548110610a5457610a54610e2c565b906000526020600020015403610ad95760028054610a7490600190610e42565b81548110610a8457610a84610e2c565b906000526020600020015460028281548110610aa257610aa2610e2c565b6000918252602090912001556002805480610abf57610abf610e5b565b600190038181906000526020600020016000905590555050565b600101610a36565b828054828255906000526020600020908101928215610b36579160200282015b82811115610b3657825182546001600160a01b0319166001600160a01b03909116178255602090920191600190910190610b01565b50610b42929150610b81565b5090565b828054828255906000526020600020908101928215610b36579160200282015b82811115610b36578251825591602001919060010190610b66565b5b80821115610b425760008155600101610b82565b602080825282518282018190526000918401906040840190835b81811015610bce578351835260209384019390920191600101610bb0565b509095945050505050565b60008060408385031215610bec57600080fd5b50508035926020909101359150565b80356001600160a01b038116811461041257600080fd5b600060208284031215610c2457600080fd5b610c2d82610bfb565b9392505050565b600060208284031215610c4657600080fd5b5035919050565b634e487b7160e01b600052602160045260246000fd5b60038110610c8157634e487b7160e01b600052602160045260246000fd5b9052565b600081518084526020840193506020830160005b82811015610cb7578151865260209586019590910190600101610c99565b5093949350505050565b600060e0820189835260e060208401528089518083526101008501915060208b01925060005b81811015610d0e5783516001600160a01b0316835260209384019390920191600101610ce7565b5050610d1d604085018a610c63565b8760608501528660808501528560a085015283810360c0850152610d418186610c85565b9b9a5050505050505050505050565b60008060408385031215610d6357600080fd5b82359150610d7360208401610bfb565b90509250929050565b6020808252600f908201526e125b9d985b1a590819d85b59481251608a1b604082015260600190565b60208082526022908201527f47616d65206973206e6f7420696e207468652072657175697265642073746174604082015261757360f01b606082015260800190565b634e487b7160e01b600052601160045260246000fd5b600060018201610e0f57610e0f610de7565b5060010190565b634e487b7160e01b600052604160045260246000fd5b634e487b7160e01b600052603260045260246000fd5b81810381811115610e5557610e55610de7565b92915050565b634e487b7160e01b600052603160045260246000fdfea2646970667358221220b1d960e76ab0161d28b160c5f84d631a362f834ee1f61627fd146d34541a434864736f6c634300081c0033",
-        "sourceMap": "118:4381:21:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;3168:103;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;2295:235;;;;;;:::i;:::-;;:::i;:::-;;1125:549;;;;;;:::i;:::-;;:::i;:::-;;;1444:25:22;;;1432:2;1417:18;1125:549:21;1298:177:22;2536:296:21;;;;;;:::i;:::-;;:::i;3992:505::-;;;;;;:::i;:::-;;:::i;:::-;;;;;;;;;;;;;:::i;3277:709::-;;;:::i;1680:297::-;;;;;;:::i;:::-;;:::i;1983:306::-;;;;;;:::i;:::-;;:::i;3168:103::-;3217:16;3252:12;3245:19;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;3168:103;:::o;2295:235::-;2371:6;2379:18;920:1;910:7;:11;:40;;;;;936:14;;925:7;:25;;910:40;902:68;;;;-1:-1:-1;;;902:68:21;;;;;;;:::i;:::-;;;;;;;;;981:17;1001:14;;;:5;:14;;;;;1048;1033:29;;;;;;;;:::i;:::-;:11;;;;;;;;:29;;;;;;;:::i;:::-;;1025:76;;;;-1:-1:-1;;;1025:76:21;;;;;;;:::i;:::-;2409:17:::1;2429:13:::0;;;:5:::1;:13;::::0;;;;;;;2452:10:::1;::::0;::::1;:25:::0;;::::1;::::0;::::1;::::0;;;;;;;;;;;::::1;::::0;;;2492:31;1444:25:22;;;2429:13:21;;2492:31:::1;::::0;1417:18:22;2492:31:21::1;;;;;;;2399:131;892:227:::0;2295:235;;;;:::o;1125:549::-;1194:7;2356:21:19;:19;:21::i;:::-;1213:14:21::1;:16:::0;;;:14:::1;:16;::::0;::::1;:::i;:::-;::::0;;;-1:-1:-1;;1259:14:21::1;::::0;;1303:253:::1;::::0;;::::1;::::0;::::1;::::0;;;;;1358:16;;-1:-1:-1;1358:16:21;;;1303:253:::1;1358:16:::0;;::::1;::::0;;1303:253;;::::1;::::0;;;;;;;;;1442:15:::1;1303:253:::0;;;;;;;;;;;;;;;;1529:16;;;;;;;::::1;::::0;;1303:253;;;;1284:16;;;:5:::1;:16:::0;;;;;:272;;;;;;;;1259:14;;1303:253;;1284:16;;:272:::1;::::0;;::::1;::::0;;::::1;::::0;::::1;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;::::0;;-1:-1:-1;1284:272:21::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;;;::::1;::::0;::::1;::::0;::::1;::::0;::::1;::::0;;::::1;::::0;::::1;:::i;:::-;-1:-1:-1::0;;1566:12:21::1;:28:::0;;::::1;::::0;::::1;::::0;;-1:-1:-1;1566:28:21;;;;;::::1;::::0;;;-1:-1:-1;1609:32:21::1;::::0;-1:-1:-1;;;;;5522:32:22;;5504:51;;1566:28:21;;1609:32:::1;::::0;5492:2:22;5477:18;1609:32:21::1;;;;;;;1658:9:::0;-1:-1:-1;2398:20:19;1713:1;2924:7;:21;2744:208;2398:20;1125:549:21;;;:::o;2536:296::-;2609:6;2617:18;920:1;910:7;:11;:40;;;;;936:14;;925:7;:25;;910:40;902:68;;;;-1:-1:-1;;;902:68:21;;;;;;;:::i;:::-;981:17;1001:14;;;:5;:14;;;;;1048;1033:29;;;;;;;;:::i;:::-;:11;;;;;;;;:29;;;;;;;:::i;:::-;;1025:76;;;;-1:-1:-1;;;1025:76:21;;;;;;;:::i;:::-;2646:17:::1;2666:13:::0;;;:5:::1;:13;::::0;;;;2704:16:::1;2690:11:::0;;::::1;:30:::0;;-1:-1:-1;;2690:30:21::1;::::0;;::::1;::::0;;2730:13:::1;::::0;::::1;:24:::0;;;2764:29:::1;2666:13:::0;2764:21:::1;:29::i;:::-;2808:17;::::0;2818:6;;2808:17:::1;::::0;;;::::1;2636:196;892:227:::0;2536:296;;;;:::o;3992:505::-;4055:10;4075:24;4109:17;4136;4163:15;4188:16;4214:22;4253:17;4273:5;:13;4279:6;4273:13;;;;;;;;;;;4253:33;;4317:4;:7;;;4338:4;:12;;4364:4;:11;;;;;;;;;;;;4389:4;:14;;;4417:4;:12;;;4443:4;:13;;;4470:4;:10;;4296:194;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;4296:194:21;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;3992:505;;;;;;;;;:::o;3277:709::-;3407:12;:19;3330:16;;3358:32;;3393:34;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;3393:34:21;;3358:69;;3437:13;3470:9;3465:260;3489:12;:19;3485:23;;3465:260;;;3529:14;3546:12;3559:1;3546:15;;;;;;;;:::i;:::-;;;;;;;;;;;-1:-1:-1;3579:13:21;;;;:5;:13;;;;;:20;;;;;;;;:45;;;;;;;:::i;:::-;;3575:140;;3669:6;3644:15;3660:5;3644:22;;;;;;;;:::i;:::-;;;;;;;;;;:31;3693:7;;;;:::i;:::-;;;;3575:140;-1:-1:-1;3510:3:21;;3465:260;;;;3809:23;3849:5;3835:20;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;3835:20:21;;3809:46;;3870:9;3865:91;3889:5;3885:1;:9;3865:91;;;3927:15;3943:1;3927:18;;;;;;;;:::i;:::-;;;;;;;3915:6;3922:1;3915:9;;;;;;;;:::i;:::-;;;;;;;;;;:30;3896:3;;3865:91;;;-1:-1:-1;3973:6:21;3277:709;-1:-1:-1;;;3277:709:21:o;1680:297::-;1737:6;1745:21;920:1;910:7;:11;:40;;;;;936:14;;925:7;:25;;910:40;902:68;;;;-1:-1:-1;;;902:68:21;;;;;;;:::i;:::-;981:17;1001:14;;;:5;:14;;;;;1048;1033:29;;;;;;;;:::i;:::-;:11;;;;;;;;:29;;;;;;;:::i;:::-;;1025:76;;;;-1:-1:-1;;;1025:76:21;;;;;;;:::i;:::-;1778:17:::1;1798:13:::0;;;:5:::1;:13;::::0;;;;1829:12:::1;::::0;::::1;:19:::0;1852:1:::1;-1:-1:-1::0;1829:24:21::1;1821:55;;;::::0;-1:-1:-1;;;1821:55:21;;5900:2:22;1821:55:21::1;::::0;::::1;5882:21:22::0;5939:2;5919:18;;;5912:30;-1:-1:-1;;;5958:18:22;;;5951:48;6016:18;;1821:55:21::1;5698:342:22::0;1821:55:21::1;1895:11;::::0;::::1;:32:::0;;-1:-1:-1;;1895:32:21::1;1909:18;1895:32;::::0;;1951:19:::1;::::0;1963:6;;1951:19:::1;::::0;-1:-1:-1;;1951:19:21::1;1768:209;892:227:::0;1680:297;;;:::o;1983:306::-;2356:21:19;:19;:21::i;:::-;2069:6:21::1;2077:21;920:1:::0;910:7:::1;:11;:40;;;;;936:14;;925:7;:25;;910:40;902:68;;;;-1:-1:-1::0;;;902:68:21::1;;;;;;;:::i;:::-;981:17;1001:14:::0;;;:5:::1;:14;::::0;;;;1048;1033:29:::1;::::0;::::1;;;;;;:::i;:::-;:11;::::0;;::::1;::::0;::::1;;::::0;:29;::::1;;;;;;:::i;:::-;;1025:76;;;;-1:-1:-1::0;;;1025:76:21::1;;;;;;;:::i;:::-;2109:17:::2;2129:13:::0;;;:5:::2;:13;::::0;;;;2160:12:::2;::::0;::::2;:19:::0;2182:2:::2;-1:-1:-1::0;2152:49:21::2;;;::::0;-1:-1:-1;;;2152:49:21;;6247:2:22;2152:49:21::2;::::0;::::2;6229:21:22::0;6286:2;6266:18;;;6259:30;-1:-1:-1;;;6305:18:22;;;6298:42;6357:18;;2152:49:21::2;6045:336:22::0;2152:49:21::2;2212:12;::::0;;::::2;:26:::0;;;;::::2;::::0;;-1:-1:-1;2212:26:21;;;::::2;::::0;;;;;;::::2;::::0;;-1:-1:-1;;;;;;2212:26:21::2;-1:-1:-1::0;;;;;2212:26:21;::::2;::::0;;::::2;::::0;;;2253:29:::2;::::0;5504:51:22;;;2266:6:21;;2253:29:::2;::::0;5477:18:22;2253:29:21::2;;;;;;;2099:190;892:227:::1;2387:1:19;;2398:20:::0;1713:1;2924:7;:21;2744:208;2398:20;1983:306:21;;:::o;2431:307:19:-;1755:1;2558:7;;:18;2554:86;;2599:30;;-1:-1:-1;;;2599:30:19;;;;;;;;;;;2554:86;1755:1;2714:7;:17;2431:307::o;2838:324:21:-;2909:9;2904:252;2928:12;:19;2924:23;;2904:252;;;2991:6;2972:12;2985:1;2972:15;;;;;;;;:::i;:::-;;;;;;;;;:25;2968:178;;3035:12;3048:19;;:23;;3070:1;;3048:23;:::i;:::-;3035:37;;;;;;;;:::i;:::-;;;;;;;;;3017:12;3030:1;3017:15;;;;;;;;:::i;:::-;;;;;;;;;;:55;3090:12;:18;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;1983:306;;:::o;2968:178::-;2949:3;;2904:252;;-1:-1:-1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;14:611:22;204:2;216:21;;;286:13;;189:18;;;308:22;;;156:4;;387:15;;;361:2;346:18;;;156:4;430:169;444:6;441:1;438:13;430:169;;;505:13;;493:26;;548:2;574:15;;;;539:12;;;;466:1;459:9;430:169;;;-1:-1:-1;616:3:22;;14:611;-1:-1:-1;;;;;14:611:22:o;630:294::-;698:6;706;759:2;747:9;738:7;734:23;730:32;727:52;;;775:1;772;765:12;727:52;-1:-1:-1;;820:23:22;;;914:2;899:18;;;886:32;;-1:-1:-1;630:294:22:o;929:173::-;997:20;;-1:-1:-1;;;;;1046:31:22;;1036:42;;1026:70;;1092:1;1089;1082:12;1107:186;1166:6;1219:2;1207:9;1198:7;1194:23;1190:32;1187:52;;;1235:1;1232;1225:12;1187:52;1258:29;1277:9;1258:29;:::i;:::-;1248:39;1107:186;-1:-1:-1;;;1107:186:22:o;1480:226::-;1539:6;1592:2;1580:9;1571:7;1567:23;1563:32;1560:52;;;1608:1;1605;1598:12;1560:52;-1:-1:-1;1653:23:22;;1480:226;-1:-1:-1;1480:226:22:o;1711:127::-;1772:10;1767:3;1763:20;1760:1;1753:31;1803:4;1800:1;1793:15;1827:4;1824:1;1817:15;1843:238;1925:1;1918:5;1915:12;1905:143;;1970:10;1965:3;1961:20;1958:1;1951:31;2005:4;2002:1;1995:15;2033:4;2030:1;2023:15;1905:143;2057:18;;1843:238::o;2086:420::-;2139:3;2177:5;2171:12;2204:6;2199:3;2192:19;2236:4;2231:3;2227:14;2220:21;;2275:4;2268:5;2264:16;2298:1;2308:173;2322:6;2319:1;2316:13;2308:173;;;2383:13;;2371:26;;2426:4;2417:14;;;;2454:17;;;;2344:1;2337:9;2308:173;;;-1:-1:-1;2497:3:22;;2086:420;-1:-1:-1;;;;2086:420:22:o;2511:1204::-;2885:4;2933:3;2922:9;2918:19;2964:6;2953:9;2946:25;3007:3;3002:2;2991:9;2987:18;2980:31;3031:6;3066;3060:13;3097:6;3089;3082:22;3135:3;3124:9;3120:19;3113:26;;3174:2;3166:6;3162:15;3148:29;;3195:1;3205:195;3219:6;3216:1;3213:13;3205:195;;;3284:13;;-1:-1:-1;;;;;3280:39:22;3268:52;;3349:2;3375:15;;;;3340:12;;;;3316:1;3234:9;3205:195;;;3209:3;;3409:54;3459:2;3448:9;3444:18;3436:6;3409:54;:::i;:::-;3499:6;3494:2;3483:9;3479:18;3472:34;3543:6;3537:3;3526:9;3522:19;3515:35;3587:6;3581:3;3570:9;3566:19;3559:35;3640:9;3635:3;3631:19;3625:3;3614:9;3610:19;3603:48;3668:41;3705:3;3697:6;3668:41;:::i;:::-;3660:49;2511:1204;-1:-1:-1;;;;;;;;;;;2511:1204:22:o;3720:300::-;3788:6;3796;3849:2;3837:9;3828:7;3824:23;3820:32;3817:52;;;3865:1;3862;3855:12;3817:52;3910:23;;;-1:-1:-1;3976:38:22;4010:2;3995:18;;3976:38;:::i;:::-;3966:48;;3720:300;;;;;:::o;4025:339::-;4227:2;4209:21;;;4266:2;4246:18;;;4239:30;-1:-1:-1;;;4300:2:22;4285:18;;4278:45;4355:2;4340:18;;4025:339::o;4369:398::-;4571:2;4553:21;;;4610:2;4590:18;;;4583:30;4649:34;4644:2;4629:18;;4622:62;-1:-1:-1;;;4715:2:22;4700:18;;4693:32;4757:3;4742:19;;4369:398::o;4954:127::-;5015:10;5010:3;5006:20;5003:1;4996:31;5046:4;5043:1;5036:15;5070:4;5067:1;5060:15;5086:135;5125:3;5146:17;;;5143:43;;5166:18;;:::i;:::-;-1:-1:-1;5213:1:22;5202:13;;5086:135::o;5226:127::-;5287:10;5282:3;5278:20;5275:1;5268:31;5318:4;5315:1;5308:15;5342:4;5339:1;5332:15;5566:127;5627:10;5622:3;5618:20;5615:1;5608:31;5658:4;5655:1;5648:15;5682:4;5679:1;5672:15;6386:128;6453:9;;;6474:11;;;6471:37;;;6488:18;;:::i;:::-;6386:128;;;;:::o;6519:127::-;6580:10;6575:3;6571:20;6568:1;6561:31;6611:4;6608:1;6601:15;6635:4;6632:1;6625:15",
-        "linkReferences": {}
-    },
-    "methodIdentifiers": {
-        "commitMove(uint256,bytes32)": "26826f62",
-        "createGame(address)": "474d0b5a",
-        "endGame(uint256,bytes32)": "6e1ef8b2",
-        "getActiveGames()": "1b76929c",
-        "getGame(uint256)": "a2f77bcc",
-        "getNotStartedGames()": "cc3415d8",
-        "joinGame(uint256,address)": "ead00e02",
-        "startGame(uint256)": "e5ed1d59"
-    },
-    "rawMetadata": "{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"ReentrancyGuardReentrantCall\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"}],\"name\":\"GameCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"}],\"name\":\"GameEnded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"}],\"name\":\"GameStarted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"moveHash\",\"type\":\"bytes32\"}],\"name\":\"MoveCommitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"player\",\"type\":\"address\"}],\"name\":\"PlayerJoined\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"moveHash\",\"type\":\"bytes32\"}],\"name\":\"commitMove\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_creator\",\"type\":\"address\"}],\"name\":\"createGame\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"gameHash\",\"type\":\"bytes32\"}],\"name\":\"endGame\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getActiveGames\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"}],\"name\":\"getGame\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"players\",\"type\":\"address[]\"},{\"internalType\":\"enum UnoGame.GameStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"startTime\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTime\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"gameHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32[]\",\"name\":\"moves\",\"type\":\"bytes32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getNotStartedGames\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_joinee\",\"type\":\"address\"}],\"name\":\"joinGame\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"}],\"name\":\"startGame\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"errors\":{\"ReentrancyGuardReentrantCall()\":[{\"details\":\"Unauthorized reentrant call.\"}]},\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/uno.sol\":\"UnoGame\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@openzeppelin/=lib/openzeppelin-contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":ds-test/=lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"]},\"sources\":{\"lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol\":{\"keccak256\":\"0xf980daa263b661ab8ddee7d4fd833c7da7e7995e2c359ff1f17e67e4112f2236\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7448ab095d6940130bcf76ba47a2eab14148c83119523b93dd89f6d84edd6c02\",\"dweb:/ipfs/QmawrZ4voKQjH3oomXT3Kuheb3Mnmo2VvVpxg8Ne5UJUrd\"]},\"src/uno.sol\":{\"keccak256\":\"0xf09ca8b01607d2e6c0ce8ed787e01c3da7a2b55c91bd1ee1bcddddc758e2b588\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://1f95bfc500cfa63d6729505edd33377d6796240145c10a37cc41ddfc6eff3dc9\",\"dweb:/ipfs/QmR12A57TjgmVRGR1jGHPnWYWyDop7FV3xTSrgYLWzbr3r\"]}},\"version\":1}",
-    "metadata": {
-        "compiler": {
-            "version": "0.8.28+commit.7893614a"
-        },
-        "language": "Solidity",
-        "output": {
-            "abi":[
-			{
-				"inputs": [],
-				"name": "ReentrancyGuardReentrantCall",
-				"type": "error"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "uint256",
-						"name": "gameId",
-						"type": "uint256"
-					},
-					{
-						"indexed": false,
-						"internalType": "address",
-						"name": "creator",
-						"type": "address"
-					}
-				],
-				"name": "GameCreated",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "uint256",
-						"name": "gameId",
-						"type": "uint256"
-					}
-				],
-				"name": "GameEnded",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "uint256",
-						"name": "gameId",
-						"type": "uint256"
-					}
-				],
-				"name": "GameStarted",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "uint256",
-						"name": "gameId",
-						"type": "uint256"
-					},
-					{
-						"indexed": false,
-						"internalType": "bytes32",
-						"name": "moveHash",
-						"type": "bytes32"
-					}
-				],
-				"name": "MoveCommitted",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "uint256",
-						"name": "gameId",
-						"type": "uint256"
-					},
-					{
-						"indexed": false,
-						"internalType": "address",
-						"name": "player",
-						"type": "address"
-					}
-				],
-				"name": "PlayerJoined",
-				"type": "event"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "gameId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bytes32",
-						"name": "moveHash",
-						"type": "bytes32"
-					}
-				],
-				"name": "commitMove",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "_creator",
-						"type": "address"
-					}
-				],
-				"name": "createGame",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "gameId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bytes32",
-						"name": "gameHash",
-						"type": "bytes32"
-					}
-				],
-				"name": "endGame",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "getActiveGames",
-				"outputs": [
-					{
-						"internalType": "uint256[]",
-						"name": "",
-						"type": "uint256[]"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "gameId",
-						"type": "uint256"
-					}
-				],
-				"name": "getGame",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "id",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address[]",
-						"name": "players",
-						"type": "address[]"
-					},
-					{
-						"internalType": "enum UnoGame.GameStatus",
-						"name": "status",
-						"type": "uint8"
-					},
-					{
-						"internalType": "uint256",
-						"name": "startTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "endTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bytes32",
-						"name": "gameHash",
-						"type": "bytes32"
-					},
-					{
-						"internalType": "bytes32[]",
-						"name": "moves",
-						"type": "bytes32[]"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "getNotStartedGames",
-				"outputs": [
-					{
-						"internalType": "uint256[]",
-						"name": "",
-						"type": "uint256[]"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "gameId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "_joinee",
-						"type": "address"
-					}
-				],
-				"name": "joinGame",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "gameId",
-						"type": "uint256"
-					}
-				],
-				"name": "startGame",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			}
-		],
-            "devdoc": {
-                "kind": "dev",
-                "methods": {},
-                "version": 1
-            },
-            "userdoc": {
-                "kind": "user",
-                "methods": {},
-                "version": 1
-            }
-        },
-        "settings": {
-            "remappings": [
-                "@openzeppelin/=lib/openzeppelin-contracts/",
-                "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-                "ds-test/=lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/",
-                "erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
-                "forge-std/=lib/forge-std/src/",
-                "openzeppelin-contracts/=lib/openzeppelin-contracts/"
-            ],
-            "optimizer": {
-                "enabled": true,
-                "runs": 200
-            },
-            "metadata": {
-                "bytecodeHash": "ipfs"
-            },
-            "compilationTarget": {
-                "src/uno.sol": "UnoGame"
-            },
-            "evmVersion": "paris",
-            "libraries": {}
-        },
-        "sources": {
-            "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol": {
-                "keccak256": "0xf980daa263b661ab8ddee7d4fd833c7da7e7995e2c359ff1f17e67e4112f2236",
-                "urls": [
-                    "bzz-raw://7448ab095d6940130bcf76ba47a2eab14148c83119523b93dd89f6d84edd6c02",
-                    "dweb:/ipfs/QmawrZ4voKQjH3oomXT3Kuheb3Mnmo2VvVpxg8Ne5UJUrd"
-                ],
-                "license": "MIT"
-            },
-            "src/uno.sol": {
-                "keccak256": "0xf09ca8b01607d2e6c0ce8ed787e01c3da7a2b55c91bd1ee1bcddddc758e2b588",
-                "urls": [
-                    "bzz-raw://1f95bfc500cfa63d6729505edd33377d6796240145c10a37cc41ddfc6eff3dc9",
-                    "dweb:/ipfs/QmR12A57TjgmVRGR1jGHPnWYWyDop7FV3xTSrgYLWzbr3r"
-                ],
-                "license": "MIT"
-            }
-        },
-        "version": 1
-    },
-    "id": 21
+            ]
 }

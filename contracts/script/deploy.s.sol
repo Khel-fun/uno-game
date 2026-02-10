@@ -31,7 +31,7 @@ import "../src/UnoGame.sol";
  * - DealVerifier:    0x4AeaB7206A19EE01FbAEC8aee3654e4E93B59BE6
  * - DrawVerifier:    0x4d9CA273817BfEf07a9D73E23072DEabeb825060  
  * - PlayVerifier:    0xB99a5Cb916bd38353C435d52dDfCb9F7b51bfF0a
- * - UnoGame:         0xCaa7e88f568A78046d017fa360e514e1526005b6
+ * - UnoGame:         0xdFE172aD77a0742B77869482aC05F6CBf2Df1DAa
  */
 contract DeployUnoGame is Script {
     // Pre-deployed verifier addresses (Base Sepolia)

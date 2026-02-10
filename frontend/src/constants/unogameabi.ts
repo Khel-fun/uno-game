@@ -12,18 +12,42 @@ export const unoGameABI = [
   },
   // Errors
   { type: "error", name: "AlreadyJoined", inputs: [] },
+  { type: "error", name: "GameAlreadyStarted", inputs: [] },
   { type: "error", name: "GameFull", inputs: [] },
+  { type: "error", name: "InvalidGameCode", inputs: [] },
   { type: "error", name: "InvalidGameId", inputs: [] },
   { type: "error", name: "InvalidGameStatus", inputs: [] },
+  { type: "error", name: "InvalidMaxPlayers", inputs: [] },
   { type: "error", name: "InvalidProof", inputs: [] },
   { type: "error", name: "InvalidVerifierAddress", inputs: [] },
   { type: "error", name: "NotEnoughPlayers", inputs: [] },
+  { type: "error", name: "NotGameCreator", inputs: [] },
+  {
+    type: "error",
+    name: "OwnableInvalidOwner",
+    inputs: [{ name: "owner", type: "address", internalType: "address" }],
+  },
+  {
+    type: "error",
+    name: "OwnableUnauthorizedAccount",
+    inputs: [{ name: "account", type: "address", internalType: "address" }],
+  },
   { type: "error", name: "PlayerNotInGame", inputs: [] },
   { type: "error", name: "ReentrancyGuardReentrantCall", inputs: [] },
   // Events
   {
     type: "event",
     name: "GameCreated",
+    inputs: [
+      { name: "gameId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "creator", type: "address", indexed: true, internalType: "address" },
+      { name: "isPrivate", type: "bool", indexed: false, internalType: "bool" },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "GameDeleted",
     inputs: [
       { name: "gameId", type: "uint256", indexed: true, internalType: "uint256" },
       { name: "creator", type: "address", indexed: true, internalType: "address" },
@@ -60,6 +84,15 @@ export const unoGameABI = [
   },
   {
     type: "event",
+    name: "OwnershipTransferred",
+    inputs: [
+      { name: "previousOwner", type: "address", indexed: true, internalType: "address" },
+      { name: "newOwner", type: "address", indexed: true, internalType: "address" },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
     name: "PlayerJoined",
     inputs: [
       { name: "gameId", type: "uint256", indexed: true, internalType: "uint256" },
@@ -78,6 +111,13 @@ export const unoGameABI = [
     anonymous: false,
   },
   // Functions
+  {
+    type: "function",
+    name: "MAX_PLAYERS",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
   {
     type: "function",
     name: "commitMove",
@@ -113,16 +153,36 @@ export const unoGameABI = [
   },
   {
     type: "function",
+    name: "createGame",
+    inputs: [
+      { name: "_creator", type: "address", internalType: "address" },
+      { name: "_isBot", type: "bool", internalType: "bool" },
+      { name: "_isPrivate", type: "bool", internalType: "bool" },
+      { name: "_gameCodeHash", type: "bytes32", internalType: "bytes32" },
+      { name: "_maxPlayers", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "dealVerifier",
     inputs: [],
-    outputs: [{ name: "", type: "address", internalType: "contract IDealVerifier" }],
+    outputs: [{ name: "", type: "address", internalType: "contract IUltraVerifier" }],
     stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "deleteGame",
+    inputs: [{ name: "gameId", type: "uint256", internalType: "uint256" }],
+    outputs: [],
+    stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "drawVerifier",
     inputs: [],
-    outputs: [{ name: "", type: "address", internalType: "contract IDrawVerifier" }],
+    outputs: [{ name: "", type: "address", internalType: "contract IUltraVerifier" }],
     stateMutability: "view",
   },
   {
@@ -147,14 +207,32 @@ export const unoGameABI = [
     name: "getGame",
     inputs: [{ name: "gameId", type: "uint256", internalType: "uint256" }],
     outputs: [
-      { name: "id", type: "uint256", internalType: "uint256" },
-      { name: "players", type: "address[]", internalType: "address[]" },
-      { name: "status", type: "uint8", internalType: "enum UnoGame.GameStatus" },
-      { name: "startTime", type: "uint256", internalType: "uint256" },
-      { name: "endTime", type: "uint256", internalType: "uint256" },
-      { name: "deckCommitment", type: "bytes32", internalType: "bytes32" },
-      { name: "moveCommitments", type: "bytes32[]", internalType: "bytes32[]" },
+      {
+        name: "view_",
+        type: "tuple",
+        internalType: "struct UnoGame.GameView",
+        components: [
+          { name: "id", type: "uint256", internalType: "uint256" },
+          { name: "creator", type: "address", internalType: "address" },
+          { name: "players", type: "address[]", internalType: "address[]" },
+          { name: "status", type: "uint8", internalType: "enum UnoGame.GameStatus" },
+          { name: "isPrivate", type: "bool", internalType: "bool" },
+          { name: "gameCodeHash", type: "bytes32", internalType: "bytes32" },
+          { name: "maxPlayers", type: "uint256", internalType: "uint256" },
+          { name: "startTime", type: "uint256", internalType: "uint256" },
+          { name: "endTime", type: "uint256", internalType: "uint256" },
+          { name: "deckCommitment", type: "bytes32", internalType: "bytes32" },
+          { name: "moveCommitments", type: "bytes32[]", internalType: "bytes32[]" },
+        ],
+      },
     ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getGameCount",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
   {
@@ -180,9 +258,30 @@ export const unoGameABI = [
   },
   {
     type: "function",
+    name: "getGamesByCreator",
+    inputs: [{ name: "_creator", type: "address", internalType: "address" }],
+    outputs: [{ name: "", type: "uint256[]", internalType: "uint256[]" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "getNotStartedGames",
     inputs: [],
     outputs: [{ name: "", type: "uint256[]", internalType: "uint256[]" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getPublicNotStartedGames",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256[]", internalType: "uint256[]" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "isGamePrivate",
+    inputs: [{ name: "gameId", type: "uint256", internalType: "uint256" }],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
     stateMutability: "view",
   },
   {
@@ -197,16 +296,41 @@ export const unoGameABI = [
   },
   {
     type: "function",
+    name: "joinGameWithCode",
+    inputs: [
+      { name: "gameId", type: "uint256", internalType: "uint256" },
+      { name: "_joinee", type: "address", internalType: "address" },
+      { name: "_gameCode", type: "string", internalType: "string" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "owner",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "playVerifier",
     inputs: [],
-    outputs: [{ name: "", type: "address", internalType: "contract IPlayVerifier" }],
+    outputs: [{ name: "", type: "address", internalType: "contract IUltraVerifier" }],
     stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "renounceOwnership",
+    inputs: [],
+    outputs: [],
+    stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "shuffleVerifier",
     inputs: [],
-    outputs: [{ name: "", type: "address", internalType: "contract IShuffleVerifier" }],
+    outputs: [{ name: "", type: "address", internalType: "contract IUltraVerifier" }],
     stateMutability: "view",
   },
   {
@@ -230,6 +354,13 @@ export const unoGameABI = [
   },
   {
     type: "function",
+    name: "transferOwnership",
+    inputs: [{ name: "newOwner", type: "address", internalType: "address" }],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "updateVerifiers",
     inputs: [
       { name: "_shuffleVerifier", type: "address", internalType: "address" },
@@ -244,7 +375,7 @@ export const unoGameABI = [
 
 // Contract addresses for each network
 export const CONTRACT_ADDRESSES = {
-  baseSepolia: "0xCaa7e88f568A78046d017fa360e514e1526005b6",
+  baseSepolia: "0xdFE172aD77a0742B77869482aC05F6CBf2Df1DAa",
 } as const;
 
 // Verifier addresses
@@ -270,4 +401,19 @@ export enum GameStatus {
   NotStarted = 0,
   Active = 1,
   Ended = 2,
+}
+
+// GameView struct type matching the contract return
+export interface GameView {
+  id: bigint;
+  creator: string;
+  players: string[];
+  status: number;
+  isPrivate: boolean;
+  gameCodeHash: string;
+  maxPlayers: bigint;
+  startTime: bigint;
+  endTime: bigint;
+  deckCommitment: string;
+  moveCommitments: string[];
 }
