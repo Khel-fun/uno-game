@@ -27,10 +27,6 @@ import {
 } from "../../lib/gameLogic";
 import { updateGlobalCardHashMap } from "../../lib/globalState";
 import { unoGameABI } from "@/constants/unogameabi";
-import { prepareContractCall, getContract, waitForReceipt } from "thirdweb";
-import { useSendTransaction } from "thirdweb/react";
-import { client } from "@/utils/thirdWebClient";
-import { getNetworkForChain } from "@/utils/networkUtils";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import {  
@@ -118,11 +114,8 @@ const Room = () => {
   // Use stats from zkIntegration
   const zkStats = zkIntegration.stats;
   
-  // Get the selected chain for thirdweb contract calls
-  const selectedChain = getNetworkForChain(chainId);
+  // Get the contract address for the current chain
   const contractAddress = getContractAddress(chainId) as `0x${string}`;
-
-  const { mutate: sendThirdwebTransaction } = useSendTransaction();
 
   // Detect MiniPay wallet on mount
   useEffect(() => {
@@ -175,7 +168,7 @@ const Room = () => {
 
       // Only join if we haven't already and socket is connected
       if (isConnected && !hasJoinedRoom.current) {
-        // Get wallet address from thirdweb hook or localStorage
+        // Get wallet address from wagmi hook or localStorage
         const walletAddress = address || null;
         // console.log('Joining room with wallet address:', walletAddress);
 

@@ -12,13 +12,11 @@ import {
   useAccount,
   useSendTransaction as useWagmiSendTransaction,
   usePublicClient,
+  useReadContract,
 } from "wagmi";
+import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
-import { client } from "@/utils/thirdWebClient";
 import { unoGameABI } from "@/constants/unogameabi";
-import { getNetworkForChain } from "@/utils/networkUtils";
-import { useReadContract } from "thirdweb/react";
-import { getContract } from "thirdweb";
 import ProfileDropdown from "@/components/profileDropdown";
 import { socketManager } from "@/services/socket";
 import { AddToFarcaster } from "@/components/AddToFarcaster";
@@ -122,7 +120,26 @@ export default function PlayGame() {
   const router = useRouter();
 
   const { selectedNetwork, isInitialized } = useNetworkSelection();
-  const { address: wagmiAddress, isConnected, chain: walletChain } = useAccount();
+  const { address: wagmiAddress, isConnected: wagmiConnected, chain: walletChain } = useAccount();
+  const { authenticated, ready: privyReady, connectWallet } = usePrivy();
+  
+  // User is "wallet ready" when authenticated via Privy AND wagmi has an address.
+  // During network switches, wagmi may briefly disconnect — use `authenticated` as
+  // the stable signal so the user isn't bounced back to the connect screen.
+  const isWalletReady = authenticated && (wagmiConnected && !!wagmiAddress);
+  
+  // Auto-reconnect: If user is authenticated via Privy but wagmi lost connection
+  // (e.g. after page reload or network switch), prompt Privy to reconnect the wallet.
+  useEffect(() => {
+    if (privyReady && authenticated && !wagmiConnected) {
+      // Small delay to let Privy's wagmi adapter sync first
+      const timer = setTimeout(() => {
+        connectWallet();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [privyReady, authenticated, wagmiConnected, connectWallet]);
+  
   const chainId = walletChain?.id || selectedNetwork.id;
   const address =
     isMiniPayWallet && miniPayAddress ? miniPayAddress : wagmiAddress;
@@ -157,29 +174,25 @@ export default function PlayGame() {
     loadBalance();
   }, [isMiniPayWallet, address, chainId]);
 
-  const selectedChain = getNetworkForChain(chainId);
   const contractAddress = getContractAddress(chainId) as `0x${string}`;
-
-  const contract = getContract({
-    client,
-    chain: selectedChain,
-    address: contractAddress,
-    abi: unoGameABI,
-  });
 
   // Fetch public not-started games for "Browse Public" tab
   const { data: publicGamesRaw, refetch: refetchPublicGames } = useReadContract({
-    contract,
-    method: "getPublicNotStartedGames",
+    address: contractAddress,
+    abi: unoGameABI,
+    functionName: "getPublicNotStartedGames",
+    chainId,
   });
   const publicGames = publicGamesRaw as readonly bigint[] | undefined;
 
   // Fetch games by creator for "My Games" tab
   const { data: myGamesRaw, refetch: refetchMyGames } = useReadContract({
-    contract,
-    method: "getGamesByCreator",
-    params: [address || "0x0000000000000000000000000000000000000000"],
-    queryOptions: { enabled: !!address },
+    address: contractAddress,
+    abi: unoGameABI,
+    functionName: "getGamesByCreator",
+    args: [(address || "0x0000000000000000000000000000000000000000") as `0x${string}`],
+    query: { enabled: !!address },
+    chainId,
   });
   const myGames = myGamesRaw as readonly bigint[] | undefined;
 
@@ -236,7 +249,7 @@ export default function PlayGame() {
           chainId
         );
         return hash as `0x${string}`;
-      } else if (isConnected && address) {
+      } else if (isWalletReady && address) {
         const hash = await sendWagmiTransaction({
           to: contractAddr,
           data,
@@ -249,7 +262,7 @@ export default function PlayGame() {
       chainId,
       isMiniPayWallet,
       address,
-      isConnected,
+      isWalletReady,
       sendMiniPayTransaction,
       sendWagmiTransaction,
     ]
@@ -749,11 +762,25 @@ export default function PlayGame() {
             </Link>
           )}
           <NetworkDropdown />
-          {isConnected && address && <ProfileDropdown address={address} />}
+          {isWalletReady && address && <ProfileDropdown address={address} />}
         </div>
       </div>
 
-      {!isConnected ? (
+      {!privyReady ? (
+        <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      ) : authenticated && !wagmiConnected ? (
+        // User is authenticated via Privy but wagmi hasn't synced yet
+        // (happens during network switch or page reload) — show loading, not connect screen
+        <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+          <div className="text-center mb-4">
+            <h1 className="text-2xl font-bold mb-2">Reconnecting Wallet...</h1>
+            <p className="text-gray-400 text-sm">Please wait while we restore your session</p>
+          </div>
+          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      ) : !isWalletReady ? (
         <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
           <div className="text-center mb-2">
             <h1 className="text-4xl font-bold mb-2">Welcome Back!</h1>

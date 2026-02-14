@@ -1,0 +1,97 @@
+{
+  "gameCodes": [
+    [
+      "RFFS2CPD",
+      {
+        "gameId": "4",
+        "roomId": "game-4",
+        "isPrivate": false,
+        "createdAt": 1770744208369
+      }
+    ],
+    [
+      "GAYGA3YN",
+      {
+        "gameId": "5",
+        "roomId": "game-5",
+        "isPrivate": true,
+        "createdAt": 1770744249923
+      }
+    ],
+    [
+      "CF5BDBTC",
+      {
+        "gameId": "6",
+        "roomId": "game-6",
+        "isPrivate": false,
+        "createdAt": 1770903502166
+      }
+    ],
+    [
+      "ULVVR2MJ",
+      {
+        "gameId": "7",
+        "roomId": "game-7",
+        "isPrivate": false,
+        "createdAt": 1770903526526
+      }
+    ],
+    [
+      "LR3PQR5G",
+      {
+        "gameId": "8",
+        "roomId": "game-8",
+        "isPrivate": true,
+        "createdAt": 1770903560281
+      }
+    ],
+    [
+      "59NQ52EP",
+      {
+        "gameId": "9",
+        "roomId": "game-9",
+        "isPrivate": true,
+        "createdAt": 1770903618118
+      }
+    ],
+    [
+      "RKG5YJCA",
+      {
+        "gameId": "10",
+        "roomId": "game-10",
+        "isPrivate": true,
+        "createdAt": 1770903885960
+      }
+    ]
+  ],
+  "gameIdToCode": [
+    [
+      "4",
+      "RFFS2CPD"
+    ],
+    [
+      "5",
+      "GAYGA3YN"
+    ],
+    [
+      "6",
+      "CF5BDBTC"
+    ],
+    [
+      "7",
+      "ULVVR2MJ"
+    ],
+    [
+      "8",
+      "LR3PQR5G"
+    ],
+    [
+      "9",
+      "59NQ52EP"
+    ],
+    [
+      "10",
+      "RKG5YJCA"
+    ]
+  ]
+}

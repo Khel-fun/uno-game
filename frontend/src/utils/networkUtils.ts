@@ -1,38 +1,21 @@
 import { SUPPORTED_NETWORKS, DEFAULT_NETWORK, getNetworkById } from '@/config/networks';
-import { defineChain } from 'thirdweb';
 
 const NETWORK_STORAGE_KEY = 'zunno_selected_network';
 
-// Convert wagmi chain to thirdweb chain format
-const convertToThirdwebChain = (wagmiChain: any) => {
-  return defineChain({
-    id: wagmiChain.id,
-    name: wagmiChain.name,
-    nativeCurrency: wagmiChain.nativeCurrency,
-    rpc: wagmiChain.rpcUrls.default.http[0],
-    blockExplorers: wagmiChain.blockExplorers ? [{
-      name: wagmiChain.blockExplorers.default.name,
-      url: wagmiChain.blockExplorers.default.url,
-    }] : undefined,
-    testnet: wagmiChain.testnet || false,
-  });
-};
-
 /**
- * Get thirdweb chain for a specific chainId
- * This ensures we use the correct RPC for the given chain
+ * Get wagmi chain config for a specific chainId
  */
 export const getNetworkForChain = (chainId: number) => {
   const network = getNetworkById(chainId);
   if (network) {
-    return convertToThirdwebChain(network.chain);
+    return network.chain;
   }
-  return convertToThirdwebChain(DEFAULT_NETWORK.chain);
+  return DEFAULT_NETWORK.chain;
 };
 
 export const getSelectedNetwork = () => {
   if (typeof window === 'undefined') {
-    return convertToThirdwebChain(DEFAULT_NETWORK.chain);
+    return DEFAULT_NETWORK.chain;
   }
 
   const storedNetworkId = localStorage.getItem(NETWORK_STORAGE_KEY);
@@ -40,11 +23,11 @@ export const getSelectedNetwork = () => {
   if (storedNetworkId) {
     const network = getNetworkById(parseInt(storedNetworkId));
     if (network) {
-      return convertToThirdwebChain(network.chain);
+      return network.chain;
     }
   }
   
-  return convertToThirdwebChain(DEFAULT_NETWORK.chain);
+  return DEFAULT_NETWORK.chain;
 };
 
 export const getSelectedNetworkId = (): number => {

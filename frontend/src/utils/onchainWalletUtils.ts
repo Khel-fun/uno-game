@@ -2,7 +2,6 @@
  * OnchainKit wallet utilities for Game of Uno
  */
 import { useAccount } from "wagmi";
-import { useActiveAccount } from "thirdweb/react";
 import { useEffect, useState } from "react";
 import { isMiniPay, getMiniPayAddress } from "./miniPayUtils";
 import { getContractAddress } from "@/config/networks";
@@ -12,7 +11,6 @@ import { getContractAddress } from "@/config/networks";
  * @returns The connected wallet address and connection status
  */
 export function useWalletAddress() {
-  const activeAccount = useActiveAccount();
   const { address: wagmiAddress, isConnected: wagmiConnected } = useAccount();
   const [miniPayAddress, setMiniPayAddress] = useState<string | null>(null);
   const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
@@ -32,15 +30,15 @@ export function useWalletAddress() {
     initMiniPay();
   }, []);
 
-  // Use MiniPay address if available, otherwise use thirdweb or wagmi
+  // Use MiniPay address if available, otherwise use wagmi
   const address =
     isMiniPayWallet && miniPayAddress
       ? miniPayAddress
-      : activeAccount?.address || wagmiAddress;
+      : wagmiAddress;
 
   const isConnected = isMiniPayWallet
     ? !!miniPayAddress
-    : !!activeAccount?.address || wagmiConnected;
+    : wagmiConnected;
 
   return { address, isConnected };
 }
