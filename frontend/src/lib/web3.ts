@@ -2,9 +2,6 @@ import { ethers } from "ethers";
 import { UnoGameContract } from "./types";
 import UNOContractJson from "../constants/UnoGame.json";
 import { getContractAddress } from "@/config/networks";
-import * as dotenv from "dotenv";
-
-dotenv.config();
 
 async function verifyContract(provider: ethers.Provider, address: string) {
   const code = await provider.getCode(address);
@@ -31,6 +28,10 @@ function getRpcUrl(chainId: number): string {
   return rpcUrl;
 }
 
+/**
+ * Get a read-only contract instance for fetching game state
+ * This does NOT require a private key - it uses a public RPC provider
+ */
 export async function getContractNew(chainId: number) {
   try {
     console.log('getContractNew called with chainId:', chainId);
@@ -47,6 +48,7 @@ export async function getContractNew(chainId: number) {
 
     await verifyContract(provider, contractAddress);
 
+    // Use read-only contract (no signer needed for read operations)
     const gameContract = new ethers.Contract(
       contractAddress,
       contractABI,

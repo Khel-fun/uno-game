@@ -26,20 +26,10 @@ export function useNetworkSelection() {
     setIsInMiniPay(isMiniPay());
   }, []);
 
-  // Initialize network selection once on mount
+  // Initialize network selection once on mount - prioritize wallet's current chain
   useEffect(() => {
     const initializeNetwork = () => {
-      const storedNetworkId = localStorage.getItem(NETWORK_STORAGE_KEY);
-
-      if (storedNetworkId) {
-        const network = getNetworkById(parseInt(storedNetworkId));
-        if (network) {
-          setSelectedNetwork(network);
-          setIsLoading(false);
-          return;
-        }
-      }
-
+      // First priority: Use wallet's current chain if it's a supported chain
       if (chain) {
         const currentNetwork = getNetworkById(chain.id);
         if (currentNetwork) {
@@ -50,7 +40,18 @@ export function useNetworkSelection() {
         }
       }
 
-      // Fallback to default network
+      // Second priority: Use stored network preference
+      const storedNetworkId = localStorage.getItem(NETWORK_STORAGE_KEY);
+      if (storedNetworkId) {
+        const network = getNetworkById(parseInt(storedNetworkId));
+        if (network) {
+          setSelectedNetwork(network);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Fallback to default network (Base Sepolia)
       setSelectedNetwork(DEFAULT_NETWORK);
       setIsLoading(false);
     };

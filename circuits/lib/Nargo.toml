@@ -1,0 +1,12 @@
+[package]
+name = "zk_uno"
+type = "lib"
+authors = ["Zunno Team"]
+compiler_version = ">=1.0.0"
+
+[dependencies]
+# Poseidon hashing library (moved from stdlib in Noir 1.0.0)
+poseidon = { tag = "v0.2.2", git = "https://github.com/noir-lang/poseidon" }
+
+# zk-kit binary merkle root library - compatible with LeanIMT in TypeScript
+binary_merkle_root = { git = "https://github.com/privacy-scaling-explorations/zk-kit.noir", tag = "binary-merkle-root-v0.0.1", directory = "packages/binary-merkle-root" }

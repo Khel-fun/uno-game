@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useDisconnect, useActiveWallet } from "thirdweb/react";
+import { usePrivy } from "@privy-io/react-auth";
+import { useDisconnect } from "wagmi";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ProfileDropdownProps {
@@ -11,8 +12,8 @@ interface ProfileDropdownProps {
 export default function ProfileDropdown({ address }: ProfileDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { logout } = usePrivy();
   const { disconnect } = useDisconnect();
-  const wallet = useActiveWallet();
   const { toast } = useToast();
 
   // Close dropdown when clicking outside
@@ -31,8 +32,8 @@ export default function ProfileDropdown({ address }: ProfileDropdownProps) {
 
   const handleDisconnect = async () => {
     try {
-      if(!wallet) return;
-      disconnect(wallet);
+      await logout();
+      disconnect();
       toast({
         title: "Wallet Disconnected",
         variant: "success",

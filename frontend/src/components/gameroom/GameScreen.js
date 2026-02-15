@@ -39,8 +39,6 @@ const GameScreen = ({
 
   // Get current player's deck
   const playerDeck = allPlayerDecks[currentUser] || [];
-
-  console.log(currentUser, "currentUser")
   
   // Get opponent decks (all other players with cards)
   const opponentDecks = [];

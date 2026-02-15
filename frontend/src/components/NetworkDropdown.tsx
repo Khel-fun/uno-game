@@ -33,8 +33,6 @@ export default function NetworkDropdown() {
     try {
       await switchNetwork(network);
       setIsOpen(false);
-      // Force full page reload when network changes
-      window.location.reload();
     } catch (error) {
       console.error("Failed to switch network:", error);
     }

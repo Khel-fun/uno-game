@@ -1,27 +1,27 @@
 "use client";
 
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import { config } from "../lib/wagmi";
-import { WagmiProvider } from "wagmi";
+import dynamic from "next/dynamic";
 import RecoilProvider from "../userstate/RecoilProvider";
 import { MiniKitContextProvider } from "../providers/MiniKitProvider";
-import { ThirdwebProvider } from "thirdweb/react";
+import { PrivyProviderWrapper } from "../providers/PrivyProvider";
 import { SocketConnectionProvider } from "../context/SocketConnectionContext";
 
-const queryClient = new QueryClient();
+// Dynamically import ZKProvider to avoid SSR issues with WASM
+const ZKProvider = dynamic(
+  () => import("../lib/zk/ZKContext").then((mod) => mod.ZKProvider),
+  { ssr: false }
+);
 
 export function Providers({ children }) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <RecoilProvider>
-        <ThirdwebProvider>
-          <WagmiProvider config={config}>
-            <SocketConnectionProvider>
-              <MiniKitContextProvider>{children}</MiniKitContextProvider>
-            </SocketConnectionProvider>
-          </WagmiProvider>
-        </ThirdwebProvider>
-      </RecoilProvider>
-    </QueryClientProvider>
+    <RecoilProvider>
+      <PrivyProviderWrapper>
+        <SocketConnectionProvider>
+          <ZKProvider autoLoad={true}>
+            <MiniKitContextProvider>{children}</MiniKitContextProvider>
+          </ZKProvider>
+        </SocketConnectionProvider>
+      </PrivyProviderWrapper>
+    </RecoilProvider>
   );
 }
