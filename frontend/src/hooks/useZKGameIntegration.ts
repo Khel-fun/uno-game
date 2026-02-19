@@ -7,6 +7,7 @@ import type { ZKProof } from '../lib/zk/types';
 // Configuration
 const ENABLE_REAL_PROOFS = true; // Set to false for simulation mode
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+const TRACKING_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 84532);
 
 // Callback type for proof tracking
 export type OnProofGeneratedCallback = (circuitName: string, proof: ZKProof) => void;
@@ -99,6 +100,13 @@ interface BackendDrawProofData {
   error?: string;
 }
 
+interface TrackingProofRecordResponse {
+  ok: boolean;
+  trackingSaved: boolean;
+  proofRecordId?: string;
+  proofHash?: string;
+}
+
 // Notification helper
 function notifyZK(
   type: 'generating' | 'success' | 'error' | 'submitting' | 'info',
@@ -117,6 +125,37 @@ function notifyZK(
     console.warn(`[ZK] ${circuit}: ${message}`);
   } else {
     console.log(`[ZK] [${type}] ${circuit}: ${message}`);
+  }
+}
+
+type TrackingCircuit = 'shuffle' | 'deal' | 'draw' | 'play';
+
+function proofBytesToHex(proofBytes: Uint8Array): string {
+  return `0x${Array.from(proofBytes).map((b) => b.toString(16).padStart(2, '0')).join('')}`;
+}
+
+function normalizeGameId(gameId: string): string {
+  return gameId.startsWith('game-') ? gameId.slice(5) : gameId;
+}
+
+async function postTracking<T>(path: string, payload: Record<string, unknown>): Promise<T | null> {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/tracking/${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.warn(`[Tracking] ${path} failed (${response.status}):`, text);
+      return null;
+    }
+
+    return (await response.json()) as T;
+  } catch (error) {
+    console.warn(`[Tracking] ${path} request failed:`, error);
+    return null;
   }
 }
 
@@ -147,6 +186,42 @@ export function useZKGameIntegration(options: UseZKGameIntegrationOptions = {}) 
   const isGeneratingRef = useRef(false);
   const socketRef = useRef<Socket | null>(null);
   const gameIdRef = useRef<string | null>(null);
+
+  const persistProofRecord = useCallback(async (
+    circuitName: TrackingCircuit,
+    proof: ZKProof,
+    gameId: string,
+    localVerified: boolean
+  ): Promise<string | null> => {
+    const normalizedGameId = normalizeGameId(gameId);
+    const payload = {
+      chainId: TRACKING_CHAIN_ID,
+      gameId: normalizedGameId,
+      roomId: `game-${normalizedGameId}`,
+      circuitName,
+      proofHex: proofBytesToHex(proof.proof),
+      publicInputs: proof.publicInputs.map((input) => String(input)),
+      localVerified,
+    };
+
+    const response = await postTracking<TrackingProofRecordResponse>('proof-record', payload);
+    if (!response || !response.trackingSaved || !response.proofRecordId) {
+      return null;
+    }
+
+    return response.proofRecordId;
+  }, []);
+
+  const persistKurierUpdate = useCallback(async (
+    proofRecordId: string,
+    jobId: string
+  ): Promise<void> => {
+    await postTracking('kurier-update', {
+      proofRecordId,
+      kurierJobId: jobId,
+      kurierStatus: 'Submitted',
+    });
+  }, []);
   
   // Initialize socket connection for ZK data requests
   useEffect(() => {
@@ -320,16 +395,20 @@ export function useZKGameIntegration(options: UseZKGameIntegrationOptions = {}) 
       // Verify locally after generation
       const verificationService = await import('../lib/zk/verificationService');
       const verifyResult = await verificationService.verifyLocally('play', proof);
+      const proofRecordId = await persistProofRecord('play', proof, effectiveGameId, verifyResult.valid);
       
       if (verifyResult.valid) {
         notifyZK('success', 'play', `Proof verified locally`);
         
         // Submit to zkVerify in the background (don't await - don't block gameplay)
         verificationService.submitToZkVerify('play', proof)
-          .then(result => {
+          .then(async (result) => {
             if (result.submitted) {
               notifyZK('success', 'play', `Submitted to zkVerify (job: ${result.jobId})`);
               console.log('[ZK] zkVerify job ID:', result.jobId);
+              if (proofRecordId && result.jobId) {
+                await persistKurierUpdate(proofRecordId, result.jobId);
+              }
             } else if (result.error) {
               console.warn('[ZK] zkVerify submission skipped:', result.error);
             }
@@ -371,7 +450,7 @@ export function useZKGameIntegration(options: UseZKGameIntegrationOptions = {}) 
     } finally {
       isGeneratingRef.current = false;
     }
-  }, []);
+  }, [persistKurierUpdate, persistProofRecord]);
   
   /**
    * Request draw proof data from backend and generate proof
@@ -497,16 +576,20 @@ export function useZKGameIntegration(options: UseZKGameIntegrationOptions = {}) 
       // Verify locally after generation
       const verificationService = await import('../lib/zk/verificationService');
       const verifyResult = await verificationService.verifyLocally('draw', proof);
+      const proofRecordId = await persistProofRecord('draw', proof, effectiveGameId, verifyResult.valid);
       
       if (verifyResult.valid) {
         notifyZK('success', 'draw', `Proof verified locally`);
         
         // Submit to zkVerify in the background (don't await - don't block gameplay)
         verificationService.submitToZkVerify('draw', proof)
-          .then(result => {
+          .then(async (result) => {
             if (result.submitted) {
               notifyZK('success', 'draw', `Submitted to zkVerify (job: ${result.jobId})`);
               console.log('[ZK] zkVerify job ID:', result.jobId);
+              if (proofRecordId && result.jobId) {
+                await persistKurierUpdate(proofRecordId, result.jobId);
+              }
             } else if (result.error) {
               console.warn('[ZK] zkVerify submission skipped:', result.error);
             }
@@ -548,7 +631,7 @@ export function useZKGameIntegration(options: UseZKGameIntegrationOptions = {}) 
     } finally {
       isGeneratingRef.current = false;
     }
-  }, []);
+  }, [persistKurierUpdate, persistProofRecord]);
   
   /**
    * Handle game state changes and trigger appropriate proofs
