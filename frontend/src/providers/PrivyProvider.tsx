@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import { PrivyProvider as PrivyAuthProvider } from "@privy-io/react-auth";
 import { WagmiProvider as PrivyWagmiProvider } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
