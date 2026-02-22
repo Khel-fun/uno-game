@@ -107,6 +107,24 @@
         "isPrivate": false,
         "createdAt": 1771504694912
       }
+    ],
+    [
+      "87M2LE9R",
+      {
+        "gameId": "21",
+        "roomId": "game-21",
+        "isPrivate": false,
+        "createdAt": 1771767796579
+      }
+    ],
+    [
+      "NGAFY6W7",
+      {
+        "gameId": "22",
+        "roomId": "game-22",
+        "isPrivate": false,
+        "createdAt": 1771774243526
+      }
     ]
   ],
   "gameIdToCode": [
@@ -157,6 +175,14 @@
     [
       "15",
       "KCGFAX46"
+    ],
+    [
+      "21",
+      "87M2LE9R"
+    ],
+    [
+      "22",
+      "NGAFY6W7"
     ]
   ]
 }
