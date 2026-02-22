@@ -65,7 +65,8 @@ contract UnoGameTest is Test {
             address(mockShuffleVerifier),
             address(mockDealVerifier),
             address(mockDrawVerifier),
-            address(mockPlayVerifier)
+            address(mockPlayVerifier),
+            address(1) // mock zkVerify address
         );
 
         // Setup test players
@@ -100,7 +101,7 @@ contract UnoGameTest is Test {
 
     function test_RevertWhenZeroAddressVerifier() public {
         vm.expectRevert(UnoGame.InvalidVerifierAddress.selector);
-        new UnoGame(address(0), address(mockDealVerifier), address(mockDrawVerifier), address(mockPlayVerifier));
+        new UnoGame(address(0), address(mockDealVerifier), address(mockDrawVerifier), address(mockPlayVerifier), address(1));
     }
 
     function test_MaxPlayersConstant() public view {

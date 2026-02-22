@@ -39,6 +39,8 @@ contract DeployUnoGame is Script {
     address constant DEAL_VERIFIER = 0x4AeaB7206A19EE01FbAEC8aee3654e4E93B59BE6;
     address constant DRAW_VERIFIER = 0x4d9CA273817BfEf07a9D73E23072DEabeb825060;
     address constant PLAY_VERIFIER = 0xB99a5Cb916bd38353C435d52dDfCb9F7b51bfF0a;
+    // zkVerify proof aggregation contract (update before mainnet deploy)
+    address constant ZK_VERIFY = 0x0000000000000000000000000000000000000001;
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -60,7 +62,8 @@ contract DeployUnoGame is Script {
             SHUFFLE_VERIFIER,
             DEAL_VERIFIER,
             DRAW_VERIFIER,
-            PLAY_VERIFIER
+            PLAY_VERIFIER,
+            ZK_VERIFY
         );
         address unoGameAddr = address(unoGame);
         console.log("\nUnoGame deployed to:", unoGameAddr);
@@ -103,6 +106,7 @@ contract DeployUnoGameWithMock is Script {
         // Deploy UnoGame with mock verifier for all circuits
         console.log("\nDeploying UnoGame with MockVerifier...");
         UnoGame unoGame = new UnoGame(
+            mockAddr,
             mockAddr,
             mockAddr,
             mockAddr,

@@ -1,6 +1,7 @@
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { realpathSync } from 'fs';
+import webpack from 'webpack';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,6 +32,15 @@ const nextConfig = {
     },
     
     webpack: (config, { isServer }) => {
+      // Some third-party bundles (styled-components CJS in deps) reference a global `React`.
+      // Provide it explicitly so SSR does not crash with "React is not defined".
+      config.plugins = config.plugins || [];
+      config.plugins.push(
+        new webpack.ProvidePlugin({
+          React: 'react',
+        })
+      );
+
       // MP3 file handling
       config.module.rules.push({
         test: /\.mp3$/,

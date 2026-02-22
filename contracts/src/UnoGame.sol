@@ -12,10 +12,23 @@ import "./interfaces/IUltraVerifier.sol";
  *      Supports private games with keccak256 game code verification
  *      and public games with open access.
  */
+
+
+interface IVerifyProofAggregation {
+    function verifyProofAggregation(
+        uint256 _domainId,
+        uint256 _aggregationId,
+        bytes32 _leaf,
+        bytes32[] calldata _merklePath,
+        uint256 _leafCount,
+        uint256 _index
+    ) external view returns (bool);
+}
+
 contract UnoGame is ReentrancyGuard, Ownable {
     uint256 private _gameIdCounter;
     uint256[] private _activeGames;
-
+    address public zkVerify;
     /// @notice Maximum number of players per game (hard cap)
     uint256 public constant MAX_PLAYERS = 4;
 
@@ -78,7 +91,7 @@ contract UnoGame is ReentrancyGuard, Ownable {
     event ProofVerified(uint256 indexed gameId, address indexed player, CircuitType circuitType);
     event GameEnded(uint256 indexed gameId, address indexed winner);
     event GameDeleted(uint256 indexed gameId, address indexed creator);
-
+    event ZkVerifyUpdated(address indexed zkVerify);
     error InvalidGameId();
     error InvalidGameStatus();
     error NotEnoughPlayers();
@@ -109,17 +122,19 @@ contract UnoGame is ReentrancyGuard, Ownable {
         address _shuffleVerifier,
         address _dealVerifier,
         address _drawVerifier,
-        address _playVerifier
+        address _playVerifier,
+        address _zkVerify
     ) Ownable(msg.sender) {
         if (_shuffleVerifier == address(0) || _dealVerifier == address(0) ||
             _drawVerifier == address(0) || _playVerifier == address(0)) {
             revert InvalidVerifierAddress();
         }
-
+    require(_zkVerify != address(0), "Invalid zkVerify address");
         shuffleVerifier = IUltraVerifier(_shuffleVerifier);
         dealVerifier = IUltraVerifier(_dealVerifier);
         drawVerifier = IUltraVerifier(_drawVerifier);
         playVerifier = IUltraVerifier(_playVerifier);
+        zkVerify = _zkVerify;
     }
 
     /**
@@ -592,5 +607,27 @@ contract UnoGame is ReentrancyGuard, Ownable {
                 break;
             }
         }
+    }
+    function verifyProofAggregation(
+        uint256 _domainId,
+        uint256 _aggregationId,
+        bytes32 _leaf,
+        bytes32[] calldata _merklePath,
+        uint256 _leafCount,
+        uint256 _index
+    ) external view returns (bool) {
+        return IVerifyProofAggregation(zkVerify).verifyProofAggregation(
+            _domainId,
+            _aggregationId,
+            _leaf,
+            _merklePath,
+            _leafCount,
+            _index
+        );
+    }
+        function updateZkVerify(address _zkVerify) external onlyOwner {
+        require(_zkVerify != address(0), "Invalid zkVerify address");
+        zkVerify = _zkVerify;
+        emit ZkVerifyUpdated(_zkVerify);
     }
 }

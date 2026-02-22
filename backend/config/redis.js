@@ -22,7 +22,8 @@ function createRedisClient(role = 'data') {
         enableReadyCheck: true,
       };
 
-  const client = new Redis(REDIS_URL || options);
+  // Keep lazyConnect behavior consistent for URL and host/port modes.
+  const client = REDIS_URL ? new Redis(REDIS_URL, options) : new Redis(options);
 
   client.on('connect', () => logger.info(`[redis-${role}] connected`));
   client.on('error', (err) => logger.error(`[redis-${role}] error: ${err.message}`));
