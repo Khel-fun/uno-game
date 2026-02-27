@@ -20,7 +20,6 @@ import { unoGameABI } from "@/constants/unogameabi";
 import ProfileDropdown from "@/components/profileDropdown";
 import { socketManager } from "@/services/socket";
 import { AddToFarcaster } from "@/components/AddToFarcaster";
-import NetworkDropdown from "@/components/NetworkDropdown";
 import {
   getContractAddress,
   isSupportedChain,
@@ -35,7 +34,6 @@ import {
   getMiniPayAddress,
 } from "@/utils/miniPayUtils";
 import { encodeFunctionData, keccak256, toBytes, toHex, stringToHex } from "viem";
-import { useNetworkSelection } from "@/hooks/useNetworkSelection";
 
 // GameCreated event signature - now includes isPrivate param
 const GAME_CREATED_EVENT_SIGNATURE = keccak256(
@@ -119,7 +117,6 @@ export default function PlayGame() {
 
   const router = useRouter();
 
-  const { selectedNetwork, isInitialized } = useNetworkSelection();
   const { address: wagmiAddress, isConnected: wagmiConnected, chain: walletChain } = useAccount();
   const { authenticated, ready: privyReady, connectWallet } = usePrivy();
   
@@ -140,7 +137,7 @@ export default function PlayGame() {
     }
   }, [privyReady, authenticated, wagmiConnected, connectWallet]);
   
-  const chainId = walletChain?.id || selectedNetwork.id;
+  const chainId = walletChain?.id || 84532; // Base Sepolia
   const address =
     isMiniPayWallet && miniPayAddress ? miniPayAddress : wagmiAddress;
   const { data: walletClient } = useWalletClient();
@@ -761,7 +758,6 @@ export default function PlayGame() {
               </button>
             </Link>
           )}
-          <NetworkDropdown />
           {isWalletReady && address && <ProfileDropdown address={address} />}
         </div>
       </div>
@@ -793,7 +789,7 @@ export default function PlayGame() {
           )}
           <WalletConnection />
         </div>
-      ) : !isInitialized ? (
+      ) : false ? (
         <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
           <div className="text-center mb-2">
             <h1 className="text-2xl font-bold mb-2">Loading Network...</h1>
