@@ -25,7 +25,6 @@ import {
   isSupportedChain,
   getSupportedChainIds,
 } from "@/config/networks";
-import { useNetworkSelection } from "@/hooks/useNetworkSelection";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 
 // Card codes: SKIP=100, DRAW2=200, DRAW4=400, WILD=500
@@ -105,9 +104,8 @@ const Game = ({
   const [computerMoveCounter, setComputerMoveCounter] = useState(0);
   const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
 
-  // Get the network selected from dropdown
-  const { selectedNetwork } = useNetworkSelection();
-  const chainId = selectedNetwork.id;
+  // Hardcoded to Base Sepolia
+  const chainId = 84532;
 
   // Wagmi hooks for browser wallet transactions
   const {
@@ -804,7 +802,7 @@ const Game = ({
 
         toast({
           title: "Game Ended on Blockchain",
-          description: `Game recorded successfully on ${selectedNetwork.displayName}.`,
+          description: "Game recorded successfully on Base Sepolia.",
           variant: "success",
           duration: 5000,
         });
@@ -882,7 +880,7 @@ const Game = ({
     if (isConfirmed && !isMiniPayWallet) {
       toast({
         title: "Game Ended on Blockchain",
-        description: `Game recorded successfully on ${selectedNetwork.displayName}.`,
+        description: "Game recorded successfully on Base Sepolia.",
         variant: "success",
         duration: 5000,
       });

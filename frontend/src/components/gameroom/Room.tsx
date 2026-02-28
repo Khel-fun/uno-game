@@ -34,7 +34,6 @@ import {
   isSupportedChain,
   getSupportedChainIds,
 } from "@/config/networks";
-import { useNetworkSelection } from "@/hooks/useNetworkSelection";
 import { MAX_PLAYERS } from "@/constants/gameConstants";
 import { useWalletStorage } from "@/hooks/useWalletStorage";
 import { useAccount, usePublicClient, useSendTransaction as useWagmiSendTransaction } from "wagmi";
@@ -97,9 +96,8 @@ const Room = () => {
   const [playerHand, setPlayerHand] = useState<string[]>([]);
   const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
 
-  // Get the network selected from dropdown - but prioritize wallet's actual chain
-  const { selectedNetwork } = useNetworkSelection();
-  const chainId = walletChain?.id || selectedNetwork.id;
+  // Hardcoded to Base Sepolia
+  const chainId = 84532;
   
   // Use public client for the wallet's current chain
   const publicClient = usePublicClient({ chainId });
