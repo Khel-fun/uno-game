@@ -8,17 +8,16 @@ import { createConfig } from "wagmi";
 import { coinbaseWallet, injected, walletConnect } from "wagmi/connectors";
 import {
   baseSepolia,
-  celoSepolia,
 } from "@/config/networks";
 
 const wcProjectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID || "";
 
 // Single wagmi config for the entire app - used by Privy's WagmiProvider
 export const privyWagmiConfig = createConfig({
-  chains: [baseSepolia, celoSepolia],
+  chains: [baseSepolia],
   connectors: [
     coinbaseWallet({ appName: "Zunno" }),
-    injected(), // MiniPay and other injected wallets
+    injected(),
     ...(wcProjectId
       ? [
           walletConnect({
@@ -36,7 +35,6 @@ export const privyWagmiConfig = createConfig({
   ],
   transports: {
     [baseSepolia.id]: http("https://sepolia.base.org"),
-    [celoSepolia.id]: http("https://rpc.ankr.com/celo_sepolia"),
   },
   ssr: true,
 });
@@ -95,7 +93,7 @@ export function PrivyProviderWrapper({
         // Default chain
         defaultChain: baseSepolia,
         // Supported chains
-        supportedChains: [baseSepolia, celoSepolia],
+        supportedChains: [baseSepolia],
       }}
     >
       <QueryClientProvider client={queryClient}>

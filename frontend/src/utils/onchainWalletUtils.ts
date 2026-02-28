@@ -16,19 +16,19 @@ export function useWalletAddress() {
   const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
 
   // Detect MiniPay and fetch address directly
-  useEffect(() => {
-    const initMiniPay = async () => {
-      if (typeof window !== "undefined" && isMiniPay()) {
-        setIsMiniPayWallet(true);
+  // useEffect(() => {
+  //   const initMiniPay = async () => {
+  //     if (typeof window !== "undefined" && isMiniPay()) {
+  //       setIsMiniPayWallet(true);
 
-        // Fetch address directly from MiniPay
-        const mpAddress = await getMiniPayAddress();
-        setMiniPayAddress(mpAddress);
-      }
-    };
+  //       // Fetch address directly from MiniPay
+  //       const mpAddress = await getMiniPayAddress();
+  //       setMiniPayAddress(mpAddress);
+  //     }
+  //   };
 
-    initMiniPay();
-  }, []);
+  //   initMiniPay();
+  // }, []);
 
   // Use MiniPay address if available, otherwise use wagmi
   const address =
