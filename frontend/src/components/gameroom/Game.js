@@ -11,11 +11,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { ethers } from "ethers";
-import {
-  isMiniPay,
-  sendMiniPayTransaction,
-  getFeeCurrency,
-} from "@/utils/miniPayUtils";
 import { encodeFunctionData } from "viem";
 import { useSocketConnection } from "@/context/SocketConnectionContext";
 import { MAX_PLAYERS } from "@/constants/gameConstants";
@@ -102,9 +97,8 @@ const Game = ({
   const [dialogCallback, setDialogCallback] = useState(null);
   const [rewardGiven, setRewardGiven] = useState(false);
   const [computerMoveCounter, setComputerMoveCounter] = useState(0);
-  const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
 
-  // Hardcoded to Base Sepolia
+  // Hardcoded to Base Sepolia only
   const chainId = 84532;
 
   // Wagmi hooks for browser wallet transactions
@@ -125,12 +119,6 @@ const Game = ({
 
   const { address, isConnected } = useWalletAddress();
 
-  // Detect MiniPay wallet on mount
-  useEffect(() => {
-    if (typeof window !== "undefined" && isMiniPay()) {
-      setIsMiniPayWallet(true);
-    }
-  }, []);
 
   const {
     gameOver,
@@ -771,43 +759,7 @@ const Game = ({
         ethers.toUtf8Bytes(JSON.stringify(gameResultData))
       );
 
-      // Use MiniPay native transaction method for fee abstraction
-      if (isMiniPayWallet && address) {
-        // Validate we're on a supported network
-        if (!isSupportedChain(chainId)) {
-          throw new Error(
-            `Unsupported network! Please switch to a supported network. Current chain: ${chainId}, Supported: ${getSupportedChainIds().join(", ")}`,
-          );
-        }
-
-        const contractAddress = getContractAddress(chainId);
-
-        if (!contractAddress) {
-          throw new Error("Contract address not configured");
-        }
-
-        const data = encodeFunctionData({
-          abi: unoGameABI,
-          functionName: "endGame",
-          args: [BigInt(room), gameHash],
-        });
-
-        // Use direct eth_sendTransaction for MiniPay
-        const hash = await sendMiniPayTransaction(
-          contractAddress,
-          data,
-          address,
-          chainId
-        );
-
-        toast({
-          title: "Game Ended on Blockchain",
-          description: "Game recorded successfully on Base Sepolia.",
-          variant: "success",
-          duration: 5000,
-        });
-      } else {
-        // Browser wallet: Use wagmi transaction
+      // Use wagmi transaction
         if (!isSupportedChain(chainId)) {
           throw new Error(
             `Unsupported network! Please switch to a supported network. Current chain: ${chainId}, Supported: ${getSupportedChainIds().join(
@@ -842,17 +794,6 @@ const Game = ({
         });
 
         // Note: Transaction confirmation is handled by the useEffect below
-      }
-
-      // Show congratulations for MiniPay (instant), browser wallet waits for confirmation
-      if (isMiniPayWallet) {
-        toast({
-          title: "Congratulations!",
-          description: "You've won the game!",
-          variant: "success",
-          duration: 5000,
-        });
-      }
     } catch (error) {
       console.error("Failed to end game on blockchain:", error);
       const errorMessage =
@@ -868,7 +809,7 @@ const Game = ({
 
   // Handle browser wallet transaction confirmation
   useEffect(() => {
-    if (isConfirming && !isMiniPayWallet) {
+    if (isConfirming) {
       toast({
         title: "Transaction Confirming",
         description: "Waiting for blockchain confirmation...",
@@ -877,7 +818,7 @@ const Game = ({
       });
     }
 
-    if (isConfirmed && !isMiniPayWallet) {
+    if (isConfirmed) {
       toast({
         title: "Game Ended on Blockchain",
         description: "Game recorded successfully on Base Sepolia.",
@@ -892,7 +833,7 @@ const Game = ({
         duration: 5000,
       });
     }
-  }, [isConfirming, isConfirmed, isMiniPayWallet]);
+  }, [isConfirming, isConfirmed]);
 
   useEffect(() => {
     if (gameOver && winner && !rewardGiven) handleWinnerReward(winner);

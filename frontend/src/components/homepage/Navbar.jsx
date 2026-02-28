@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 
 import styles from '../styles';
-import { navVariants } from '@/utils/motion';
 import StyledButton from "../styled-button";
 import { useRouter } from 'next/navigation';
 

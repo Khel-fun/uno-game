@@ -7,7 +7,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { http } from "viem";
 import { createConfig } from "wagmi";
 import { coinbaseWallet, injected, walletConnect } from "wagmi/connectors";
-import { baseSepolia } from "@/config/networks";
+import {
+  baseSepolia,
+} from "@/config/networks";
 
 const wcProjectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID || "";
 

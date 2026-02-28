@@ -29,7 +29,7 @@ import { updateGlobalCardHashMap } from "../../lib/globalState";
 import { unoGameABI } from "@/constants/unogameabi";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import {  
+import {
   getContractAddress,
   isSupportedChain,
   getSupportedChainIds,
@@ -37,11 +37,6 @@ import {
 import { MAX_PLAYERS } from "@/constants/gameConstants";
 import { useWalletStorage } from "@/hooks/useWalletStorage";
 import { useAccount, usePublicClient, useSendTransaction as useWagmiSendTransaction } from "wagmi";
-import {
-  isMiniPay,
-  sendMiniPayTransaction,
-  getFeeCurrency,
-} from "@/utils/miniPayUtils";
 import { encodeFunctionData } from "viem";
 import { useZKGameIntegration } from "@/hooks/useZKGameIntegration";
 import { useZK } from "@/lib/zk";
@@ -94,9 +89,8 @@ const Room = () => {
     useState<OffChainGameState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [playerHand, setPlayerHand] = useState<string[]>([]);
-  const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
 
-  // Hardcoded to Base Sepolia
+  // Hardcoded to Base Sepolia only
   const chainId = 84532;
   
   // Use public client for the wallet's current chain
@@ -115,12 +109,6 @@ const Room = () => {
   // Get the contract address for the current chain
   const contractAddress = getContractAddress(chainId) as `0x${string}`;
 
-  // Detect MiniPay wallet on mount
-  useEffect(() => {
-    if (typeof window !== "undefined" && isMiniPay()) {
-      setIsMiniPayWallet(true);
-    }
-  }, []);
 
   // Initialize computer game (off-chain only)
   const initializeComputerGame = async () => {
@@ -605,7 +593,7 @@ const Room = () => {
     console.log('Starting game with:', { address, account, userAccount, offChainGameState: !!offChainGameState, gameId, isWalletConnected });
     
     // Check for wallet connection first
-    if (!isWalletConnected && !isMiniPayWallet) {
+    if (!isWalletConnected) {
       console.error("Wallet not connected");
       setError("Please connect your wallet to start the game");
       toast({
@@ -626,55 +614,8 @@ const Room = () => {
     try {
       setStartGameLoading(true);
 
-      // Use MiniPay native transaction method for fee abstraction
-      if (isMiniPayWallet && address) {
-        // Validate we're on a supported network
-        if (!isSupportedChain(chainId)) {
-          throw new Error(
-            `Unsupported network! Please switch to a supported network. Current chain: ${chainId}, Supported: ${getSupportedChainIds().join(", ")}`,
-          );
-        }
-
-        const contractAddr = getContractAddress(chainId) as `0x${string}`;
-
-        if (!contractAddr) {
-          throw new Error("Contract address not configured");
-        }
-
-        const data = encodeFunctionData({
-          abi: unoGameABI,
-          functionName: "startGame",
-          args: [gameId],
-        });
-
-        // Use direct eth_sendTransaction for MiniPay
-        const hash = await sendMiniPayTransaction(
-          contractAddr,
-          data,
-          address as string,
-          chainId,
-        );
-
-        toast({
-          title: "Transaction Sent!",
-          description: "Waiting for confirmation...",
-          duration: 5000,
-          variant: "default",
-        });
-
-        // Wait a moment for transaction to be mined
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-
-        toast({
-          title: "Game started successfully!",
-          description: "Game started successfully!",
-          duration: 5000,
-          variant: "success",
-        });
-
-        initializeGameAfterStart();
-        setStartGameLoading(false);
-      } else if (isWalletConnected && address) {
+      // Use wagmi transaction for all wallets
+      if (isWalletConnected && address) {
         // Use wagmi's sendTransaction for browser wallets (MetaMask, etc.)
         const data = encodeFunctionData({
           abi: unoGameABI,

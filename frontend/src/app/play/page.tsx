@@ -25,14 +25,6 @@ import {
   isSupportedChain,
   getSupportedChainIds,
 } from "@/config/networks";
-import {
-  isMiniPay,
-  supportsFeeAbstraction,
-  getFeeCurrency,
-  sendMiniPayTransaction,
-  checkCUSDBalance,
-  getMiniPayAddress,
-} from "@/utils/miniPayUtils";
 import { encodeFunctionData, keccak256, toBytes, toHex, stringToHex } from "viem";
 
 // GameCreated event signature - now includes isPrivate param
@@ -97,10 +89,7 @@ export default function PlayGame() {
   const [joiningGameId, setJoiningGameId] = useState<BigInt | null>(null);
   const [deletingGameId, setDeletingGameId] = useState<BigInt | null>(null);
   const [gameId, setGameId] = useState<BigInt | null>(null);
-  const [isMiniPayWallet, setIsMiniPayWallet] = useState(false);
   const [transactionStatus, setTransactionStatus] = useState<string>("");
-  const [cusdBalance, setCusdBalance] = useState<string>("");
-  const [miniPayAddress, setMiniPayAddress] = useState<string | null>(null);
 
   // Lobby state
   const [activeTab, setActiveTab] = useState<LobbyTab>("public");
@@ -138,8 +127,7 @@ export default function PlayGame() {
   }, [privyReady, authenticated, wagmiConnected, connectWallet]);
   
   const chainId = walletChain?.id || 84532; // Base Sepolia
-  const address =
-    isMiniPayWallet && miniPayAddress ? miniPayAddress : wagmiAddress;
+  const address = wagmiAddress;
   const { data: walletClient } = useWalletClient();
   const { account: recoilAccount } = useUserAccount();
   const { sendTransactionAsync: sendWagmiTransaction } =
@@ -149,27 +137,17 @@ export default function PlayGame() {
   const { connect, connectors } = useConnect();
 
   // Detect MiniPay on mount
-  useEffect(() => {
-    const initMiniPay = async () => {
-      if (typeof window !== "undefined" && isMiniPay()) {
-        setIsMiniPayWallet(true);
-        const mpAddress = await getMiniPayAddress();
-        setMiniPayAddress(mpAddress);
-      }
-    };
-    initMiniPay();
-  }, []);
+  // useEffect(() => {
+  //   const initMiniPay = async () => {
+  //     if (typeof window !== "undefined" && isMiniPay()) {
+  //       setIsMiniPayWallet(true);
+  //       const mpAddress = await getMiniPayAddress();
+  //       setMiniPayAddress(mpAddress);
+  //     }
+  //   };
+  //   initMiniPay();
+  // }, []);
 
-  // Check cUSD balance for MiniPay users
-  useEffect(() => {
-    const loadBalance = async () => {
-      if (isMiniPayWallet && address && chainId === 11142220) {
-        const balance = await checkCUSDBalance(address, chainId);
-        setCusdBalance(balance);
-      }
-    };
-    loadBalance();
-  }, [isMiniPayWallet, address, chainId]);
 
   const contractAddress = getContractAddress(chainId) as `0x${string}`;
 
@@ -232,37 +210,18 @@ export default function PlayGame() {
   }, [activeTab]);
 
   /**
-   * Send a transaction via MiniPay or browser wallet
+   * Send a transaction via browser wallet
    */
   const sendTransaction = useCallback(
     async (data: `0x${string}`): Promise<`0x${string}`> => {
       const contractAddr = getContractAddress(chainId) as `0x${string}`;
-
-      if (isMiniPayWallet && address) {
-        const hash = await sendMiniPayTransaction(
-          contractAddr,
-          data,
-          address as string,
-          chainId
-        );
-        return hash as `0x${string}`;
-      } else if (isWalletReady && address) {
-        const hash = await sendWagmiTransaction({
-          to: contractAddr,
-          data,
-        });
-        return hash;
-      }
-      throw new Error("Wallet not connected");
+      const hash = await sendWagmiTransaction({
+        to: contractAddr,
+        data,
+      });
+      return hash;
     },
-    [
-      chainId,
-      isMiniPayWallet,
-      address,
-      isWalletReady,
-      sendMiniPayTransaction,
-      sendWagmiTransaction,
-    ]
+    [chainId, isWalletReady, sendWagmiTransaction]
   );
 
   /**
@@ -782,11 +741,6 @@ export default function PlayGame() {
             <h1 className="text-4xl font-bold mb-2">Welcome Back!</h1>
             <p className="text-gray-300 text-lg">Ready to challenge?</p>
           </div>
-          {isMiniPayWallet && (
-            <div className="mb-4 text-green-400 text-sm animate-pulse">
-              Connecting to MiniPay...
-            </div>
-          )}
           <WalletConnection />
         </div>
       ) : false ? (
@@ -798,25 +752,6 @@ export default function PlayGame() {
         </div>
       ) : (
         <>
-          {/* MiniPay Status */}
-          {isMiniPayWallet && (
-            <div className="px-6 pb-2">
-              <div className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-lg p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-green-400 font-medium">
-                    Connected via MiniPay
-                  </span>
-                  {supportsFeeAbstraction(chainId) && (
-                    <span className="text-xs text-blue-300 ml-auto">
-                      Gas fees in cUSD
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
           <div className="px-6">
             {/* Main Action Cards */}
             <div className="space-y-4 mb-6">
