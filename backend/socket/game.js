@@ -2,7 +2,13 @@ const logger = require('../logger');
 const { clearRemoval } = require('./timers');
 const { initializeZKGame, getPlayProofData, getDrawProofData, getZKGameState } = require('../zk');
 
-module.exports = function gameHandler(io, socket, { gameStateManager, userManager }) {
+module.exports = function gameHandler(io, socket, { gameStateManager, userManager, trackingService }) {
+  const getTrackingChainId = (chainId) => {
+    const parsed = Number(chainId);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    return trackingService?.getStatus()?.defaultChainId || 84532;
+  };
+
   // Join a specific game room (socket.io room)
   socket.on('joinRoom', (roomId) => {
     const user = userManager.getUser(socket.id);
@@ -12,13 +18,23 @@ module.exports = function gameHandler(io, socket, { gameStateManager, userManage
   });
 
   // Create a new game room (broadcast) with optional game code registration
-  socket.on('createGameRoom', ({ gameId, isPrivate, gameCode } = {}, callback) => {
+  socket.on('createGameRoom', ({ gameId, isPrivate, gameCode, chainId, creatorAddress, gameCodeHash } = {}, callback) => {
     let code = null;
     if (gameId) {
       const roomId = `game-${gameId}`;
       // Use frontend-provided game code (matches on-chain hash), or generate one
       code = gameStateManager.registerGameCode(gameId, roomId, !!isPrivate, gameCode || null);
       logger.info('Game room created: gameId=%s, isPrivate=%s, code=%s', gameId, isPrivate, code);
+
+      trackingService?.enqueueGameSessionUpsert({
+        chainId: getTrackingChainId(chainId),
+        gameId: String(gameId),
+        roomId,
+        ownerAddress: creatorAddress || '0x0000000000000000000000000000000000000000',
+        isPrivate: !!isPrivate,
+        gameCodeHash: gameCodeHash || null,
+        status: 'not_started',
+      });
     }
     io.emit('gameRoomCreated', { gameId, isPrivate });
     callback?.({ gameCode: code });
@@ -45,8 +61,15 @@ module.exports = function gameHandler(io, socket, { gameStateManager, userManage
   });
 
   // Delete a game code (when game is deleted on-chain)
-  socket.on('deleteGameCode', ({ gameId }) => {
+  socket.on('deleteGameCode', ({ gameId, chainId } = {}) => {
     gameStateManager.deleteGameCode(gameId);
+    if (gameId) {
+      trackingService?.enqueueGameStatusUpdate({
+        chainId: getTrackingChainId(chainId),
+        gameId: String(gameId),
+        status: 'ended',
+      });
+    }
   });
 
   /**
@@ -132,6 +155,14 @@ module.exports = function gameHandler(io, socket, { gameStateManager, userManage
       await gameStateManager.saveGameState(roomId, newState);
       if (cardHashMap) {
         await gameStateManager.saveCardHashMap(roomId, cardHashMap);
+      }
+
+      if (gameId) {
+        trackingService?.enqueueGameStatusUpdate({
+          chainId: getTrackingChainId(newState?.chainId),
+          gameId: String(gameId),
+          status: 'started',
+        });
       }
       
       logger.info('Game started: %s', roomId);

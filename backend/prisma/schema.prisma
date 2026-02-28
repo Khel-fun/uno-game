@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+model GameSession {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  chainId      Int      @map("chain_id")
+  gameId       String   @map("game_id")
+  roomId       String   @unique @map("room_id")
+  ownerAddress String   @map("owner_address")
+  isPrivate    Boolean  @default(false) @map("is_private")
+  gameCodeHash String?  @map("game_code_hash")
+  status       String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@unique([chainId, gameId], name: "game_sessions_chain_id_game_id")
+  @@map("game_sessions")
+}
+
+model ZkCircuitSetup {
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  circuitName         String        @map("circuit_name")
+  proofSystem         String        @default("ultrahonk") @map("proof_system")
+  compiledCircuitJson Json          @map("compiled_circuit_json")
+  artifactSha256      String        @map("artifact_sha256")
+  noirVersion         String?       @map("noir_version")
+  circuitHash         String?       @map("circuit_hash")
+  verificationKeyHex  String        @map("verification_key_hex")
+  vkHash              String        @map("vk_hash")
+  isActive            Boolean       @default(true) @map("is_active")
+  createdAt           DateTime      @default(now()) @map("created_at")
+
+  proofRecords ProofRecord[]
+
+  @@unique([circuitName, artifactSha256], name: "zk_circuit_setup_circuit_name_artifact_sha256")
+  @@index([circuitName, isActive], map: "idx_zk_circuit_setup_circuit_active")
+  @@map("zk_circuit_setup")
+}
+
+model ProofRecord {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  chainId        Int      @map("chain_id")
+  gameId         String   @map("game_id")
+  roomId         String   @map("room_id")
+  circuitName    String   @map("circuit_name")
+  circuitSetupId String   @map("circuit_setup_id") @db.Uuid
+  playerAddress  String?  @map("player_address")
+  proofHex       String   @map("proof_hex")
+  proofHash      String   @map("proof_hash")
+  publicInputs   Json     @map("public_inputs_json")
+  localVerified  Boolean? @map("local_verified")
+  kurierJobId    String?  @map("kurier_job_id")
+  kurierStatus   String?  @map("kurier_status")
+  aggregationId  BigInt?  @map("aggregation_id")
+  domainId       BigInt?  @map("domain_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  circuitSetup              ZkCircuitSetup            @relation(fields: [circuitSetupId], references: [id])
+  aggregationVerifications  AggregationVerification[]
+
+  @@index([chainId, gameId], map: "idx_proof_records_chain_game")
+  @@index([roomId], map: "idx_proof_records_room_id")
+  @@index([kurierJobId], map: "idx_proof_records_kurier_job_id")
+  @@index([aggregationId], map: "idx_proof_records_aggregation_id")
+  @@map("proof_records")
+}
+
+model AggregationVerification {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  proofRecordId          String   @map("proof_record_id") @db.Uuid
+  zkverifyContractAddress String  @map("zkverify_contract_address")
+  domainId               BigInt   @map("domain_id")
+  aggregationId          BigInt   @map("aggregation_id")
+  leaf                   String
+  merklePath             Json     @map("merkle_path_json")
+  leafCount              BigInt   @map("leaf_count")
+  leafIndex              BigInt   @map("leaf_index")
+  verified               Boolean?
+  txHash                 String?  @map("tx_hash")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  proofRecord ProofRecord @relation(fields: [proofRecordId], references: [id])
+
+  @@unique([proofRecordId, domainId, aggregationId], name: "aggregation_verifications_proof_domain_agg")
+  @@index([domainId, aggregationId], map: "idx_aggregation_verifications_domain_agg")
+  @@map("aggregation_verifications")
+}
