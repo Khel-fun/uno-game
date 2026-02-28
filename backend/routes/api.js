@@ -2,6 +2,9 @@ const express = require('express');
 const os = require('os');
 const gameStateManager = require('../gameStateManager');
 const RedisStorage = require('../services/redisStorage');
+const trackingService = require('../tracking/service');
+const { checkTrackingDbHealth } = require('../config/postgres');
+const trackingRouter = require('./tracking');
 
 const router = express.Router();
 
@@ -9,6 +12,8 @@ router.get('/health', async (_req, res) => {
   const redis = new RedisStorage();
   const redisEnabled = redis.isEnabled();
   const counts = gameStateManager.counts();
+  const trackingDb = await checkTrackingDbHealth();
+  const trackingStatus = trackingService.getStatus();
 
   res.json({
     status: 'ok',
@@ -18,6 +23,10 @@ router.get('/health', async (_req, res) => {
     gameCodes: counts.gameCodes,
     redisEnabled,
     storageType: redisEnabled ? 'redis' : 'memory',
+    tracking: {
+      ...trackingStatus,
+      db: trackingDb,
+    },
     memory: process.memoryUsage(),
     loadavg: os.loadavg(),
   });
@@ -45,5 +54,7 @@ router.get('/game/:gameId/code', (req, res) => {
   }
   res.json({ gameCode: code });
 });
+
+router.use('/tracking', trackingRouter);
 
 module.exports = router;

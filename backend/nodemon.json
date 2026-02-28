@@ -1,0 +1,13 @@
+{
+  "watch": [
+    "."
+  ],
+  "ext": "js,json",
+  "ignore": [
+    "game-states.json",
+    "game-codes.json",
+    "game-logs/**",
+    "node_modules/**",
+    "prisma/migrations/**"
+  ]
+}

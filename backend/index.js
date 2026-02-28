@@ -12,6 +12,7 @@ const apiRouter = require('./routes/api');
 const logger = require('./logger');
 const gameStateManager = require('./gameStateManager');
 const userManager = require('./users');
+const trackingService = require('./tracking/service');
 const { setupCleanup } = require('./utils/cleanup');
 
 const PORT = process.env.PORT || 4000;
@@ -25,7 +26,7 @@ app.use('/api', apiRouter);
 const server = http.createServer(app);
 
 const io = new Server(server, socketConfig);
-registerSocketHandlers(io, { gameStateManager, userManager });
+registerSocketHandlers(io, { gameStateManager, userManager, trackingService });
 
 // Apply server-level timeouts
 server.timeout = 120000; // 120 seconds
