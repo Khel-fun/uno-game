@@ -3,12 +3,18 @@
 import { useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useLoginToMiniApp } from "@privy-io/react-auth/farcaster";
+import { useSwitchChain, useAccount } from "wagmi";
 import miniappSdk from "@farcaster/miniapp-sdk";
+
+const BASE_SEPOLIA_CHAIN_ID = 84532;
 
 export function FarcasterAutoLogin() {
   const { ready, authenticated } = usePrivy();
   const { initLoginToMiniApp, loginToMiniApp } = useLoginToMiniApp();
+  const { switchChain } = useSwitchChain();
+  const { chain } = useAccount();
 
+  // Auto-login effect
   useEffect(() => {
     // Only attempt auto-login if:
     // 1. Privy is ready
@@ -46,6 +52,17 @@ export function FarcasterAutoLogin() {
       login();
     }
   }, [ready, authenticated, initLoginToMiniApp, loginToMiniApp]);
+
+  // Chain switching effect - runs after authentication
+  useEffect(() => {
+    if (authenticated && chain && switchChain) {
+      // If user is authenticated but on wrong chain, switch to Base Sepolia
+      if (chain.id !== BASE_SEPOLIA_CHAIN_ID) {
+        console.log(`[Farcaster] Switching from chain ${chain.id} to Base Sepolia (${BASE_SEPOLIA_CHAIN_ID})`);
+        switchChain({ chainId: BASE_SEPOLIA_CHAIN_ID });
+      }
+    }
+  }, [authenticated, chain, switchChain]);
 
   // This component doesn't render anything
   return null;
