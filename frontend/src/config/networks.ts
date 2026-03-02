@@ -35,6 +35,13 @@ export const SUPPORTED_NETWORKS: NetworkConfig[] = [
 
 export const DEFAULT_NETWORK = SUPPORTED_NETWORKS[0];
 
+/**
+ * The active chain ID used across the app.
+ * Change DEFAULT_NETWORK (index above) to switch the entire app to a different chain.
+ */
+export const DEFAULT_CHAIN_ID = DEFAULT_NETWORK.id;
+export const DEFAULT_CHAIN = DEFAULT_NETWORK.chain;
+
 export const getNetworkById = (chainId: number): NetworkConfig | undefined => {
   return SUPPORTED_NETWORKS.find((network) => network.id === chainId);
 };

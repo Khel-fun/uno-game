@@ -1,9 +1,9 @@
 import { createPublicClient, http, PublicClient } from 'viem';
 import type { ZKProof } from './types';
 import { VERIFIER_ADDRESSES, CircuitType } from '../../constants/unogameabi';
+import { DEFAULT_CHAIN_ID, DEFAULT_CHAIN } from '../../config/networks';
 
-// Chain ID for Base Sepolia
-const BASE_SEPOLIA_CHAIN_ID = 84532;
+const BASE_SEPOLIA_CHAIN_ID = DEFAULT_CHAIN_ID;
 function getBaseSepoliaClient(): PublicClient {
   return createPublicClient({
     chain: {

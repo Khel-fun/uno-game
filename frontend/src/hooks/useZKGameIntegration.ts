@@ -3,11 +3,12 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import type { Socket } from 'socket.io-client';
 import type { ZKProof } from '../lib/zk/types';
+import { DEFAULT_CHAIN_ID } from '../config/networks';
 
 // Configuration
 const ENABLE_REAL_PROOFS = true; // Set to false for simulation mode
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
-const TRACKING_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 84532);
+const TRACKING_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || DEFAULT_CHAIN_ID);
 
 // Callback type for proof tracking
 export type OnProofGeneratedCallback = (circuitName: string, proof: ZKProof) => void;

@@ -10,6 +10,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useZK, type ProofRecord } from '../../lib/zk';
 import { useWalletClient, useSwitchChain } from 'wagmi';
+import { DEFAULT_CHAIN_ID } from '@/config/networks';
 
 // ============================================================================
 // Types
@@ -188,15 +189,15 @@ function OnChainVerificationSection({ proofs }: OnChainVerificationSectionProps)
 
     // Check wallet's chain and switch if needed
     const walletChainId = walletClient.chain?.id;
-    if (walletChainId !== 84532) {
-      console.log('[ZKProofPanel] Wrong chain:', walletChainId, 'switching to Base Sepolia (84532)...');
+    if (walletChainId !== DEFAULT_CHAIN_ID) {
+      console.log('[ZKProofPanel] Wrong chain:', walletChainId, 'switching to default chain (' + DEFAULT_CHAIN_ID + ')...');
       const zkNotify = (window as unknown as { 
         zkNotify?: (type: string, circuit: string, message: string) => void 
       }).zkNotify;
       
       try {
         zkNotify?.('submitting', proof.circuitName, 'Switching to Base Sepolia...');
-        await switchChainAsync({ chainId: 84532 });
+        await switchChainAsync({ chainId: DEFAULT_CHAIN_ID });
         console.log('[ZKProofPanel] Chain switched successfully to Base Sepolia');
       } catch (switchError) {
         console.error('[ZKProofPanel] Chain switch failed:', switchError);
