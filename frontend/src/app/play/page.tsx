@@ -24,8 +24,10 @@ import {
   getContractAddress,
   isSupportedChain,
   getSupportedChainIds,
+  DEFAULT_CHAIN_ID,
 } from "@/config/networks";
 import { encodeFunctionData, keccak256, toBytes, toHex, stringToHex } from "viem";
+import { useChainSwitcher } from "@/hooks/useChainSwitcher";
 
 // GameCreated event signature - now includes isPrivate param
 const GAME_CREATED_EVENT_SIGNATURE = keccak256(
@@ -126,7 +128,7 @@ export default function PlayGame() {
     }
   }, [privyReady, authenticated, wagmiConnected, connectWallet]);
   
-  const chainId = walletChain?.id || 84532; // Base Sepolia
+  const chainId = walletChain?.id || DEFAULT_CHAIN_ID;
   const address = wagmiAddress;
   const { data: walletClient } = useWalletClient();
   const { account: recoilAccount } = useUserAccount();
@@ -135,19 +137,7 @@ export default function PlayGame() {
   const publicClient = usePublicClient({ chainId });
   const { toast } = useToast();
   const { connect, connectors } = useConnect();
-
-  // Detect MiniPay on mount
-  // useEffect(() => {
-  //   const initMiniPay = async () => {
-  //     if (typeof window !== "undefined" && isMiniPay()) {
-  //       setIsMiniPayWallet(true);
-  //       const mpAddress = await getMiniPayAddress();
-  //       setMiniPayAddress(mpAddress);
-  //     }
-  //   };
-  //   initMiniPay();
-  // }, []);
-
+  const { ensureCorrectChain } = useChainSwitcher();
 
   const contractAddress = getContractAddress(chainId) as `0x${string}`;
 
@@ -214,14 +204,16 @@ export default function PlayGame() {
    */
   const sendTransaction = useCallback(
     async (data: `0x${string}`): Promise<`0x${string}`> => {
+      await ensureCorrectChain();
       const contractAddr = getContractAddress(chainId) as `0x${string}`;
       const hash = await sendWagmiTransaction({
         to: contractAddr,
         data,
+        chainId: DEFAULT_CHAIN_ID,
       });
       return hash;
     },
-    [chainId, isWalletReady, sendWagmiTransaction]
+    [chainId, isWalletReady, sendWagmiTransaction, ensureCorrectChain]
   );
 
   /**
@@ -312,6 +304,7 @@ export default function PlayGame() {
         title: "Transaction Sent!",
         description: "Waiting for confirmation...",
         duration: 5000,
+        variant: "success",
       });
 
       const receipt = await waitForReceipt(hash);
@@ -397,6 +390,7 @@ export default function PlayGame() {
         title: "Transaction Sent!",
         description: "Waiting for confirmation...",
         duration: 5000,
+        variant: "success",
       });
 
       const receipt = await waitForReceipt(hash);
@@ -472,6 +466,7 @@ export default function PlayGame() {
         title: "Transaction Sent!",
         description: "Waiting for confirmation...",
         duration: 5000,
+        variant: "success",
       });
 
       const joinReceipt = await waitForReceipt(hash);
@@ -575,6 +570,7 @@ export default function PlayGame() {
         title: "Transaction Sent!",
         description: "Verifying game code...",
         duration: 5000,
+        variant: "success",
       });
 
       const joinCodeReceipt = await waitForReceipt(hash);
@@ -692,10 +688,10 @@ export default function PlayGame() {
 
   return (
     <div
-      className="min-h-screen text-white relative overflow-hidden bg-[url('/images/bg_effect.png')]"
+      className="min-h-screen text-white relative overflow-hidden]"
       style={{
         background:
-          'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%), url("/images/bg_effect.png")',
+          'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
         backgroundBlendMode: "overlay",
       }}
     >

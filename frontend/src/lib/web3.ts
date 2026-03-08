@@ -16,7 +16,6 @@ async function verifyContract(provider: ethers.Provider, address: string) {
  */
 function getRpcUrl(chainId: number): string {
   const rpcUrls: Record<number, string> = {
-    11142220: "https://rpc.ankr.com/celo_sepolia", // Celo Sepolia
     84532: "https://sepolia.base.org", // Base Sepolia
   };
 

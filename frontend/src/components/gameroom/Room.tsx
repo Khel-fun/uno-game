@@ -33,11 +33,13 @@ import {
   getContractAddress,
   isSupportedChain,
   getSupportedChainIds,
+  DEFAULT_CHAIN_ID,
 } from "@/config/networks";
 import { MAX_PLAYERS } from "@/constants/gameConstants";
 import { useWalletStorage } from "@/hooks/useWalletStorage";
 import { useAccount, usePublicClient, useSendTransaction as useWagmiSendTransaction } from "wagmi";
 import { encodeFunctionData } from "viem";
+import { useChainSwitcher } from "@/hooks/useChainSwitcher";
 import { useZKGameIntegration } from "@/hooks/useZKGameIntegration";
 import { useZK } from "@/lib/zk";
 
@@ -81,6 +83,7 @@ const Room = () => {
   // Use wagmi for wallet connection (works with both MetaMask and other connectors)
   const { address: wagmiAddress, isConnected: isWalletConnected, chain: walletChain } = useAccount();
   const { sendTransactionAsync: sendWagmiTransaction } = useWagmiSendTransaction();
+  const { ensureCorrectChain } = useChainSwitcher();
   
   // Prefer wagmi address, fallback to stored address
   const address = wagmiAddress || storedAddress;
@@ -90,8 +93,7 @@ const Room = () => {
   const [error, setError] = useState<string | null>(null);
   const [playerHand, setPlayerHand] = useState<string[]>([]);
 
-  // Hardcoded to Base Sepolia only
-  const chainId = 84532;
+  const chainId = DEFAULT_CHAIN_ID;
   
   // Use public client for the wallet's current chain
   const publicClient = usePublicClient({ chainId });
@@ -624,16 +626,18 @@ const Room = () => {
         });
 
         try {
+          await ensureCorrectChain();
           const hash = await sendWagmiTransaction({
             to: contractAddress,
             data,
+            chainId: DEFAULT_CHAIN_ID,
           });
 
           toast({
             title: "Transaction Sent!",
             description: "Waiting for confirmation...",
             duration: 5000,
-            variant: "default",
+            variant: "success",
           });
 
           // Wait for transaction confirmation

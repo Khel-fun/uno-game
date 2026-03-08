@@ -19,8 +19,10 @@ import {
   getContractAddress,
   isSupportedChain,
   getSupportedChainIds,
+  DEFAULT_CHAIN_ID,
 } from "@/config/networks";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
+import { useChainSwitcher } from "@/hooks/useChainSwitcher";
 
 // Card codes: SKIP=100, DRAW2=200, DRAW4=400, WILD=500
 const checkGameOver = (deck) => deck.length === 1;
@@ -98,8 +100,7 @@ const Game = ({
   const [rewardGiven, setRewardGiven] = useState(false);
   const [computerMoveCounter, setComputerMoveCounter] = useState(0);
 
-  // Hardcoded to Base Sepolia only
-  const chainId = 84532;
+  const chainId = DEFAULT_CHAIN_ID;
 
   // Wagmi hooks for browser wallet transactions
   const {
@@ -107,6 +108,7 @@ const Game = ({
     data: txHash,
     isPending: isTxPending,
   } = useSendTransaction();
+  const { ensureCorrectChain } = useChainSwitcher();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash: txHash,
@@ -787,10 +789,12 @@ const Game = ({
           duration: 5000,
         });
 
-        // Send transaction using wagmi
+        // Ensure correct chain before sending
+        await ensureCorrectChain();
         sendTransaction({
           to: contractAddress,
           data: data,
+          chainId: DEFAULT_CHAIN_ID,
         });
 
         // Note: Transaction confirmation is handled by the useEffect below
